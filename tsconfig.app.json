@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["cypress","src"]
+  "include": ["cypress","@storybook/react","src"]
 }
