@@ -22,7 +22,7 @@
             }
         },
         "forgotCredentials": {
-            "link": "Forgot Username or Password?",
+            "link": "Forgot  Password?",
             "helperText": "Can't remember your login details?"
         },
         "createAccount": {

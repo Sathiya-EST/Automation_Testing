@@ -1,6 +1,6 @@
 // import { useTranslation } from 'react-i18next'
 // import { ThemeProvider } from './components/providers/themeProvider';
-import Signin from './pages/auth/signin';
+import LoginPage from './pages/auth/signin';
 import './style/global.css'
 import ThemeDataProvider from './contexts/themeContext';
 import { ThemeProvider } from 'next-themes';
@@ -14,7 +14,7 @@ function App() {
     <ThemeProvider attribute="class">
       <ThemeDataProvider >
         <Provider store={store}>
-          <Signin />
+          <LoginPage />
         </Provider>
       </ThemeDataProvider>
     </ThemeProvider>

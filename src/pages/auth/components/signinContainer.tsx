@@ -40,7 +40,7 @@ export function LoginForm({
     onSubmit,
     showForgotPassword = true,
     showCreateAccount = true,
-    cardClassName = "w-full max-w-md",
+    cardClassName = "w-full max-w-md ",
     formClassName = ""
 }: LoginFormProps) {
     const { t } = useTranslation();
@@ -144,7 +144,7 @@ export function LoginForm({
                             <Button
                                 variant="outline"
                                 type="button"
-                                className="w-full"
+                                className="w-full foreground"
                             >
                                 {t('login.createAccount.text')}
                             </Button>
