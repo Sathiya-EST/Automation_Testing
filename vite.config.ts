@@ -1,8 +1,14 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa';
-// https://vite.dev/config/
-export default defineConfig({
+// import path from "path"
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react'
+// import { VitePWA } from 'vite-plugin-pwa';
+const path = require('path');
+const react = require('@vitejs/plugin-react');
+const { VitePWA } = require('vite-plugin-pwa');
+const { defineConfig } = require('vite');
+
+
+module.exports = defineConfig({
   plugins: [react(),
   VitePWA({
     registerType: 'autoUpdate',
@@ -26,6 +32,12 @@ export default defineConfig({
       ],
     },
   }),
-
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 })
+
+

@@ -22,9 +22,22 @@ module.exports = defineConfig({
       return devServer({
         ...cypressConfig,
         framework: 'react',
-        viteConfig: require('./vite.config.js'),
+        viteConfig: require('./vite.config.ts'),
       });
     },
+    supportFile: false,
   },
 });
+
+
+// import { defineConfig } from 'cypress'
+
+// export default defineConfig({
+//   component: {
+//     devServer: {
+//       framework: 'react',
+//       bundler: 'vite'
+//     }
+//   }
+// })
 

@@ -5,7 +5,7 @@ export default function swDev(): void {
     navigator.serviceWorker
       .register('/sw.js')
       .then((registration: ServiceWorkerRegistration) => {
-        alert('Service worker integrated');
+        // alert('Service worker integrated');
         console.log('Service Worker registered with scope:', registration.scope);
       })
       .catch((err: Error) => {

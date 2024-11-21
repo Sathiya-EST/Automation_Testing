@@ -5,7 +5,7 @@ const InstallPWA = () => {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault(); 
+      e.preventDefault();
       setDeferredPrompt(e);
     };
 
@@ -18,10 +18,10 @@ const InstallPWA = () => {
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt(); 
-      const { outcome } = await deferredPrompt.userChoice; 
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
       console.log(`User choice: ${outcome}`);
-      setDeferredPrompt(null); 
+      setDeferredPrompt(null);
     }
   };
 
