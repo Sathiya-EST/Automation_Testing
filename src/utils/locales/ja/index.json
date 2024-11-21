@@ -1,0 +1,68 @@
+{
+    "login": {
+        "title": "アカウントにログイン",
+        "description": "ダッシュボードにアクセスするには、認証情報を入力してください",
+        "userId": {
+            "label": "ユーザー名",
+            "placeholder": "ユーザー名を入力",
+            "errors": {
+                "min": "ユーザー名は4文字以上である必要があります",
+                "max": "ユーザー名は20文字以内でなければなりません",
+                "regex": "ユーザー名には、文字、数字、アンダーバーのみを使用できます",
+                "required": "ユーザー名は必須です"
+            }
+        },
+        "password": {
+            "label": "パスワード",
+            "placeholder": "パスワードを入力",
+            "errors": {
+                "min": "パスワードは8文字以上である必要があります",
+                "required": "パスワードは必須です",
+                "complexity": "パスワードは大文字、小文字、数字、特殊文字を含める必要があります"
+            }
+        },
+        "forgotCredentials": {
+            "link": "ユーザー名またはパスワードをお忘れですか？",
+            "helperText": "ログイン情報を覚えていませんか？"
+        },
+        "createAccount": {
+            "text": "アカウントを作成",
+            "helperText": "アカウントをまだお持ちでない方"
+        },
+        "socialLogin": {
+            "google": "Googleでログイン",
+            "microsoft": "Microsoftでログイン",
+            "apple": "Appleでログイン"
+        },
+        "submitButton": {
+            "login": "ログイン",
+            "loggingIn": "ログイン中...",
+            "success": "ログイン成功",
+            "error": "ログイン失敗"
+        },
+        "validationMessages": {
+            "generic": "入力内容を確認し、再度お試しください",
+            "networkError": "接続できません。インターネット接続を確認してください。",
+            "serverError": "サーバーエラーが発生しました。後でもう一度お試しください。",
+            "tooManyAttempts": "ログイン試行回数が多すぎます。しばらく経ってからもう一度お試しください。"
+        },
+        "twoFactor": {
+            "label": "二段階認証コード",
+            "placeholder": "6桁のコードを入力",
+            "errors": {
+                "invalid": "認証コードが無効です",
+                "required": "認証コードは必須です"
+            }
+        },
+        "rememberMe": {
+            "label": "ログイン状態を保持",
+            "description": "このデバイスでサインイン状態を維持する"
+        }
+    },
+    "common": {
+        "or": "または",
+        "cancel": "キャンセル",
+        "continue": "続行",
+        "back": "戻る"
+    }
+}

@@ -1,5 +1,68 @@
 {
-    "welcome": "Welcome to our application!",
-    "description": "This app is multilingual."
+    "login": {
+        "title": "Login to Your Account",
+        "description": "Enter your credentials to access your dashboard",
+        "userId": {
+            "label": "Username",
+            "placeholder": "Enter your username",
+            "errors": {
+                "min": "Username must be at least 4 characters",
+                "max": "Username must not exceed 20 characters",
+                "regex": "Username can only contain letters, numbers, and underscores",
+                "required": "Username is required"
+            }
+        },
+        "password": {
+            "label": "Password",
+            "placeholder": "Enter your password",
+            "errors": {
+                "min": "Password must be at least 8 characters",
+                "required": "Password is required",
+                "complexity": "Password must include uppercase, lowercase, number, and special character"
+            }
+        },
+        "forgotCredentials": {
+            "link": "Forgot Username or Password?",
+            "helperText": "Can't remember your login details?"
+        },
+        "createAccount": {
+            "text": "Create an account",
+            "helperText": "Don't have an account yet?"
+        },
+        "socialLogin": {
+            "google": "Continue with Google",
+            "microsoft": "Continue with Microsoft",
+            "apple": "Continue with Apple"
+        },
+        "submitButton": {
+            "login": "Sign In",
+            "loggingIn": "Signing In...",
+            "success": "Login Successful",
+            "error": "Login Failed"
+        },
+        "validationMessages": {
+            "generic": "Please check your input and try again",
+            "networkError": "Unable to connect. Please check your internet connection.",
+            "serverError": "Server error. Please try again later.",
+            "tooManyAttempts": "Too many login attempts. Please try again later."
+        },
+        "twoFactor": {
+            "label": "Two-Factor Authentication Code",
+            "placeholder": "Enter 6-digit code",
+            "errors": {
+                "invalid": "Invalid authentication code",
+                "required": "Authentication code is required"
+            }
+        },
+        "rememberMe": {
+            "label": "Remember me",
+            "description": "Keep me signed in on this device"
+        }
+    },
+    "common": {
+        "or": "or",
+        "cancel": "Cancel",
+        "continue": "Continue",
+        "back": "Back"
+    }
 }
-  

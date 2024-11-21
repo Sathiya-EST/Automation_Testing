@@ -2,9 +2,9 @@ import { useTheme } from 'next-themes'
 import { Button } from '../ui/button'
 import { Moon, Sun } from 'lucide-react'
 
-type Props = {}
 
-const ThemeModeToggle = (props: Props) => {
+
+const ThemeModeToggle = () => {
 
     const { setTheme, theme } = useTheme()
     return (

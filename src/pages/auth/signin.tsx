@@ -1,26 +1,17 @@
-// import { ModeToggle } from '@/components/shared/ModeToggle'
-import { ThemeColorToggle } from '@/components/shared/ThemeColorToggle'
-import ThemeModeToggle from '@/components/shared/ThemeModeToggle'
-import { Button } from '@/components/ui/button'
+import { LoginForm } from "./components/signinContainer";
 
-const Signin = () => {
+export default function LoginPage() {
+    const handleLogin = async (data: { userId: string; password: string }) => {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('Login attempted with:', data);
+    };
+
     return (
-        <div>
-            <ThemeModeToggle />
-            <ThemeColorToggle />
-
-            {/* <ModeToggle /> */}
-            <Button className="bg-background text-foreground" >Theme Button</Button>
-
-            <div className="min-h-screen bg-background text-foreground p-4">
-                <h1 className="text-primary">Welcome to the App</h1>
-                <p className="text-muted-foreground">This is a customizable theme.</p>
-                <button className="bg-primary text-primary-foreground px-4 py-2 rounded">
-                    Click Me
-                </button>
-            </div>
+        <div className="flex items-center justify-center min-h-screen  p-4 bg-background">
+            <LoginForm
+                onSubmit={handleLogin}
+                showCreateAccount={false}
+            />
         </div>
     )
 }
-
-export default Signin

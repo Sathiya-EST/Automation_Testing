@@ -21,6 +21,6 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "vite.config.cjs"
-  ]
+    "vite.config.ts"
+  ],
 }
