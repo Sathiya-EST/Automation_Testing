@@ -2,6 +2,9 @@ import { useState } from "react";
 import { LoginForm } from "./components/signinContainer";
 import { useSignInMutation } from "@/store/services/auth/login";
 import { storeToken } from "@/utils/securels";
+import { Button } from "@/components/ui/button";
+import { useSignOutMutation } from "@/store/services/auth/logout";
+import AppLayout from "@/components/Applayout";
 
 interface SignInData {
     userId: string;
@@ -18,6 +21,8 @@ interface SignInResponse {
 
 export default function LoginPage() {
     const [signIn] = useSignInMutation<SignInResponse>();
+    const [signOut] = useSignOutMutation();
+
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 
@@ -32,14 +37,30 @@ export default function LoginPage() {
         }
     };
 
+    const handleLogout = async () => {
+
+        try {
+            await signOut({}).unwrap();
+
+            console.log('User logged out successfully');
+
+
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+
+            {/* <AppLayout /> */}
             {/* {isLoading && <div className="loader">Loading...</div>} */}
             {errorMessage && <div className="error-message">{errorMessage}</div>}
             <LoginForm
                 onSubmit={handleLogin}
                 showCreateAccount={false}
             />
+            <Button onClick={handleLogout} >Logout</Button>
         </div>
     );
 }

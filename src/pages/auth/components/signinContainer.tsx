@@ -132,7 +132,7 @@ export function LoginForm({
                     <CardFooter className="p-0 pt-4 flex flex-col space-y-2">
                         <Button
                             type="submit"
-                            className="w-full"
+                            className="w-full "
                             disabled={isSubmitting}
                         >
                             {isSubmitting

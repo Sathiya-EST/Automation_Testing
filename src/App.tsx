@@ -6,6 +6,8 @@ import ThemeDataProvider from './contexts/themeContext';
 import { ThemeProvider } from 'next-themes';
 import { Provider } from 'react-redux';
 import store from './store';
+import { Menu } from './components/Applayout/Menu';
+import Master from './pages/master';
 
 
 function App() {
@@ -14,7 +16,8 @@ function App() {
     <ThemeProvider attribute="class">
       <ThemeDataProvider >
         <Provider store={store}>
-          <LoginPage />
+          {/* <LoginPage /> */}
+          <Master/>
         </Provider>
       </ThemeDataProvider>
     </ThemeProvider>
