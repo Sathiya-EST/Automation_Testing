@@ -14,25 +14,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { BreadcrumbItemType } from "@/types/data";
 
-export type BreadcrumbItemType =
-    | {
-        type: "link";
-        title: string;
-        path: string;
-        isActive?: false;
-    }
-    | {
-        type: "dropdown";
-        title: string;
-        dropdownItems: string[];
-        isActive?: false;
-    }
-    | {
-        type: "page";
-        title: string;
-        isActive: true;
-    };
+
 
 interface BreadcrumbComponentProps {
     items: BreadcrumbItemType[];
@@ -40,12 +24,12 @@ interface BreadcrumbComponentProps {
 
 const BreadcrumbComponent: React.FC<BreadcrumbComponentProps> = ({ items }) => {
     return (
-        <Breadcrumb className="bg-gray-200 p-2 rounded-lg dark:bg-background">
+        <Breadcrumb className="bg-gray-200 px-2 py-1 rounded-sm dark:bg-background">
             <BreadcrumbList >
                 {items.map((item, index) => (
                     <React.Fragment key={index}>
                         {item.type === "link" && (
-                            <BreadcrumbItem>
+                            <BreadcrumbItem className="text-xs font-semibold">
                                 <BreadcrumbLink href={item.path} aria-current={item.isActive ? "page" : undefined}>
                                     {item.title}
                                 </BreadcrumbLink>
@@ -69,8 +53,8 @@ const BreadcrumbComponent: React.FC<BreadcrumbComponentProps> = ({ items }) => {
                             </BreadcrumbItem>
                         )}
                         {item.type === "page" && (
-                            <BreadcrumbItem>
-                                <BreadcrumbPage className="text-primary">{item.title}</BreadcrumbPage>
+                            <BreadcrumbItem className="text-xs " >
+                                <BreadcrumbPage className="text-primary font-semibold">{item.title}</BreadcrumbPage>
                             </BreadcrumbItem>
                         )}
                         {index < items.length - 1 && <BreadcrumbSeparator className="text-gray-700 dark:text-gray-200" />}

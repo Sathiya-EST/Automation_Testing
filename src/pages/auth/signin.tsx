@@ -29,7 +29,8 @@ export default function LoginPage() {
     const handleLogin = async (data: SignInData) => {
         try {
             const result = await signIn(data).unwrap();
-            storeToken(result.access_token, result.refresh_token);
+            localStorage.setItem('userName', result.user_name);
+            localStorage.setItem('userRole', result.user_role);
             setErrorMessage(null);
         } catch (err) {
             console.error('Login failed:', err);
@@ -41,8 +42,6 @@ export default function LoginPage() {
 
         try {
             await signOut({}).unwrap();
-
-            console.log('User logged out successfully');
 
 
         } catch (error) {

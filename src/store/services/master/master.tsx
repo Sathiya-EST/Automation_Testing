@@ -1,17 +1,15 @@
-// import { USER_API } from '@/constants/api.constants';
-// import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { MASTER_API } from '@/constants/api.constants';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import baseQueryWithAuth from '../baseQueryHook';
 
+export const masterApi = createApi({
+    reducerPath: 'masterApi',
+    baseQuery: baseQueryWithAuth,
+    endpoints: (builder) => ({
+        getLog: builder.query({
+            query: () => ({ url: MASTER_API.LOG }),
+        }),
+    }),
+});
 
-
-
-// export const masterApi = createApi({
-//     reducerPath: 'masterApi',
-//     baseQuery: fetchBaseQuery({ baseUrl: USER_API.LOGOUT }),
-//     endpoints: (builder) => ({
-//         signOut: builder.mutation({
-
-//         }),
-//     }),
-// });
-
-// export const { useSignOutMutation } = masterApi
+export const { useGetLogQuery } = masterApi

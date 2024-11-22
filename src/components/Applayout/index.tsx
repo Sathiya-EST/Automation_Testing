@@ -2,10 +2,15 @@ import { DatabaseZap, Settings, Workflow } from 'lucide-react';
 import Header from './Header';
 import { Menu } from './Menu';
 import { Separator } from '../ui/separator';
-import BreadcrumbComponent, { BreadcrumbItemType } from './BreadCrumbComp';
+import { BreadcrumbItemType, User } from '@/types/data';
+import BreadcrumbComponent from './BreadcrumbComp';
+
 
 type Props = {
     children: React.ReactNode;
+    breadcrumbItems: BreadcrumbItemType[];
+    User: User
+
 };
 
 const navigationItems = [
@@ -38,24 +43,24 @@ const navigationItems = [
     },
 ];
 
-const User = {
-    user_name: 'Yukesh',
-    user_role: 'Creator'
-}
+// const User = {
+//     user_name: 'Yukesh',
+//     user_role: 'Creator'
+// }
 
-const breadcrumbItems: BreadcrumbItemType[] = [
-    { type: "link", title: "Home", path: "/", isActive: false },
-    {
-        type: "dropdown",
-        title: "More",
-        dropdownItems: ["Documentation", "Themes", "GitHub"],
-        isActive: false,
-    },
-    { type: "link", title: "Components", path: "/docs/components", isActive: false },
-    { type: "page", title: "Breadcrumb", isActive: true },
-];
+// const breadcrumbItems: BreadcrumbItemType[] = [
+//     { type: "link", title: "Home", path: "/", isActive: false },
+//     {
+//         type: "dropdown",
+//         title: "More",
+//         dropdownItems: ["Documentation", "Themes", "GitHub"],
+//         isActive: false,
+//     },
+//     { type: "link", title: "Components", path: "/docs/components", isActive: false },
+//     { type: "page", title: "Breadcrumb", isActive: true },
+// ];
 
-const AppLayout = ({ children }: Props) => {
+const AppLayout = ({ children,User,breadcrumbItems }: Props) => {
     return (
         <div className="flex h-screen bg-background text-foreground">
             {/* Sidebar */}
@@ -85,8 +90,8 @@ const AppLayout = ({ children }: Props) => {
                 </header>
                 <Separator orientation="horizontal" />
                 {/* Main Content */}
-                <div className="flex-1 overflow-y-auto p-6 bg-accent text-foreground ">
-                    <span className="inline-block w-auto ">
+                <div className="flex-1 overflow-y-auto p-4 bg-accent text-foreground ">
+                    <span className="inline-block w-auto my-1 ">
                         <BreadcrumbComponent items={breadcrumbItems} />
                     </span>
 

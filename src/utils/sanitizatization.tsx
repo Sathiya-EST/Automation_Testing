@@ -1,6 +1,5 @@
 import DOMPurify from 'dompurify';
 
-// Type for the sanitizeInput function
 export const sanitizeInput = (dirtyInput: unknown): string => {
   // If input is undefined or null, return empty string
   if (dirtyInput == null) {
@@ -26,27 +25,6 @@ export const sanitizeInput = (dirtyInput: unknown): string => {
   });
 
   return cleanInput;
-}
-
-// Example usage in different contexts
-const unsafeUserInput = '<script>alert("XSS");</script>Hello <b>World</b>!';
-const safeOutput = sanitizeInput(unsafeUserInput);
-console.log(safeOutput); // Outputs: "Hello <b>World</b>!"
-
-// React component example
-interface UserContentProps {
-  text: string;
-}
-
-export const UserContent: React.FC<UserContentProps> = ({ text }) => {
-  const sanitizedText = sanitizeInput(text);
-
-  return (
-    <div
-      // Use dangerouslySetInnerHTML with sanitized content
-      dangerouslySetInnerHTML={{ __html: sanitizedText }}
-    />
-  );
 }
 
 // Additional helper for more strict sanitization

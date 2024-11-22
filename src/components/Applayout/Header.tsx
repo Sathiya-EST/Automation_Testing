@@ -1,19 +1,14 @@
-import { Separator } from "@/components/ui/separator";
 import { Toggle } from "../ui/toggle";
 import { Bell, ChevronDown, ChevronLeft, CircleUserRound } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import Text from "../shared/Text";
-import { Button } from "../ui/button";
+import { User } from "@/types/data";
 
-type Props = {
-    userData: {
-        user_name: string;
-        user_role: string;
-    }
+type HeaderProps = {
+    userData: User
 }
 
-const Header = (props: Props) => {
+const Header = ({ userData }: HeaderProps) => {
     return (
         <header className="flex justify-between items-center p-auto bg-card text-cardForeground">
 
@@ -41,8 +36,8 @@ const Header = (props: Props) => {
 
                         {/* Username and Role */}
                         <div className="flex flex-col ml-3">
-                            <span className="font-semibold text-sm text-gray-800 dark:text-gray-100">{props.userData.user_name}</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{props.userData.user_role}</span>
+                            <span className="font-semibold text-sm text-gray-800 dark:text-gray-100">{userData.userName}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{userData.userRole}</span>
                         </div>
 
                         {/* Down Arrow Icon */}
