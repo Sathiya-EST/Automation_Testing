@@ -1,25 +1,14 @@
-import { AlertCircle, DatabaseZap, Settings, Workflow } from 'lucide-react';
+import { DatabaseZap, Settings, Workflow } from 'lucide-react';
 import Header from './Header';
 import { Menu } from './Menu';
 import { Separator } from '../ui/separator';
-import { BreadcrumbItemType, User } from '@/types/data';
 import BreadcrumbComponent from './BreadcrumbComp';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@radix-ui/react-alert-dialog';
-import { AlertDialogHeader, AlertDialogFooter } from '../ui/alert-dialog';
-import { Button } from '../ui/button';
 import SessionExpiredModal from './SessionExpiredModal';
 import { useSignOutMutation } from '@/store/services/auth/logout';
+import { Outlet } from 'react-router-dom';
 
-
-type Props = {
-    children: React.ReactNode;
-    breadcrumbItems: BreadcrumbItemType[];
-    User: User
-
-};
 
 const navigationItems = [
     {
@@ -52,23 +41,18 @@ const navigationItems = [
 ];
 
 
-// const breadcrumbItems: BreadcrumbItemType[] = [
-//     { type: "link", title: "Home", path: "/", isActive: false },
-//     {
-//         type: "dropdown",
-//         title: "More",
-//         dropdownItems: ["Documentation", "Themes", "GitHub"],
-//         isActive: false,
-//     },
-//     { type: "link", title: "Components", path: "/docs/components", isActive: false },
-//     { type: "page", title: "Breadcrumb", isActive: true },
-// ];
 
 
-const AppLayout = ({ children, User, breadcrumbItems }: Props) => {
+const AppLayout = () => {
     const isSessionExpired = useSelector((state: RootState) => state.auth.isExpired);
+    const userName = useSelector((state: RootState) => state.auth.userName);
+    const userRole = useSelector((state: RootState) => state.auth.userRole);
+    const breadcrumbs = useSelector((state: RootState) => state.app.items);
     const [signOut] = useSignOutMutation();
-
+    const userData = {
+        userName,
+        userRole,
+    };
     const handleLogout = async () => {
         try {
             await signOut({}).unwrap();
@@ -101,14 +85,14 @@ const AppLayout = ({ children, User, breadcrumbItems }: Props) => {
                 {/* Header */}
                 <header className="h-14 bg-card text-card-foreground shadow-[0_2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_5px_rgba(255,255,255,0.1)] sticky top-0 z-10">
                     <div className="h-full px-4">
-                        <Header userData={User} handleLogout={handleLogout} />
+                        <Header userData={userData} handleLogout={handleLogout} />
                     </div>
                 </header>
                 <Separator orientation="horizontal" />
                 {/* Main Content */}
                 <div className="flex-1 overflow-y-auto p-4 bg-accent text-foreground ">
                     <span className="inline-block w-auto my-1 ">
-                        <BreadcrumbComponent items={breadcrumbItems} />
+                        <BreadcrumbComponent items={breadcrumbs} />
                     </span>
 
                     <SessionExpiredModal
@@ -120,7 +104,7 @@ const AppLayout = ({ children, User, breadcrumbItems }: Props) => {
                             throw new Error('Function not implemented.');
                         }} />
 
-                    {children}
+                    <Outlet />
                 </div>
             </main>
         </div>

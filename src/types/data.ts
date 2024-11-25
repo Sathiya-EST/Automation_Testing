@@ -1,6 +1,6 @@
 export type User = {
-    userName: string,
-    userRole: string
+    userName: string | null,
+    userRole: string | null
 }
 
 export type BreadcrumbItemType =
