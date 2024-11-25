@@ -1,9 +1,17 @@
-import { DatabaseZap, Settings, Workflow } from 'lucide-react';
+import { AlertCircle, DatabaseZap, Settings, Workflow } from 'lucide-react';
 import Header from './Header';
 import { Menu } from './Menu';
 import { Separator } from '../ui/separator';
 import { BreadcrumbItemType, User } from '@/types/data';
 import BreadcrumbComponent from './BreadcrumbComp';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@radix-ui/react-alert-dialog';
+import { AlertDialogHeader, AlertDialogFooter } from '../ui/alert-dialog';
+import { Button } from '../ui/button';
+import SessionExpiredModal from './SessionExpiredModal';
+import { useSignOutMutation } from '@/store/services/auth/logout';
 
 
 type Props = {
@@ -43,10 +51,6 @@ const navigationItems = [
     },
 ];
 
-// const User = {
-//     user_name: 'Yukesh',
-//     user_role: 'Creator'
-// }
 
 // const breadcrumbItems: BreadcrumbItemType[] = [
 //     { type: "link", title: "Home", path: "/", isActive: false },
@@ -60,7 +64,19 @@ const navigationItems = [
 //     { type: "page", title: "Breadcrumb", isActive: true },
 // ];
 
-const AppLayout = ({ children,User,breadcrumbItems }: Props) => {
+
+const AppLayout = ({ children, User, breadcrumbItems }: Props) => {
+    const isSessionExpired = useSelector((state: RootState) => state.auth.isExpired);
+    const [signOut] = useSignOutMutation();
+
+    const handleLogout = async () => {
+        try {
+            await signOut({}).unwrap();
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
+
     return (
         <div className="flex h-screen bg-background text-foreground">
             {/* Sidebar */}
@@ -85,7 +101,7 @@ const AppLayout = ({ children,User,breadcrumbItems }: Props) => {
                 {/* Header */}
                 <header className="h-14 bg-card text-card-foreground shadow-[0_2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_5px_rgba(255,255,255,0.1)] sticky top-0 z-10">
                     <div className="h-full px-4">
-                        <Header userData={User} />
+                        <Header userData={User} handleLogout={handleLogout} />
                     </div>
                 </header>
                 <Separator orientation="horizontal" />
@@ -94,6 +110,15 @@ const AppLayout = ({ children,User,breadcrumbItems }: Props) => {
                     <span className="inline-block w-auto my-1 ">
                         <BreadcrumbComponent items={breadcrumbItems} />
                     </span>
+
+                    <SessionExpiredModal
+                        isOpen={isSessionExpired}
+                        onClose={function (): void {
+                            throw new Error('Function not implemented.');
+                        }}
+                        handleNavigate={function (): void {
+                            throw new Error('Function not implemented.');
+                        }} />
 
                     {children}
                 </div>

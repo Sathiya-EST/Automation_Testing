@@ -5,7 +5,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const API_CLIENT_ID = import.meta.env.VITE_API_CLIENT_ID;
 const API_CLIENT_PASSWORD = import.meta.env.VITE_API_CLIENT_PASSWORD;
 
-const authHeader = 'Basic ' + btoa(API_CLIENT_ID + ':' + API_CLIENT_PASSWORD);
+ export const authHeader = 'Basic ' + btoa(API_CLIENT_ID + ':' + API_CLIENT_PASSWORD);
 
 export const authApi = createApi({
     reducerPath: 'authApi',
@@ -37,4 +37,4 @@ export const authApi = createApi({
     }),
 });
 
-export const { useSignInMutation } = authApi
+export const { useSignInMutation } = authApi;

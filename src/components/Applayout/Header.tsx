@@ -3,12 +3,15 @@ import { Bell, ChevronDown, ChevronLeft, CircleUserRound } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { User } from "@/types/data";
+import { UI_ROUTES } from "@/constants/routes";
+import { Link } from "react-router-dom";
 
 type HeaderProps = {
-    userData: User
+    userData: User;
+    handleLogout: () => void
 }
 
-const Header = ({ userData }: HeaderProps) => {
+const Header = ({ userData, handleLogout }: HeaderProps) => {
     return (
         <header className="flex justify-between items-center p-auto bg-card text-cardForeground">
 
@@ -22,7 +25,6 @@ const Header = ({ userData }: HeaderProps) => {
             </div>
             <div className="flex items-center gap-6">
                 <Toggle><Bell /></Toggle>
-
                 <Popover>
                     <PopoverTrigger className="flex items-center gap-3 cursor-pointer outline-none p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 ease-in-out">
                         {/* Avatar */}
@@ -45,24 +47,27 @@ const Header = ({ userData }: HeaderProps) => {
                     </PopoverTrigger>
 
                     <PopoverContent className="flex flex-col p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 w-48 rounded-lg shadow-lg">
-                        <a
-                            href="/change-password"
+                        <Link
+                            to="/change-password"
                             className="py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-300"
                         >
                             Change Password
-                        </a>
-                        <a
-                            href="/reset-password"
+                        </Link>
+
+                        <Link
+                            to="/reset-password"
                             className="py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-300"
                         >
                             Reset Password
-                        </a>
-                        <a
-                            href="/logout"
-                            className="py-2 px-4 text-sm font-medium text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-300"
+                        </Link>
+
+                        <Link
+                            to={UI_ROUTES.LOGIN}
+                            onClick={handleLogout}
+                            className="cursor-pointer py-2 px-4 text-sm font-medium text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-300"
                         >
                             Logout
-                        </a>
+                        </Link>
                     </PopoverContent>
 
                 </Popover>

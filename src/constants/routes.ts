@@ -2,7 +2,7 @@ const MASTER = '/master';
 const PROCESS = '/process';
 
 export const UI_ROUTES = {
-    SIGN_IN: '/signin',
+    LOGIN: '/login',
     SETTINGS: '/settings',
     MASTER: MASTER,
     MASTER_FORM_CREATE: `${MASTER}/create`,

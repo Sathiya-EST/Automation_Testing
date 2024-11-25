@@ -1,22 +1,19 @@
 import { fetchBaseQuery, FetchArgs, BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import { setTokens, clearTokens } from '../slice/authSlice';
+import { clearTokens, setIsExpired } from '../slice/authSlice';
 import { RootState } from '../';
-import { USER_API } from '@/constants/api.constants';
-
-interface RefreshTokenResponse {
-    access_token: string;
-    refresh_token: string;
-}
+import getNewAccessToken from './getNewAccessToken';
 
 const baseQueryWithAuth: BaseQueryFn<FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
     const state = api.getState() as RootState;
     const { accessToken, refreshToken } = state.auth;
+    console.log("Tokens", accessToken, refreshToken);
 
     if (!accessToken || !refreshToken) {
         console.error('No access token or refresh token available.');
-        return { error: { status: 401, message: 'Missing tokens' } };
+        return { error: { status: 401, data: 'Missing tokens' } };
     }
 
+    // Custom base query for making API requests with the access token
     const customBaseQuery = fetchBaseQuery({
         baseUrl: '',
         prepareHeaders: (headers) => {
@@ -29,55 +26,32 @@ const baseQueryWithAuth: BaseQueryFn<FetchArgs, unknown, FetchBaseQueryError> = 
 
     // Send the original request
     let result = await customBaseQuery(args, api, extraOptions);
-    console.log("xxxxxxx", result);
-    console.log("xxxxxxx22", result.error);
-    console.log("xxxxxxx22333", result.error?.status);
-    console.log("xxxxxxx2233344", result.error?.originalStatus);
 
     // Check if the result is a 401 Unauthorized error
-    if (result.error && result.error.originalStatus === 401) {
+    if (result.error?.originalStatus === 401) {
         console.log('Received 401, attempting to refresh token...');
 
         if (refreshToken) {
-            // Try to refresh the token
-            const refreshResponse = await customBaseQuery(
-                {
-                    url: USER_API.REFRESH_TOKEN,
-                    method: 'POST',
-                    body: { refresh_token: refreshToken },
-                },
-                api,
-                extraOptions
-            );
+            // Use getNewAccessToken to attempt to refresh the token
+            const refreshedTokens = await getNewAccessToken(refreshToken, api, extraOptions);
 
-            // Check for invalid token format (XML or non-JSON response)
-            if (refreshResponse.error) {
-                const errorData = refreshResponse.error.data;
-                if (errorData && typeof errorData === 'string' && errorData.startsWith('<')) {
-                    // If the response starts with '<', we likely have XML or HTML
-                    console.error('Received non-JSON error response:', errorData);
-                    // Handle the XML response or throw an error to stop further processing
-                    return { error: { status: 401, message: 'Invalid token or unexpected response format' } };
-                }
-            }
-
-            // If the refresh token request is successful (in JSON format)
-            if (refreshResponse.data) {
-                const { access_token, refresh_token } = refreshResponse.data as RefreshTokenResponse;
-                console.log('Successfully refreshed tokens.');
-
-                // Dispatch the new tokens to Redux
-                api.dispatch(setTokens({ accessToken: access_token, refreshToken: refresh_token }));
-
+            if (refreshedTokens) {
+                const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshedTokens;
                 // Retry the original request with the new access token
-                result = await customBaseQuery(args, api, extraOptions);
+                result = await customBaseQuery(
+                    { ...args, headers: { Authorization: `Bearer ${newAccessToken}` } },
+                    api,
+                    extraOptions
+                );
             } else {
-                // If the refresh token request fails, clear the tokens from Redux
-                console.error('Failed to refresh token:', refreshResponse.error);
-                api.dispatch(clearTokens());
+                console.error('Failed to refresh token, redirecting to login.');
+                // Optionally, handle user redirection to login or show a session expired message
+                api.dispatch(setIsExpired(true));
             }
         } else {
             console.error('No refresh token available to refresh the access token.');
+            api.dispatch(setIsExpired(true));
+            api.dispatch(clearTokens());
         }
     }
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { LoginForm } from "./components/signinContainer";
 import { useSignInMutation } from "@/store/services/auth/login";
-import { storeToken } from "@/utils/securels";
 import { Button } from "@/components/ui/button";
-import { useSignOutMutation } from "@/store/services/auth/logout";
 import AppLayout from "@/components/Applayout";
+import { useNavigate } from "react-router-dom";
+import { UI_ROUTES } from "@/constants/routes";
+import { setTokens } from "@/store/slice/authSlice";
+import { useDispatch } from "react-redux";
 
 interface SignInData {
     userId: string;
@@ -19,47 +21,38 @@ interface SignInResponse {
     user_name: string;
 }
 
-export default function LoginPage() {
+const LoginPage = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [signIn] = useSignInMutation<SignInResponse>();
-    const [signOut] = useSignOutMutation();
-
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
 
     const handleLogin = async (data: SignInData) => {
         try {
             const result = await signIn(data).unwrap();
-            localStorage.setItem('userName', result.user_name);
-            localStorage.setItem('userRole', result.user_role);
+            dispatch(setTokens({
+                accessToken: result.access_token,
+                refreshToken: result.refresh_token,
+                userName: result.user_name,
+                userRole: result.user_role
+            }));
             setErrorMessage(null);
+            navigate(UI_ROUTES.MASTER);
         } catch (err) {
             console.error('Login failed:', err);
             setErrorMessage('Login failed. Please check your credentials and try again.');
         }
     };
 
-    const handleLogout = async () => {
-
-        try {
-            await signOut({}).unwrap();
-
-
-        } catch (error) {
-            console.error('Error during logout:', error);
-        }
-    };
-
     return (
         <div className="flex items-center justify-center min-h-screen p-4 bg-background">
-
-            {/* <AppLayout /> */}
-            {/* {isLoading && <div className="loader">Loading...</div>} */}
             {errorMessage && <div className="error-message">{errorMessage}</div>}
             <LoginForm
                 onSubmit={handleLogin}
                 showCreateAccount={false}
             />
-            <Button onClick={handleLogout} >Logout</Button>
         </div>
     );
-}
+};
+
+export default LoginPage;
