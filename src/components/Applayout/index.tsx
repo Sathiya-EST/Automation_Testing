@@ -90,7 +90,7 @@ const AppLayout = () => {
                 </header>
                 <Separator orientation="horizontal" />
                 {/* Main Content */}
-                <div className="flex-1 overflow-y-auto p-4 bg-accent text-foreground ">
+                <div className="flex-1 overflow-y-hiden p-4 bg-accent text-foreground ">
                     <span className="inline-block w-auto my-1 ">
                         <BreadcrumbComponent items={breadcrumbs} />
                     </span>

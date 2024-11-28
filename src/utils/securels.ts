@@ -12,6 +12,10 @@ export const storeToken = (accessToken: string, refreshToken: string) => {
 // Retrieve Tokens
 export const getToken = (key: string) => secureLS.get(key);
 
+// Retrieve Data From Local Storage
+
+export const getDataFromLocalStorage = (key: string) => localStorage.getItem(key);
+
 // Remove Tokens
 export const removeTokens = () => {
     secureLS.remove('accessToken');

@@ -1,73 +1,72 @@
 import useBreadcrumb from "@/hooks/useBreadCrumb";
-import { useGetLogQuery } from "@/store/services/master/master";
 import { BreadcrumbItemType } from "@/types/data";
-import { useMemo } from "react";
-import ModuleList from "./components/moduleList";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import ModuleList from "./components/ModuleList";
+import { Outlet, useNavigate } from "react-router-dom";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { useGetModuleMutation } from "@/store/services/master/module";
+import { UI_ROUTES } from "@/constants/routes";
 
-type Props = {}
+type Props = {};
 
 const Master = (props: Props) => {
-    // const { data, error, isLoading } = useGetLogQuery({});
-    // console.log(data);
+    const [getModule, { data, error, isLoading }] = useGetModuleMutation();
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [sort, setSort] = useState([
+        { key: 'createdOn', order: 'ASC' }
+    ]);
+    const [filters, setFilters] = useState([]);
+    const [selectedModule, setSelectedModule] = useState<string>('');
+    const navigate = useNavigate();
 
-    const updatedItems: BreadcrumbItemType[] = useMemo(() => [
-        { type: 'link', title: 'Home', path: '/', isActive: false },
-        { type: 'page', title: 'About', isActive: true },
+    const updatedRoutes: BreadcrumbItemType[] = useMemo(() => [
+        { type: 'link', title: 'Master', path: UI_ROUTES.MASTER, isActive: false },
+        { type: 'page', title: 'Form', isActive: true },
     ], []);
 
-    const jsonData = {
-        totalRecords: 1,
-        data: [
-            {
-                moduleIdPk: "a9fef88c-ceee-4a71-a57f-79877e12f2b4",
-                moduleName: "Common",
-                moduleDescription: "Common form are categorized",
-                formList: [
-                    {
-                        formId: '1',
-                        formName: 'form Name',
-                    },
-                    {
-                        formId: '1',
-                        formName: 'form Name 2',
-                    },
-                    {
-                        formId: '1',
-                        formName: 'form Name big Form Name',
-                    },
-                ]
-            },
-            {
-                moduleIdPk: "a9fef88c-ceee-71-a57f-79877e12f2b4",
-                moduleName: "Common",
-                moduleDescription: "Common form are categorized",
-            },
-            {
-                moduleIdPk: "a9fef88c-ceee-41-a57f-79877e12f2b4",
-                moduleName: "Common",
-                moduleDescription: "Common form are categorized",
-            },
-            {
-                moduleIdPk: "a9fef8-ceee-4a71-a57f-79877e12f2b4",
-                moduleName: "Common",
-                moduleDescription: "Common form are categorized",
-            },
-            {
-                moduleIdPk: "a9fef88c-ceee-4a71-a57f-777e12f2b4",
-                moduleName: "Common",
-                moduleDescription: "Common form are categorized",
-            },
-        ],
-        validationMessage: null,
-    };
-    useBreadcrumb(updatedItems);
-    return (
-        <>
-            <div className="w-[15%] bg-white dark:bg-gray-900">
-                <ModuleList data={jsonData.data} />
-            </div>
-        </>
-    )
-}
+    useBreadcrumb(updatedRoutes);
 
-export default Master
+    const handleModuleClick = useCallback((moduleName: string) => {
+        setSelectedModule(moduleName);
+        navigate(`/master/form/${moduleName}`);
+    }, [navigate]);
+
+    const fetchModules = useCallback(async () => {
+        try {
+            await getModule({ pageNo, pageSize, sort, filters });
+        } catch (err) {
+            console.error('Failed to fetch modules', err);
+        }
+    }, [getModule, pageNo, pageSize, sort, filters]);
+
+    useEffect(() => {
+        fetchModules();
+    }, [fetchModules]);
+
+    if (isLoading) return <div>Loading...</div>;
+    // if (error) return <div>Error: {error.message}</div>;
+
+    return (
+        <div>
+            <ResizablePanelGroup
+                direction="horizontal"
+                className="max-w-full rounded-lg border md:min-w-[450px]"
+            >
+                <ResizablePanel defaultSize={20}>
+                    {data ? (
+                        <ModuleList data={data.data} handleModuleSelect={handleModuleClick} showForm={false} />
+                    ) : (
+                        <div>No modules available.</div>
+                    )}
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={80} className="h-full">
+                    <Outlet context={{ selectedModule }} />
+                </ResizablePanel>
+            </ResizablePanelGroup>
+        </div>
+    );
+};
+
+export default Master;

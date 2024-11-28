@@ -13,8 +13,8 @@ interface RefreshTokenResponse {
 interface TokenRefreshResult {
     accessToken: string;
     refreshToken: string;
-    userName: string;
-    userRole: string;
+    userName: string | null;
+    userRole: string | null;
 }
 
 
@@ -60,15 +60,15 @@ const getNewAccessToken = async (
             api.dispatch(setTokens({
                 accessToken: access_token,
                 refreshToken: refresh_token,
-                userName: user_name,
-                userRole: user_role,
+                userName: user_name || null,
+                userRole: user_role || null,
             }));
 
             return {
                 accessToken: access_token,
                 refreshToken: refresh_token,
-                userName: user_name,
-                userRole: user_role,
+                userName: user_name || null,
+                userRole: user_role || null,
             };
         }
 

@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import UnAuthenticatedRoutes from './routes/unAuthenticatedRoutes';
-import AuthenticatedRoutes from './routes/authenticatedRoutes';
+import { BrowserRouter as Router, Routes } from 'react-router-dom';
 import AppProviders from './contexts/AppProvider';
+import UnAuthenticatedRoutes from './routes/UnAuthenticatedRoutes';
+import AuthenticatedRoutes from './routes/AuthenticatedRoutes';
 function App() {
   // const { t } = useTranslation();
   return (

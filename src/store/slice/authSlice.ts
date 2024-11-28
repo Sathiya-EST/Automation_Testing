@@ -1,4 +1,4 @@
-import { getToken, removeTokens, storeToken } from '@/utils/securels';
+import { getDataFromLocalStorage, getToken, removeTokens, storeToken } from '@/utils/securels';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
@@ -13,15 +13,23 @@ const initialState: AuthState = {
     accessToken: getToken('accessToken'),
     refreshToken: getToken('refreshToken'),
     isExpired: false,
-    userName: null,
-    userRole: null,
+    userName: getDataFromLocalStorage('userName'),
+    userRole: getDataFromLocalStorage('userRole'),
 };
 
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; userName: string; userRole: string }>) => {
+        setTokens: (
+            state,
+            action: PayloadAction<{
+                accessToken: string;
+                refreshToken: string;
+                userName: string | null;
+                userRole: string | null;
+            }>
+        ) => {
             state.accessToken = action.payload.accessToken;
             state.refreshToken = action.payload.refreshToken;
             state.isExpired = false;

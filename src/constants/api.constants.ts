@@ -11,8 +11,8 @@ export const USER_API = {
     RESET_PASSWORD: '',
 }
 export const MASTER_API = {
-    GET_MODULES: `${MASTER_API_BASE_URL}/auth`,
-    GET_FORMS_BY_MODULE: (id: string) => `${MASTER_API_BASE_URL}/products/${id}`,
+    GET_MODULES: `${MASTER_API_BASE_URL}/module/list`,
+    GET_FORMS_BY_MODULE: `${MASTER_API_BASE_URL}/form/template/get`,
     LOG: `${MASTER_API_BASE_URL}/log`
 }
 

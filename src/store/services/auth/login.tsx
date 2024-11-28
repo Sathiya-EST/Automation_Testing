@@ -1,11 +1,12 @@
 import { USER_API } from '@/constants/api.constants';
 import { sanitizeInput } from '@/utils/sanitizatization';
+import { getToken } from '@/utils/securels';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_CLIENT_ID = import.meta.env.VITE_API_CLIENT_ID;
 const API_CLIENT_PASSWORD = import.meta.env.VITE_API_CLIENT_PASSWORD;
 
- export const authHeader = 'Basic ' + btoa(API_CLIENT_ID + ':' + API_CLIENT_PASSWORD);
+export const authHeader = 'Basic ' + btoa(API_CLIENT_ID + ':' + API_CLIENT_PASSWORD);
 
 export const authApi = createApi({
     reducerPath: 'authApi',
@@ -34,7 +35,25 @@ export const authApi = createApi({
                 };
             },
         }),
+        getNewToken: builder.mutation({
+            query: () => {
+                const refreshToken = getToken('refreshToken')
+                const formData = new URLSearchParams();
+                formData.append('refreshToken', refreshToken);
+                formData.append('grant_type', 'password');
+
+                return {
+                    url: '',
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Authorization: authHeader,
+                    },
+                };
+            }
+        })
     }),
 });
 
-export const { useSignInMutation } = authApi;
+export const { useSignInMutation, useGetNewTokenMutation } = authApi;
