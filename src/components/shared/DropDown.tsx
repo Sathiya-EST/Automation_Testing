@@ -1,42 +1,63 @@
-import { 
-    Select, 
-    SelectContent, 
-    SelectGroup, 
-    SelectItem, 
-    SelectLabel, 
-    SelectTrigger, 
-    SelectValue 
+import React from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select";
 
-interface SelectOption {
+export interface SelectOption {
     value: string;
     label: string;
 }
 
 interface SelectDropdownProps {
-    label: string;
+    label?: string;
+    placeholder?: string;
     options: SelectOption[];
+    value?: string;
+    onChange?: (value: string) => void;
+    className?: string;
 }
 
-const SelectDropdown: React.FC<SelectDropdownProps> = ({ label, options }) => (
-    <div className="grid gap-2">
-        <h4 className="font-medium leading-none">{label}</h4>
-        <Select>
-            <SelectTrigger>
-                <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    <SelectLabel>{label}</SelectLabel>
-                    {options.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                        </SelectItem>
-                    ))}
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-    </div>
-);
+const SelectDropdown: React.FC<SelectDropdownProps> = ({
+    label,
+    options,
+    placeholder,
+    value,
+    onChange,
+    className = ''
+}) => {
+    const handleChange = (selectedValue: string) => {
+        onChange?.(selectedValue);
+    };
+
+    return (
+        <div className={`grid gap-2 w-full ${className}`}>
+            {label && <label className="font-medium leading-none">{label}</label>}
+            <Select value={value} onValueChange={handleChange}>
+                <SelectTrigger className="w-full">
+                    <SelectValue 
+                        placeholder={placeholder} 
+                        className={`${!value ? 'text-slate-400' : ''}`}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        {label && <SelectLabel>{label}</SelectLabel>}
+                        {options.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+        </div>
+    );
+};
 
 export default SelectDropdown;

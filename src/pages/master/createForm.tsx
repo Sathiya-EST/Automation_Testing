@@ -1,12 +1,11 @@
 import { UI_ROUTES } from '@/constants/routes';
 import useBreadcrumb from '@/hooks/useBreadCrumb';
 import { BreadcrumbItemType } from '@/types/data';
-import React, { useMemo } from 'react'
-import ResponsiveForm from './components/DynamicField';
+import { useMemo } from 'react'
+import CreateFormComp from './components/CreateFormComp';
 
-type Props = {}
 
-const CreateForm = (props: Props) => {
+const CreateForm = () => {
 
 
     const updatedRoutes: BreadcrumbItemType[] = useMemo(() => [
@@ -17,9 +16,9 @@ const CreateForm = (props: Props) => {
     useBreadcrumb(updatedRoutes);
 
     return (
-        <div>
-            <ResponsiveForm />
-        </div>
+        <>
+            <CreateFormComp />
+        </>
     )
 }
 

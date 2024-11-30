@@ -1,0 +1,183 @@
+{
+    "formIdPk": "01ebbacc-96cf-4166-b582-038a9f8c566c",
+    "formName": "custom_gl_account_details",
+    "displayName": "GL Account Details",
+    "moduleName": null,
+    "formDescription": null,
+    "formLayout": null,
+    "fields": [
+      {
+        "name": "custom_gl_account_id",
+        "label": "GL Account Id",
+        "field": {
+          "dataTypeName": "Text Input",
+          "type": "text",
+          "min": null,
+          "max": null,
+          "readOnly": true,
+          "pattern": null,
+          "formula": null,
+          "required": true,
+          "placeholder": "Enter GL Account Id",
+          "defaultValue": null,
+          "alphabetic": null,
+          "alphanumeric": true,
+          "defaultChoice": null,
+          "uniqueValue": true,
+          "decimalLimit": null,
+          "positiveOnly": null,
+          "negativeOnly": null,
+          "multiple": null,
+          "asynchronousField": null,
+          "compute": null
+        }
+      },
+      {
+        "name": "custom_gl_account_description",
+        "label": "GL Account Description",
+        "field": {
+          "dataTypeName": "Text Input",
+          "type": "text",
+          "min": null,
+          "max": null,
+          "readOnly": null,
+          "pattern": null,
+          "formula": null,
+          "required": true,
+          "placeholder": "Enter Cost Centre Description",
+          "defaultValue": null,
+          "alphabetic": null,
+          "alphanumeric": true,
+          "defaultChoice": null,
+          "uniqueValue": null,
+          "decimalLimit": null,
+          "positiveOnly": null,
+          "negativeOnly": null,
+          "multiple": null,
+          "asynchronousField": null,
+          "compute": null
+        }
+      },
+      {
+        "name": "custom_pr_type",
+        "label": "PR Type",
+        "field": {
+          "dataTypeName": "List Box",
+          "type": "select",
+          "min": null,
+          "max": null,
+          "readOnly": null,
+          "pattern": null,
+          "formula": null,
+          "required": true,
+          "placeholder": "Select PR Type",
+          "defaultValue": null,
+          "alphabetic": null,
+          "alphanumeric": null,
+          "defaultChoice": [
+            "OPEX",
+            "CAPEX"
+          ],
+          "uniqueValue": null,
+          "decimalLimit": null,
+          "positiveOnly": null,
+          "negativeOnly": null,
+          "multiple": null,
+          "asynchronousField": null,
+          "compute": null
+        }
+      },
+      {
+        "name": "custom_gl_account_status",
+        "label": "GL Account Status",
+        "field": {
+          "dataTypeName": "List Box",
+          "type": "select",
+          "min": null,
+          "max": null,
+          "readOnly": null,
+          "pattern": null,
+          "formula": null,
+          "required": true,
+          "placeholder": "Select PR Type",
+          "defaultValue": null,
+          "alphabetic": null,
+          "alphanumeric": null,
+          "defaultChoice": [
+            "IsActive",
+            "IsDeactive"
+          ],
+          "uniqueValue": null,
+          "decimalLimit": null,
+          "positiveOnly": null,
+          "negativeOnly": null,
+          "multiple": null,
+          "asynchronousField": null,
+          "compute": null
+        }
+      },
+      {
+        "name": "custom_financial_year",
+        "label": "Financial Year",
+        "field": {
+          "dataTypeName": "Whole Number",
+          "type": "numerical",
+          "min": null,
+          "max": null,
+          "readOnly": null,
+          "pattern": null,
+          "formula": null,
+          "required": true,
+          "placeholder": "Enter the financial year",
+          "defaultValue": null,
+          "alphabetic": null,
+          "alphanumeric": null,
+          "defaultChoice": [
+            "IsActive",
+            "IsDeactive"
+          ],
+          "uniqueValue": null,
+          "decimalLimit": 0,
+          "positiveOnly": true,
+          "negativeOnly": null,
+          "multiple": null,
+          "asynchronousField": null,
+          "compute": null
+        }
+      },
+      {
+        "name": "custom_cost_centre_id",
+        "label": "Cost Centre Id",
+        "field": {
+          "dataTypeName": "Asynchronous List",
+          "type": "asynchronouslist",
+          "min": null,
+          "max": null,
+          "readOnly": null,
+          "pattern": null,
+          "formula": null,
+          "required": true,
+          "placeholder": "",
+          "defaultValue": null,
+          "alphabetic": null,
+          "alphanumeric": true,
+          "defaultChoice": null,
+          "uniqueValue": null,
+          "decimalLimit": null,
+          "positiveOnly": null,
+          "negativeOnly": null,
+          "multiple": null,
+          "asynchronousField": {
+            "formName": "custom_cost_centre_details",
+            "fieldName": "custom_cost_centre_id",
+            "fieldType": "STRING"
+          },
+          "compute": null
+        }
+      }
+    ],
+    "createRow": true,
+    "deleteRow": true,
+    "updateRow": true,
+    "isPublished": true
+  }

@@ -1,76 +1,127 @@
-import React from 'react';
-import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-import { Plus } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import React, { useEffect, useRef } from 'react';
+import { Control, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
+import { Plus, Trash2 } from 'lucide-react';
+import { FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import FieldGenerator from '@/components/shared/FieldGenerator';
 
-const formSchema = z.object({
-    fields: z.array(
-        z.object({
-            fieldName: z.string().min(1, 'Field name is required'),
-        })
-    ),
-});
+interface DynamicFieldProps {
+    control: Control<any>;
+    layout: 'GRID_1' | 'GRID_2' | 'GRID_3' | string;
+    onFieldFocus?: (index: number) => void;
+    onFieldDelete: (index: number) => void;
+    selectedFieldIndex: number | null;
+}
 
-type FormData = z.infer<typeof formSchema>;
+interface Field {
+    name: string;
+    field: {
+        dataTypeName: string;
+        placeholder: string;
+        value?: string;
+    };
+}
 
-const DynamicField: React.FC = () => {
-    const { control, handleSubmit, register } = useForm<FormData>({
-        resolver: zodResolver(formSchema),
-    });
+interface FormValues {
+    fields: Field[];
+}
 
-    const { fields, append, remove } = useFieldArray<FormData>({
+const DynamicField: React.FC<DynamicFieldProps> = ({
+    control,
+    layout,
+    onFieldFocus,
+    onFieldDelete,
+    selectedFieldIndex,
+}) => {
+    const { fields, append } = useFieldArray<FormValues>({
         control,
         name: 'fields',
     });
+    const refs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const onSubmit: SubmitHandler<FormData> = (data) => {
-        console.log(data);
+    const gridClass = {
+        GRID_1: 'grid-cols-1',
+        GRID_2: 'grid-cols-2',
+        GRID_3: 'grid-cols-3',
+    }[layout] || 'grid-cols-1';
+
+    const handleFocus = (index: number) => {
+        onFieldFocus?.(index);
     };
 
+    const handleDelete = (index: number) => {
+        onFieldDelete(index);
+    };
+    useEffect(() => {
+        if (selectedFieldIndex !== null && refs.current[selectedFieldIndex]) {
+            refs.current[selectedFieldIndex]?.focus();
+        }
+    }, [selectedFieldIndex, fields]);
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader>
-                <CardTitle>Responsive Form with Dynamic Fields</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    {fields.map((field, index) => (
-                        <div key={field.id} className="flex items-center space-x-4">
-                            <input
-                                type="text"
-                                placeholder={`Field ${index + 1}`}
-                                className="input input-bordered w-full"
-                                {...register(`fields.${index}.fieldName`)}
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => remove(index)}
-                                className="p-2"
-                            >
-                                X
-                            </Button>
+        <div className="w-full">
+            <div className={`grid gap-4 ${gridClass}`}>
+                {/* <FieldGenerator fields={fields} /> */}
+                {fields.map((field, index) => {
+                    const { name, field: fieldDetails } = field;
+
+                    const isSelected = selectedFieldIndex === index;
+                    return (
+                        <div
+                            key={field.id}
+                            className={`relative group flex flex-col space-y-2 `}
+                            onClick={() => handleFocus(index)}
+                        >
+                            <FormItem>
+                                <FormLabel>{name || `Field ${index + 1}`}</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        id={`fields.${index}.name`}
+                                        type="text"
+                                        placeholder={
+                                            fieldDetails?.placeholder || `Enter ${name || 'field name'}`
+                                        }
+                                        {...control.register(`fields.${index}.field.value`)}
+
+                                        className={`${isSelected ? 'bg-primary/10' : 'focus:none'}`}
+                                        readOnly={true}
+
+                                    />
+                                </FormControl>
+                            </FormItem>
+
+                            {fields.length > 1 && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => handleDelete(index)}
+                                    className="absolute top-0 right-0 p-2 text-red-500 hidden group-hover:block"
+                                >
+                                    <Trash2 />
+                                </Button>
+                            )}
                         </div>
-                    ))}
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => append({ fieldName: '' })}
-                        className="flex items-center space-x-2"
-                    >
-                        <Plus className="h-5 w-5" />
-                        <span>Add new field</span>
-                    </Button>
-                    <Button type="submit" className="w-full">
-                        Submit
-                    </Button>
-                </form>
-            </CardContent>
-        </Card>
+                    );
+                })}
+            </div>
+            <Button
+                type="button"
+                variant="ghost"
+                onClick={() =>
+                    append({
+                        name: '',
+                        field: {
+                            dataTypeName: '',
+                            placeholder: '',
+                        },
+                    })
+                }
+                className="flex items-center space-x-2 mt-4"
+            >
+                <Plus />
+                <span>Add new field</span>
+            </Button>
+        </div>
     );
 };
 
