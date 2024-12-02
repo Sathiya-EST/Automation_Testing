@@ -8,6 +8,7 @@ import { RootState } from '@/store';
 import SessionExpiredModal from './SessionExpiredModal';
 import { useSignOutMutation } from '@/store/services/auth/logout';
 import { Outlet } from 'react-router-dom';
+import { UI_ROUTES } from '@/constants/routes';
 
 
 const navigationItems = [
@@ -15,6 +16,16 @@ const navigationItems = [
         title: "Master",
         url: "/master",
         icon: DatabaseZap,
+        items: [
+            {
+                title: "Master",
+                url: UI_ROUTES.MASTER
+            },
+            {
+                title: "Date",
+                url: UI_ROUTES.MASTER_DATA
+            }
+        ],
         isActive: true
     },
     {
@@ -23,11 +34,11 @@ const navigationItems = [
         icon: Workflow,
         items: [
             {
-                title: "Getting Started",
+                title: "Creation",
                 url: "/docs/getting-started"
             },
             {
-                title: "API Reference",
+                title: "Perform",
                 url: "/docs/api"
             }
         ]

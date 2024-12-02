@@ -41,7 +41,10 @@ const LoginPage = () => {
         } catch (err) {
             console.error('Login failed:', err);
             setErrorMessage('Login failed. Please check your credentials and try again.');
+
         }
+        navigate(UI_ROUTES.MASTER);//FIXME:Remove
+
     };
 
     return (

@@ -12,6 +12,7 @@ import DateTimePicker from "./DateTimepicker";
 
 interface Field {
     name: string;
+    layout: "GRID_1" | "GRID_2" | "GRID_3";
     field: {
         dataTypeName: string;
         type?: string;
@@ -66,6 +67,19 @@ const FieldGenerator: React.FC<FormProps> = ({ fields }) => {
         setSelectedRecord(value);
     };
 
+    const getGridClass = (layout: string) => {
+        switch (layout) {
+            case "GRID_1":
+                return "grid-cols-1";
+            case "GRID_2":
+                return "grid-cols-2";
+            case "GRID_3":
+                return "grid-cols-3";
+            default:
+                return "grid-cols-3";
+        }
+    };
+
     const renderField = (field: Field) => {
         const { name, field: fieldProps } = field;
         const {
@@ -87,8 +101,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields }) => {
             defaultValue: defaultValue || "",
             readOnly: readOnly ?? false,
         };
-
-        switch (dataTypeName) {
+        switch (type) {
             case "text":
                 return (
                     <div key={name} className="field-container">
@@ -211,7 +224,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields }) => {
     };
 
     return (
-        <form className="form-container">
+        <form className={`grid gap-4 ${getGridClass(fields[0]?.layout)}`}>
             {fields.map(renderField)}
         </form>
     );

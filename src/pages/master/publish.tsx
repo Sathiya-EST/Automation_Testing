@@ -70,7 +70,7 @@ const GroupSection = ({
     setValue,
     getValues,
     accessType = 'createAccess',
-    disabled = false  // New prop to disable checkbox
+    disabled = false
 }: {
     groupName: string,
     control: any,
@@ -93,7 +93,7 @@ const GroupSection = ({
 
     const handleValueChange = (selectedValues: string[]) => {
         // Prevent selection if full access is true or checkbox is disabled
-        if (isFullAccess || disabled) return;
+        // if (isFullAccess || disabled) return;
 
         setSelectedOptions(selectedValues);
         setValue(`${accessType}.specificAccess.${groupName.toUpperCase()}`, selectedValues);
@@ -108,31 +108,31 @@ const GroupSection = ({
                     <FormItem className="flex items-center space-x-2">
                         <FormControl>
                             <Checkbox
-                                disabled={disabled || isFullAccess}
+                                // disabled={disabled || isFullAccess}
                                 checked={field.value && field.value.length > 0}
-                                onCheckedChange={(checked) => {
-                                    if (disabled) return;
+                                // onCheckedChange={(checked) => {
+                                //     if (disabled) return;
 
-                                    if (checked) {
-                                        // Set fullAccess to true when checkbox is checked
-                                        setValue(`${accessType}.fullAccess`, true);
-                                    } else {
-                                        // When unchecked, clear specific access
-                                        setValue(`${accessType}.specificAccess.${groupName.toUpperCase()}`, []);
+                                //     if (checked) {
+                                //         // Set fullAccess to true when checkbox is checked
+                                //         // setValue(`${accessType}.fullAccess`, true);
+                                //     } else {
+                                //         // When unchecked, clear specific access
+                                //         setValue(`${accessType}.specificAccess.${groupName.toUpperCase()}`, []);
 
-                                        const otherGroups = ['DEPARTMENT', 'ROLE', 'USER']
-                                            .filter(group => group !== groupName.toUpperCase());
+                                //         const otherGroups = ['DEPARTMENT', 'ROLE', 'USER']
+                                //             .filter(group => group !== groupName.toUpperCase());
 
-                                        const hasOtherSelections = otherGroups.some(group => {
-                                            const groupValues = getValues(`${accessType}.specificAccess.${group}`);
-                                            return groupValues && groupValues.length > 0;
-                                        });
+                                //         const hasOtherSelections = otherGroups.some(group => {
+                                //             const groupValues = getValues(`${accessType}.specificAccess.${group}`);
+                                //             return groupValues && groupValues.length > 0;
+                                //         });
 
-                                        if (!hasOtherSelections) {
-                                            setValue(`${accessType}.fullAccess`, false);
-                                        }
-                                    }
-                                }}
+                                //         if (!hasOtherSelections) {
+                                //             setValue(`${accessType}.fullAccess`, false);
+                                //         }
+                                //     }
+                                // }}
                                 className="mt-2"
                             />
                         </FormControl>
@@ -145,12 +145,41 @@ const GroupSection = ({
                     options={dummyOptions}
                     placeholder={`Select ${groupName}`}
                     multiselect={true}
-                    disabled={disabled || isFullAccess}
+                    // disabled={disabled || isFullAccess}
                     selectedValues={selectedOptions}
                     onValueChange={handleValueChange}
                 />
             </div>
-            {/* Rest of the component remains the same */}
+            <div className="col-span-3 border min-h-20 h-auto p-2 bg-primary/5 rounded-md ">
+                <Text>
+                    {selectedOptions.length > 0 ? (
+                        <div>
+                            <p>Selected {groupName}s:</p>
+                            <div className="flex space-x-2">
+                                {selectedOptions.map((option, index) => (
+                                    <Badge
+                                        key={index}
+                                        className="bg-primary/25 rounded-md p-2 flex items-center space-x-1 hover:bg-primary/20"
+                                    >
+                                        <span className="text-primary">{option}</span>
+                                        <X
+                                            className="cursor-pointer text-primary hover:text-primary"
+                                            onClick={() => {
+                                                const newSelected = selectedOptions.filter((item) => item !== option);
+                                                setSelectedOptions(newSelected);
+                                                setValue(`createAccess.specificAccess.${groupName.toUpperCase()}`, newSelected);
+                                            }}
+                                            size={16}
+                                        />
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-slate-400 font-normal text-sm">No {groupName}s selected...</p>
+                    )}
+                </Text>
+            </div>
         </div>
     );
 };
@@ -219,13 +248,41 @@ const PublishForm = () => {
 
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
-        defaultValues: {
-            isPublished: true,
-            createAccess: { fullAccess: true, specificAccess: {} },
-            updateAccess: { fullAccess: true, specificAccess: {} },
-            viewAccess: { fullAccess: true, specificAccess: {} },
-            deleteAccess: { fullAccess: true, specificAccess: {} },
-        },
+        // defaultValues: {
+        //     isPublished: true,
+        //     createAccess: {
+        //         fullAccess: true,
+        //         specificAccess: {
+        //             DEPARTMENT: [],
+        //             ROLE: [],
+        //             USER: []
+        //         }
+        //     },
+        //     updateAccess: {
+        //         fullAccess: true,
+        //         specificAccess: {
+        //             DEPARTMENT: [],
+        //             ROLE: [],
+        //             USER: []
+        //         }
+        //     },
+        //     viewAccess: {
+        //         fullAccess: true,
+        //         specificAccess: {
+        //             DEPARTMENT: [],
+        //             ROLE: [],
+        //             USER: []
+        //         }
+        //     },
+        //     deleteAccess: {
+        //         fullAccess: true,
+        //         specificAccess: {
+        //             DEPARTMENT: [],
+        //             ROLE: [],
+        //             USER: []
+        //         }
+        //     },
+        // },
     });
 
     // const { control, setValue, getValues, watch } = form;
@@ -308,7 +365,7 @@ const PublishForm = () => {
                                                 setValue={form.setValue}
                                                 getValues={form.getValues}
                                                 accessType="deleteAccess"
-                                                disabled={!form.watch('deleteAccess.fullAccess')}
+                                            // disabled={!form.watch('deleteAccess.fullAccess')}
                                             />
                                         ))}
                                     </div>
@@ -333,6 +390,8 @@ const PublishForm = () => {
                                                 setValue={form.setValue}
                                                 getValues={form.getValues}
                                                 accessType="updateAccess"
+                                                disabled={!form.watch('updateAccess.fullAccess')}
+
                                             />
                                         ))}
                                     </div>
@@ -357,6 +416,8 @@ const PublishForm = () => {
                                                 setValue={form.setValue}
                                                 getValues={form.getValues}
                                                 accessType="createAccess"
+                                                disabled={!form.watch('createAccess.fullAccess')}
+
                                             />
                                         ))}
                                     </div>
@@ -381,6 +442,8 @@ const PublishForm = () => {
                                                 setValue={form.setValue}
                                                 getValues={form.getValues}
                                                 accessType="viewAccess"
+                                                disabled={!form.watch('viewAccess.fullAccess')}
+
                                             />
                                         ))}
                                     </div>

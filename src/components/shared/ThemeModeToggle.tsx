@@ -1,27 +1,35 @@
-import { useTheme } from 'next-themes'
-import { Button } from '../ui/button'
-import { Moon, Sun } from 'lucide-react'
-
-
+import { useTheme } from 'next-themes';
+import { Button } from '../ui/button';
+import { Sun, Moon } from 'lucide-react';
 
 const ThemeModeToggle = () => {
+  const { setTheme, theme } = useTheme();
 
-    const { setTheme, theme } = useTheme()
-    return (
-        <>
-            <Button variant={'outline'} size={'icon'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                <Sun
-                    className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90
-          dark:scale-0"
-                />
-                <Moon
-                    className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0
-          dark:scale-100"
-                />
-                <span className="sr-only">Toggle theme</span>
-            </Button>
-        </>
-    )
-}
+  const handleThemeChange = (selectedTheme: 'light' | 'dark') => {
+    setTheme(selectedTheme);
+  };
 
-export default ThemeModeToggle
+  const icons: Record<'light' | 'dark', JSX.Element> = {
+    light: <Sun className="h-4 w-4" />,
+    dark: <Moon className="h-4 w-4" />,
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {['light', 'dark'].map((mode) => (
+        <Button
+          key={mode}
+          variant={theme === mode ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => handleThemeChange(mode as 'light' | 'dark')}
+          className={`flex items-center gap-2 capitalize ${theme === mode ? 'bg-primary text-white' : ''}`}
+        >
+          {icons[mode as 'light' | 'dark']}
+          {mode}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+export default ThemeModeToggle;

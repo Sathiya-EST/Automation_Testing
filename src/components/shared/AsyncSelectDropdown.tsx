@@ -42,16 +42,15 @@ const AsyncSelectDropdown = ({ tableName, onChange, value, placeholder }: AsyncS
     };
 
     return (
-        <div className="space-y-6">
-            <FormItem className="flex flex-col">
-                <FormLabel>Record</FormLabel>
+        <div className=" ">
+            <FormItem >
                 <Popover>
                     <PopoverTrigger asChild>
                         <FormControl>
                             <Button
                                 variant="outline"
                                 role="combobox"
-                                className={cn("w-[200px] justify-between", !value && "text-muted-foreground")}
+                                className={cn(" w-full justify-between", !value && "text-muted-foreground")}
                             >
                                 {/* Display the label of the selected record */}
                                 {selectedRecord ?

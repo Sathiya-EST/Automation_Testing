@@ -155,8 +155,6 @@ const CreateFormComp = () => {
 
                 <Form {...form}>
                     <form className="space-x-4 w-full" onSubmit={form.handleSubmit(onSubmit)}>
-
-                        {/* <FieldGenerator fields={FieldList.fields} /> */}
                         <div className="flex gap-4">
                             <section className="flex-[4]">
                                 <Card>

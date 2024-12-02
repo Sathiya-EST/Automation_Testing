@@ -25,14 +25,30 @@ export function NavMain({ items }: { items: NavItem[] }) {
               <div className="group relative">
                 <Popover>
                   <PopoverTrigger
-                    className={`
-                      flex items-center gap-3 cursor-pointer outline-none p-2 rounded-md hover:bg-gray-100 
-                      dark:hover:bg-gray-700 transition-all duration-200 ease-in-out
-                      ${item.isActive ? 'text-primary bg-primary/10' : 'text-gray-700 dark:text-gray-200'}
-                    `}
+                    asChild
                   >
-                    <IconComponent className="w-5 h-6" />
-                    {/* <span className="font-medium">{item.title}</span> */}
+                    {item.items && item.items.length > 0 ? (
+                      <div
+                        className={`
+                          flex items-center gap-3 cursor-pointer outline-none p-2 rounded-md hover:bg-gray-100 
+                          dark:hover:bg-gray-700 transition-all duration-200 ease-in-out
+                          ${item.isActive ? 'text-primary bg-primary/10' : 'text-gray-700 dark:text-gray-200'}
+                        `}
+                      >
+                        <IconComponent className="w-5 h-6" />
+                      </div>
+                    ) : (
+                      <a
+                        href={item.url}
+                        className={`
+                          flex items-center gap-3 cursor-pointer outline-none p-2 rounded-md hover:bg-gray-100 
+                          dark:hover:bg-gray-700 transition-all duration-200 ease-in-out
+                          ${item.isActive ? 'text-primary bg-primary/10' : 'text-gray-700 dark:text-gray-200'}
+                        `}
+                      >
+                        <IconComponent className="w-5 h-6" />
+                      </a>
+                    )}
                   </PopoverTrigger>
 
                   {item.items && item.items.length > 0 && (

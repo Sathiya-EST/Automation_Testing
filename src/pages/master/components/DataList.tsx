@@ -156,16 +156,6 @@ const FormList: React.FC = () => {
                     onRequestParamsChange={() => { }}
                 />
             }
-            {/* {data &&
-                <AdvancedTable<MasterColumns>
-                    columns={columns}
-                    data={data.data || []}
-                    totalCount={data?.totalRecords || 5}
-                    requestParams={requestParams}
-                    onRequestParamsChange={() => { }}
-                />
-            } */}
-            {/* <FormTable formData={forms} handleView={handleView} /> */}
         </div>
     );
 };

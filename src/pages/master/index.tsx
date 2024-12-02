@@ -44,8 +44,27 @@ const Master = (props: Props) => {
         fetchModules();
     }, [fetchModules]);
 
-    if (isLoading) return <div>Loading...</div>;
+    // if (isLoading) return <div>Loading...</div>;
     // if (error) return <div>Error: {error.message}</div>;
+    const sampleModuleData = [{
+        moduleIdPk: "module123",
+        moduleName: "Employee Management",
+        moduleDescription: "Handles employee data, records, and processes.",
+        formList: [
+            {
+                formId: "form001",
+                formName: "Employee Registration",
+            },
+            {
+                formId: "form002",
+                formName: "Leave Application",
+            },
+            {
+                formId: "form003",
+                formName: "Performance Review",
+            },
+        ],
+    }];
 
     return (
         <div>
@@ -54,8 +73,8 @@ const Master = (props: Props) => {
                 className="max-w-full rounded-lg border md:min-w-[450px]"
             >
                 <ResizablePanel defaultSize={20}>
-                    {data ? (
-                        <ModuleList data={data.data} handleModuleSelect={handleModuleClick} showForm={false} />
+                    {sampleModuleData ? (
+                        <ModuleList data={sampleModuleData} handleModuleSelect={handleModuleClick} showForm={false} />
                     ) : (
                         <div>No modules available.</div>
                     )}
