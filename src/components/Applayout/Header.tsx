@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { User } from "@/types/data";
 import { UI_ROUTES } from "@/constants/routes";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type HeaderProps = {
     userData: User;
@@ -12,12 +12,16 @@ type HeaderProps = {
 }
 
 const Header = ({ userData, handleLogout }: HeaderProps) => {
+    const navigate = useNavigate();
+    const handleBack = () => {
+        navigate(-1);
+    }
     return (
         <header className="flex justify-between items-center p-auto bg-card text-cardForeground">
 
 
             <div className=" bg-primary/5 p-2 rounded-md">
-                <ChevronLeft className="w-5 h-5 text-primary  " strokeWidth={3} />
+                <ChevronLeft className="w-5 h-5 text-primary  " strokeWidth={3} onClick={handleBack} />
             </div>
             <div className="flex items-center gap-6">
                 {/* TODO:Header main content goes here */}

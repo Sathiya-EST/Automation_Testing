@@ -19,6 +19,7 @@ const availableThemeColors = [
     { name: 'Red', light: "bg-red-900", dark: "bg-red-700" },
     { name: 'Yellow', light: "bg-yellow-900", dark: "bg-yellow-700" },
     { name: 'Violet', light: "bg-violet-900", dark: "bg-violet-700" },
+    { name: 'LightBlue', light: "bg-blue-400", dark: "bg-blue-600" },
 ]
 export function ThemeColorToggle() {
     const { themeColor, setThemeColor } = useThemeContext();

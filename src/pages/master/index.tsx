@@ -6,6 +6,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useGetModuleMutation } from "@/store/services/master/module";
 import { UI_ROUTES } from "@/constants/routes";
+import { Card } from "@/components/ui/card";
 
 type Props = {};
 
@@ -73,15 +74,16 @@ const Master = (props: Props) => {
                 className="max-w-full rounded-lg border md:min-w-[450px]"
             >
                 <ResizablePanel defaultSize={20}>
-                    {sampleModuleData ? (
-                        <ModuleList data={sampleModuleData} handleModuleSelect={handleModuleClick} showForm={false} />
+                    {data ? (
+                        <ModuleList data={data.data} handleModuleSelect={handleModuleClick} showForm={false} />
                     ) : (
                         <div>No modules available.</div>
                     )}
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={80} className="h-full">
+                <ResizablePanel defaultSize={80} className="h-full bg-background">
                     <Outlet context={{ selectedModule }} />
+                    {/* {selectedModule ? <Outlet context={{ selectedModule }} /> : <div className="flex justify-center" >Choose Module</div>} */}
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>

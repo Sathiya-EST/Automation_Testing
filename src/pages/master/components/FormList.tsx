@@ -10,6 +10,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import AdvancedTable, { TableRequestParams } from "@/components/shared/Table";
 import { Badge } from "@/components/ui/badge";
 import { UI_ROUTES } from "@/constants/routes";
+import Text from "@/components/shared/Text";
 
 interface MasterColumns {
     displayName: string;
@@ -32,26 +33,12 @@ const FormList: React.FC = () => {
         filters: [],
     });
 
-    useEffect(() => {
-        setForms([
-            { formId: 1, displayName: "Form A", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 2, displayName: "Form B", formDescription: "User", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-            { formId: 3, displayName: "Form C", formDescription: "Admin", module: "Module 1", isPublished: true },
-        ]);
-    }, []);
-
     const handleView = (formName: string) => {
         navigate(UI_ROUTES.MASTER_FORM_PREVIEW, { state: { formName } });
 
     };
     const handleCreate = () => {
-        navigate(UI_ROUTES.MASTER_FORM_CREATE, { state: { moduleId } });
+        navigate(UI_ROUTES.MASTER_FORM_CREATE, { state: { context } });
     };
 
     const { data, isLoading, error } = useGetFormsQuery(
@@ -78,9 +65,6 @@ const FormList: React.FC = () => {
             setForms(data.data);
         }
     }, [data, isLoading, error]);
-    console.log(data?.totalRecords);
-
-
 
     const columns = [
 
@@ -134,12 +118,12 @@ const FormList: React.FC = () => {
     ];
 
     return (
-        <div className="p-4 space-y-6 bg-card">
-            <p>{moduleId}</p>
+        <div className="p-4 space-y-1 bg-card">
+            <Text className="text-lg font-bold">{moduleId}</Text>
             <div className="flex items-center space-x-4">
                 <SearchInput
                     onSearch={(query: string) => console.log("Search:", query)}
-                    className="flex-1"
+                    className="flex-1 "
                 />
                 <Button variant="default" className="rounded text-white" onClick={handleCreate}>
                     <Plus size={18} strokeWidth={3} />
@@ -147,16 +131,7 @@ const FormList: React.FC = () => {
                 </Button>
             </div>
 
-            {forms &&
-                <AdvancedTable<MasterColumns>
-                    columns={columns}
-                    data={forms || []}
-                    totalCount={data?.totalRecords || 5}
-                    requestParams={requestParams}
-                    onRequestParamsChange={() => { }}
-                />
-            }
-            {/* {data &&
+            {data &&
                 <AdvancedTable<MasterColumns>
                     columns={columns}
                     data={data.data || []}
@@ -164,8 +139,7 @@ const FormList: React.FC = () => {
                     requestParams={requestParams}
                     onRequestParamsChange={() => { }}
                 />
-            } */}
-            {/* <FormTable formData={forms} handleView={handleView} /> */}
+            }
         </div>
     );
 };

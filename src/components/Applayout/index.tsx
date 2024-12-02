@@ -35,11 +35,11 @@ const navigationItems = [
         items: [
             {
                 title: "Creation",
-                url: "/docs/getting-started"
+                url: "#"
             },
             {
                 title: "Perform",
-                url: "/docs/api"
+                url: "#"
             }
         ]
     },

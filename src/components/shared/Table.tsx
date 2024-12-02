@@ -36,18 +36,12 @@ import TableSettingPopover from '@/pages/master/components/TableSettings';
 import { Toggle } from '../ui/toggle';
 import clsx from 'clsx';
 import PinningControls from './PinningControl';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../ui/pagination';
 
 // API Request and Response Types
 interface SortConfig {
   key: string;
   order: 'ASC' | 'DESC';
-}
-interface ColumnDefinition<T> {
-  accessorKey: string;
-  header: string;
-  size?: number;
-  cell?: (info: any) => React.ReactNode;
-  initiallyVisible?: boolean;
 }
 interface FilterConfig {
   key: string;
@@ -134,6 +128,7 @@ function AdvancedTable<T>({
     }
   };
 
+
   const columnHelper = createColumnHelper<T>();
 
   // Prepare table columns
@@ -192,58 +187,83 @@ function AdvancedTable<T>({
     }
   }
 
+  const PaginationControls = ({ pagination, table }: { pagination: { pageIndex: number; pageSize: number }; table: any }) => {
+    return (
+      <Pagination>
+        <PaginationContent>
+          {/* Previous Page Button */}
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={() => table.previousPage()}
+            // disabled={!table.getCanPreviousPage()}
+            />
+          </PaginationItem>
 
+          {/* Page Number Items */}
+          {[...Array(table.getPageCount())].map((_, index) => {
+            const pageIndex = index + 1;
+            return (
+              <PaginationItem key={pageIndex}>
+                <PaginationLink
+                  href="#"
+                  isActive={pagination.pageIndex === index}
+                  onClick={() => table.gotoPage(index)}
+                >
+                  {pageIndex}
+                </PaginationLink>
+              </PaginationItem>
+            );
+          })}
 
-  const PaginationControls = () => (
-    <div className="flex items-center justify-between p-4 space-x-4">
-      <div className="flex items-center space-x-2">
-        <span className="text-sm">Rows per page:</span>
-        <Select
-          value={pagination.pageSize.toString()}
-          onValueChange={(value) => {
-            table.setPageSize(Number(value));
-          }}
-        >
-          <SelectTrigger className="h-8 w-[70px]">
-            <SelectValue placeholder={pagination.pageSize} />
-          </SelectTrigger>
-          <SelectContent side="top">
-            {[5, 10, 20, 50, 100].map((pageSize) => (
-              <SelectItem key={pageSize} value={`${pageSize}`}>
-                {pageSize}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          {/* Ellipsis for pages beyond the current set */}
+          {pagination.pageIndex < table.getPageCount() - 3 && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
 
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <span className="text-sm">
-          Page {pagination.pageIndex + 1} of {table.getPageCount()}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
+          {/* Next Page Button */}
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={() => table.nextPage()}
+            // disabled={!table.getCanNextPage()}
+            />
+          </PaginationItem>
+        </PaginationContent>
+
+        {/* Rows per page Select */}
+        <div className="flex items-center justify-between p-4 space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Rows per page:</span>
+            <Select
+              value={pagination.pageSize.toString()}
+              onValueChange={(value) => {
+                table.setPageSize(Number(value));
+              }}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder={pagination.pageSize} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[5, 10, 20, 50, 100].map((pageSize) => (
+                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Pagination>
+    );
+  }
   const columnHeaders = table.getAllLeafColumns().map((column, index) => ({
     ...column,
     index,
   }));
+  
   return (
     <div className="w-full">
       <div className="flex justify-end items-center mb-4">
@@ -257,7 +277,7 @@ function AdvancedTable<T>({
                   const size = header.column.getSize();
                   const { column } = header;
                   const isPinned = column.getIsPinned();
-                  const isLastColumn = index === headerGroup.headers.length - 1; // Check if it's the last column
+                  const isLastColumn = index === headerGroup.headers.length - 1;
 
                   return (
                     <TableHead
@@ -356,7 +376,7 @@ function AdvancedTable<T>({
           </TableBody>
         </Table>
       </div>
-      <PaginationControls />
+      <PaginationControls pagination={pagination} table={table} />
     </div >
   );
 }
