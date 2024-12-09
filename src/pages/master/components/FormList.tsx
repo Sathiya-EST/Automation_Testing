@@ -7,10 +7,12 @@ import { Eye, Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from "@/components/ui/pagination";
 import { useGetFormsQuery } from "@/store/services/master/form";
 import { skipToken } from "@reduxjs/toolkit/query";
-import AdvancedTable, { TableRequestParams } from "@/components/shared/Table";
+import AdvancedTable from "@/components/shared/Table";
 import { Badge } from "@/components/ui/badge";
 import { UI_ROUTES } from "@/constants/routes";
 import Text from "@/components/shared/Text";
+import { TableRequestParams } from "@/types/data";
+import Spinner from "@/components/shared/Spinner";
 
 interface MasterColumns {
     displayName: string;
@@ -21,7 +23,9 @@ interface MasterColumns {
 
 const FormList: React.FC = () => {
     const { moduleId } = useParams<{ moduleId: string }>();
-    const [forms, setForms] = useState<any[]>([]);
+    const [query, setQuery] = useState<string | null>(null);
+    // const [pageSize, setPageSize] = useState<number>(1);
+    // const [pageNo, setPageNo] = useState<number>(1);
     const context = useOutletContext<{ selectedModuleId: string }>();
     const location = useLocation();
     const navigate = useNavigate();
@@ -29,9 +33,25 @@ const FormList: React.FC = () => {
     const [requestParams, setRequestParams] = useState<TableRequestParams>({
         pageNo: 1,
         pageSize: 10,
-        sort: [{ key: 'name', order: 'ASC' }],
-        filters: [],
+        sort: [{ key: 'createdOn', order: 'ASC' }],
+        filters: moduleId
+            ? [
+                {
+                    key: "moduleName",
+                    operator: "EQUAL",
+                    field_type: "STRING",
+                    value: moduleId,
+                },
+            ]
+            : [],
     });
+
+    const onRequestParamsChange = (updatedParams: Partial<TableRequestParams>) => {
+        setRequestParams((prevParams) => ({
+            ...prevParams,
+            ...updatedParams,
+        }));
+    };
 
     const handleView = (formName: string) => {
         navigate(UI_ROUTES.MASTER_FORM_PREVIEW, { state: { formName } });
@@ -41,31 +61,7 @@ const FormList: React.FC = () => {
         navigate(UI_ROUTES.MASTER_FORM_CREATE, { state: { context } });
     };
 
-    const { data, isLoading, error } = useGetFormsQuery(
-        moduleId
-            ? {
-                pageNo: 1,
-                pageSize: 10,
-                sort: [{ key: 'createdOn', order: 'ASC' }],
-                filters: [
-                    {
-                        key: 'moduleName',
-                        operator: 'EQUAL',
-                        field_type: 'STRING',
-                        value: moduleId,
-                    },
-                ],
-            }
-            : skipToken
-    );
-
-    useEffect(() => {
-        if (data && !isLoading && !error) {
-            console.log(data);
-            setForms(data.data);
-        }
-    }, [data, isLoading, error]);
-
+    const { data, isLoading, error } = useGetFormsQuery(requestParams);
     const columns = [
 
         {
@@ -103,10 +99,10 @@ const FormList: React.FC = () => {
                 return (
                     <Button
                         variant="default"
-                        className="text-white text-xs h-[32px] rounded flex items-center justify-center px-4 py-1 border-none"
+                        className="text-white text-[10px] h-[32px] rounded flex items-center justify-center px-4 py-1 border-none"
                         onClick={() => handleView(formName)}
                     >
-                        <Eye className="mr-2" />
+                        <Eye className="mr-2 w-4 h-4" />
                         View
                     </Button>
                 );
@@ -116,13 +112,49 @@ const FormList: React.FC = () => {
         }
 
     ];
+    const handleAddFilter = (key: string, operator: string, field_type: string, value: any) => {
+        setRequestParams((prevParams) => {
+            const existingFilterIndex = prevParams.filters.findIndex(filter => filter.key === key);
+
+            if (existingFilterIndex !== -1) {
+                const updatedFilters = [...prevParams.filters];
+                updatedFilters[existingFilterIndex] = {
+                    ...updatedFilters[existingFilterIndex],
+                    value,
+                };
+
+                return {
+                    ...prevParams,
+                    filters: updatedFilters,
+                };
+            }
+
+            // If it doesn't exist, add a new filter
+            return {
+                ...prevParams,
+                filters: [
+                    ...prevParams.filters,
+                    { key, operator, field_type, value },
+                ],
+            };
+        });
+    };
+
+    const handleSearch = (query: string) => {
+        const key = 'default_search_criteria';
+        const operator = 'LIKE';
+        const field_type = 'STRING';
+        const value = query;
+
+        handleAddFilter(key, operator, field_type, value);
+    };
 
     return (
         <div className="p-4 space-y-1 bg-card">
             <Text className="text-lg font-bold">{moduleId}</Text>
             <div className="flex items-center space-x-4">
                 <SearchInput
-                    onSearch={(query: string) => console.log("Search:", query)}
+                    onSearch={(query: string) => handleSearch(query)}
                     className="flex-1 "
                 />
                 <Button variant="default" className="rounded text-white" onClick={handleCreate}>
@@ -130,14 +162,14 @@ const FormList: React.FC = () => {
                     Create Form
                 </Button>
             </div>
-
+            {isLoading && <Spinner />}
             {data &&
                 <AdvancedTable<MasterColumns>
                     columns={columns}
                     data={data.data || []}
                     totalCount={data?.totalRecords || 5}
                     requestParams={requestParams}
-                    onRequestParamsChange={() => { }}
+                    onRequestParamsChange={onRequestParamsChange}
                 />
             }
         </div>

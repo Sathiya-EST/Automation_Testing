@@ -11,8 +11,17 @@ export const USER_API = {
     RESET_PASSWORD: '',
 }
 export const MASTER_API = {
+    // Module API Path
+
     GET_MODULES: `${MASTER_API_BASE_URL}/module/list`,
+    LOG: `${MASTER_API_BASE_URL}/log`,
+    CREATE_MODULE: `${MASTER_API_BASE_URL}/module`,
+    // Forms API Path
     GET_FORMS_BY_MODULE: `${MASTER_API_BASE_URL}/form/template/get`,
-    LOG: `${MASTER_API_BASE_URL}/log`
+    GET_DATA_TYPES: `${MASTER_API_BASE_URL}/form/datatype`,
+    CREATE_FORM: `${MASTER_API_BASE_URL}/form/template`,
+    PREVIEW_FORM: `${MASTER_API_BASE_URL}/form/template/view`,
+    GET_ASYNCDATA: `${MASTER_API_BASE_URL}/form/get`,
+    UPDATE_FORM: `${MASTER_API_BASE_URL}/form/template/add/fields`,
 }
 

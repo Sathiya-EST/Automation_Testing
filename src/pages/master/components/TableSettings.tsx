@@ -34,7 +34,7 @@ const TableSettingPopover: React.FC<TableSettingPopoverProps> = ({
         }, {} as Record<string, boolean>),
         [columnHeaders]
     );
-
+    const [pageSizeVal, setPageSizeVal] = useState<number>(settings.pageSize)
     // State for selected column visibility
     const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>(initialColumnVisibility);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -148,11 +148,18 @@ const TableSettingPopover: React.FC<TableSettingPopoverProps> = ({
                     <Input
                         id="pageSize"
                         type="number"
-                        min={1}
-                        max={100}
-                        value={settings.pageSize}
-                        onChange={(e) => handleChange(e, "pageSize")}
+                        min={5}
+                        max={settings.totalPages || 100}
+                        value={pageSizeVal}
                         className="col-span-2 h-8"
+                        onChange={(e) => setPageSizeVal(Number(e.target.value))}
+                        onBlur={() => {
+                            const validPageSize = pageSizeVal < 5 || pageSizeVal > (settings.totalPages || 100)
+                                ? 10
+                                : pageSizeVal;
+                            setPageSizeVal(validPageSize);
+                            updateSettings({ pageSize: validPageSize });
+                        }}
                     />
                 </div>
             </div>

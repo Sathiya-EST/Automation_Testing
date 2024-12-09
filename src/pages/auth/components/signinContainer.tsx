@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff } from "lucide-react"
+import { AlertTriangle, Eye, EyeOff } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // Zod validation schema
 const loginSchema = z.object({
@@ -30,18 +31,22 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
     onSubmit: (data: LoginFormValues) => void | Promise<void>;
+    handleForgotPassword: () => void
     showForgotPassword?: boolean;
     showCreateAccount?: boolean;
     cardClassName?: string;
     formClassName?: string;
+    isError?: boolean;
 }
 
 export function LoginForm({
     onSubmit,
+    handleForgotPassword,
     showForgotPassword = true,
     showCreateAccount = true,
     cardClassName = "w-full max-w-md ",
-    formClassName = ""
+    formClassName = "",
+    isError
 }: LoginFormProps) {
     const { t } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
@@ -68,6 +73,15 @@ export function LoginForm({
         setShowPassword(!showPassword);
     };
 
+    const renderErrorAlert = (errorMessage: string) => (
+        <Alert variant="destructive" className="my-2">
+            <AlertTriangle className="h-5 w-5" />
+            {/* <AlertTitle>Error</AlertTitle> */}
+            <AlertDescription className="text-md font-semibold">
+                {errorMessage}
+            </AlertDescription>
+        </Alert>
+    );
     return (
         <Card className={cardClassName}>
             <CardHeader>
@@ -120,15 +134,17 @@ export function LoginForm({
                         </div>
                         {showForgotPassword && (
                             <div className="flex items-center justify-end">
-                                <a
-                                    href="#"
-                                    className="text-sm text-blue-600 hover:underline"
+                                <Button
+                                    variant={"ghost"}
+                                    className="text-sm text-blue-600 "
+                                    onClick={handleForgotPassword}
                                 >
                                     {t('login.forgotCredentials.link')}
-                                </a>
+                                </Button>
                             </div>
                         )}
                     </div>
+                    {isError && renderErrorAlert(t('login.validationMessages.generic'))}
                     <CardFooter className="p-0 pt-4 flex flex-col space-y-2">
                         <Button
                             type="submit"

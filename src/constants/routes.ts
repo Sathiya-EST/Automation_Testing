@@ -3,6 +3,8 @@ const PROCESS = '/process';
 
 export const UI_ROUTES = {
     LOGIN: '/login',
+    FORGOT_PASSWORD: '/forgot-password',
+    CHANGE_PASSWORD: '/change-password',
     APP_SETTINGS: '/settings',
     MASTER: MASTER,
     MASTER_FORM_CREATE: `${MASTER}/create`,

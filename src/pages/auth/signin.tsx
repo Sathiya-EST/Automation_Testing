@@ -43,15 +43,17 @@ const LoginPage = () => {
             setErrorMessage('Login failed. Please check your credentials and try again.');
 
         }
-        navigate(UI_ROUTES.MASTER);//FIXME:Remove
-
     };
-
+    const handleForgotPassword = () => {
+        navigate(UI_ROUTES.FORGOT_PASSWORD)
+    }
     return (
         <div className="flex items-center justify-center min-h-screen p-4 bg-background">
             <LoginForm
                 onSubmit={handleLogin}
                 showCreateAccount={false}
+                isError={!!errorMessage}
+                handleForgotPassword={handleForgotPassword}
             />
             {errorMessage && <div className="error-message">{errorMessage}</div>}
         </div>

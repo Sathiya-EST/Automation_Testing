@@ -9,7 +9,7 @@ const themes = {
             cardForeground: "210 25% 10%",
             popover: "200 90% 98%",
             popoverForeground: "210 25% 10%",
-            primary: "205 85% 65%",
+            primary: "204 83% 44%", // Converted from rgba(17, 140, 207, 1)
             primaryForeground: "210 20% 96%",
             secondary: "210 15% 95%",
             secondaryForeground: "210 25% 10%",
@@ -21,7 +21,7 @@ const themes = {
             destructiveForeground: "210 20% 96%",
             border: "210 20% 90%",
             input: "210 20% 90%",
-            ring: "205 85% 65%",
+            ring: "204 83% 44%", // Matching primary color
             radius: "0.5rem",
         },
         dark: {
@@ -31,7 +31,7 @@ const themes = {
             cardForeground: "210 20% 96%",
             popover: "210 25% 10%",
             popoverForeground: "210 20% 96%",
-            primary: "205 80% 50%",
+            primary: "204 80% 39%", // Converted from rgba(17, 140, 207, 1)
             primaryForeground: "210 20% 96%",
             secondary: "210 15% 20%",
             secondaryForeground: "210 20% 96%",
@@ -43,7 +43,7 @@ const themes = {
             destructiveForeground: "210 20% 96%",
             border: "210 15% 20%",
             input: "210 15% 20%",
-            ring: "205 80% 50%",
+            ring: "204 80% 39%", // Matching primary color
         },
     },
     Orange: {

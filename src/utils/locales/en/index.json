@@ -29,6 +29,37 @@
             "text": "Create an account",
             "helperText": "Don't have an account yet?"
         },
+        "forgotPassword": {
+            "title": "Forgot Password?",
+            "description": "No worries,we'll send you reset instructions",
+            "email": {
+                "label": "Email",
+                "placeholder": "Enter your Email",
+                "errormessage": "Enter valid Email"
+            },
+            "submit": "Reset Password",
+            "back": "Back to Login"
+        },
+        "changePassword": {
+            "title": "Change Password?",
+            "oldPassword": {
+                "label": "Old Password",
+                "placeholder": "Enter your old password",
+                "errormessage": "Invalid Password"
+            },
+            "newPassword": {
+                "label": "New Password",
+                "placeholder": "Enter your new password",
+                "errormessage": "Enter valid Password"
+            },
+            "confirmPassword": {
+                "label": "Confirmation Password",
+                "placeholder": "Enter confirm password",
+                "errormessage": "Password confirmation doesn't match"
+            },
+            "submit": "Change Password",
+            "back": "Cancel"
+        },
         "socialLogin": {
             "google": "Continue with Google",
             "microsoft": "Continue with Microsoft",
@@ -41,7 +72,7 @@
             "error": "Login Failed"
         },
         "validationMessages": {
-            "generic": "Please check your input and try again",
+            "generic": "Invalid credentials",
             "networkError": "Unable to connect. Please check your internet connection.",
             "serverError": "Server error. Please try again later.",
             "tooManyAttempts": "Too many login attempts. Please try again later."
@@ -63,6 +94,36 @@
         "or": "or",
         "cancel": "Cancel",
         "continue": "Continue",
-        "back": "Back"
+        "back": "Back",
+        "update": "Update",
+        "generate": "Generate",
+        "publish": "Publish",
+        "search": "Search..."
+    },
+    "master": {
+        "form": {
+            "list": {
+                "title": "Modules",
+                "createBtn": "Create Form",
+                "filterBtn": "Status",
+                "sortBtn": "Sort",
+                "viewBtn": "View",
+                "tableHeader": {
+                    "formName": "Form Name",
+                    "formDesc": "Form Description",
+                    "status": "Status",
+                    "action": "Action"
+                },
+                "statusFilter": {
+                    "published": "Published",
+                    "unPublished": "UnPublished"
+                }
+            },
+            "create": {},
+            "update": {},
+            "preview": {},
+            "publish": {}
+        },
+        "data": {}
     }
 }

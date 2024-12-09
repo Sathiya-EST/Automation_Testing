@@ -21,19 +21,21 @@ export const masterApi = createApi({
                 },
             }),
         }),
-        getForms: builder.query({
-            query: ({ pageNo, pageSize, sort, filters }) => ({
-                url: MASTER_API.GET_MODULES,
+        postModule: builder.mutation({
+            query: ({ moduleName, moduleDescription }) => ({
+                url: MASTER_API.CREATE_MODULE,
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer YOUR_ACCESS_TOKEN`,
+                },
                 body: {
-                    pageNo,
-                    pageSize,
-                    sort: sort,
-                    filters: filters,
+                    moduleName,
+                    moduleDescription,
                 },
             }),
-        })
+        }),
     }),
 });
 
-export const { useGetLogQuery, useGetModuleMutation } = masterApi
+export const { useGetLogQuery, useGetModuleMutation, usePostModuleMutation } = masterApi

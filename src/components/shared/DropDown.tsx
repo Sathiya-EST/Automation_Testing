@@ -40,9 +40,9 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
             {label && <label className="font-medium leading-none">{label}</label>}
             <Select value={value} onValueChange={handleChange}>
                 <SelectTrigger className="w-full">
-                    <SelectValue 
-                        placeholder={placeholder} 
-                        className={`${!value ? 'text-slate-400' : ''}`}
+                    <SelectValue
+                        placeholder={placeholder}
+                        className={`${!value ? 'text-red-500' : ''}`}
                     />
                 </SelectTrigger>
                 <SelectContent>

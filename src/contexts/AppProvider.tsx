@@ -4,6 +4,7 @@ import { FC, ReactNode } from "react";
 import { Provider } from "react-redux";
 import ThemeDataProvider from "./themeContext";
 import '../style/global.css';
+import { Toaster } from "@/components/ui/toaster";
 interface AppProvidersProps {
     children: ReactNode;
 }
@@ -14,6 +15,7 @@ const AppProviders: FC<AppProvidersProps> = ({ children }) => {
             <ThemeDataProvider>
                 <Provider store={store}>
                     {children}
+                    <Toaster />
                 </Provider>
             </ThemeDataProvider>
         </ThemeProvider>

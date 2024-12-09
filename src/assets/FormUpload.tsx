@@ -7,11 +7,11 @@ const FormUpload = () => {
     useEffect(() => {
         const lineTimer = setTimeout(() => {
             setAnimateLines(true);
-        }, 500); // Delay before starting line animation
+        }, 500); 
 
         const tickTimer = setTimeout(() => {
             setShowTick(true);
-        }, 2000); // Show tick after 2 seconds
+        }, 2000); 
 
         return () => {
             clearTimeout(lineTimer);
