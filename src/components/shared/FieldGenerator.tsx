@@ -27,7 +27,7 @@ interface FormProps {
     layout: string;
 }
 
-const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsyncOptions,layout }) => {
+const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsyncOptions, layout }) => {
 
     const [asyncDataOptions, setAsyncDataOptions] = useState<{ label: string; value: string }[]>([]);
     const [totalAsyncOptions, setTotalAsyncOptions] = useState(0);
@@ -68,7 +68,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
     const renderField = (field: FormFieldType) => {
         const { name, label, field: fieldProps } = field;
         const {
-            type,
+            dataTypeName,
             required,
             placeholder,
             defaultValue,
@@ -78,8 +78,8 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
             asynchronousField,
         } = fieldProps;
 
-        switch (type) {
-            case "text":
+        switch (dataTypeName) {
+            case "Text Input":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -98,7 +98,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                     </div>
                 );
 
-            case "number":
+            case "Whole Number":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -115,7 +115,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         />
                     </div>
                 );
-            case "numerical":
+            case "Decimal Number":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -132,7 +132,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         />
                     </div>
                 );
-            case "select":
+            case "List Box":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -151,22 +151,33 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                     </div>
                 );
 
-            case "checkbox":
+            case "Check Box / Boolean":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>
+                    <div key={name} className="flex items-center space-x-2 py-2">
+                        <Label
+                            htmlFor={name}
+                            className="flex items-center space-x-2 cursor-pointer">
+
+                            {/* Checkbox Controller */}
                             <Controller
                                 name={name}
                                 control={control}
                                 defaultValue={false}
-                                render={({ field }) => <Checkbox {...field} />}
-                            />{" "}
-                            {name}
+                                render={({ field }) => (
+                                    <Checkbox
+                                        {...field}
+                                    />
+                                )}
+                            />
+
+                            {/* Label text */}
+                            <span className="text-sm">{label}</span>
                         </Label>
                     </div>
+
                 );
 
-            case "date":
+            case "Date":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -179,7 +190,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                     </div>
                 );
 
-            case "datetime":
+            case "Date Time":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -197,7 +208,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         />
                     </div>
                 );
-            case "upload":
+            case "File Upload":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -231,7 +242,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         />
                     </div>
                 );
-            case "asynchronouslist":
+            case "Asynchronous List":
                 return (
                     <div key={name} className="field-container">
                         <Label htmlFor={name}>{label}</Label>
@@ -259,7 +270,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
             default:
                 return (
                     <div key={name} className="field-container">
-                        <Label htmlFor={name}>{name}</Label>
+                        <Label htmlFor={name}>{label}</Label>
                         <Controller
                             name={name}
                             control={control}

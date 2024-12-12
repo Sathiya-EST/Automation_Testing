@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import useBreadcrumb from '@/hooks/useBreadCrumb';
 import { BreadcrumbItemType } from '@/types/data';
 import { useMemo } from 'react'
+import LanguageSwitcher from './components/LanguageSelect';
+import { useTranslation } from 'react-i18next';
 
 type Props = {}
 
@@ -14,6 +16,7 @@ const Settings = (props: Props) => {
   ], []);
 
   useBreadcrumb(updatedRoutes);
+  const { t,i18n } = useTranslation();
 
   return (
     <Card>
@@ -32,6 +35,13 @@ const Settings = (props: Props) => {
           </div>
           <div className=" p-4 col-span-3">
             <ThemeColorToggle />
+          </div>
+          <div className=" p-4">
+            <Label>Choose Language</Label>
+          </div>
+          <div className=" p-4 col-span-3">
+          <h1>{t('welcome')}</h1> 
+          <LanguageSwitcher />
           </div>
 
         </div>

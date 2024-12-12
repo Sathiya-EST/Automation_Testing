@@ -95,7 +95,7 @@ export const formApi = createApi({
                     pageSize,
                     sort: [
                         {
-                            key: "custom_strudent_id",
+                            key: fieldName,
                             order: "ASC",
                         },
                     ],
@@ -143,6 +143,72 @@ export const formApi = createApi({
                 body: data,
             }),
         }),
+        getModuleOptions: builder.query<{
+            moduleOptions: { label: string; value: string }[];
+            formOptions: { label: string; value: string }[];
+        }, { pageNo: number; pageSize: number; sort?: any[]; filters?: any[]; selectedModuleName?: string | null }>({
+            query: ({ pageNo, pageSize, sort = [], filters = [] }) => ({
+                url: MASTER_API.GET_MODULES,
+                method: 'POST',
+                body: {
+                    pageNo,
+                    pageSize,
+                    sort,
+                    filters,
+                },
+            }),
+            transformResponse: (response: { data: any[] }, meta, arg) => {
+                const selectedModuleName = arg.selectedModuleName;
+
+                return {
+                    moduleOptions: response.data.map((module) => ({
+                        label: module.moduleName,
+                        value: module.moduleName,
+                    })),
+                    formOptions: response.data
+                        .filter((module) =>
+                            // Ensure selectedModuleName is validated and matched
+                            selectedModuleName && module.moduleName === selectedModuleName
+                        )
+                        .flatMap((module) =>
+                            module.formList?.map((form: { formId: string; formName: string }) => ({
+                                label: form.formName,
+                                value: form.formId,
+                            })) || []
+                        ),
+                };
+            },
+        }),
+        getAsyncFormFields: builder.query<{ options: { label: string; value: string }[] }, string>({
+            query: (formName) => {
+                if (!formName) {
+                    throw new Error("formName cannot be null or empty");
+                }
+
+                return {
+                    url: `${MASTER_API.PREVIEW_FORM}?formName=${formName}`,
+                    method: 'GET',
+                };
+            },
+            transformResponse: (response: { fields: { name: string; label: string; field: { uniqueValue: boolean; required: boolean; readOnly: boolean } }[] }) => {
+                if (!response || !response.fields) {
+                    return { options: [] };
+                }
+                const filteredFields = response.fields.filter(field =>
+                    field.field.uniqueValue === true &&
+                    field.field.required === true &&
+                    field.field.readOnly === true
+                );
+                return {
+                    options: filteredFields.map((field) => ({
+                        label: field.label,
+                        value: field.name,
+                    })),
+                };
+            },
+        }),
+
+
     }),
 });
 
@@ -154,4 +220,6 @@ export const {
     useLazyGetFormAsyncDataQuery,
     useGetFormAsyncDataQuery,
     useUpdateFormMutation,
+    useGetModuleOptionsQuery,
+    useGetAsyncFormFieldsQuery
 } = formApi;

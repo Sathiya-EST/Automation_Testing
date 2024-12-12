@@ -1,15 +1,15 @@
 import React from 'react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Check, CircleDot, Circle, LucideIcon } from "lucide-react";
 
 // Define status type
-export type StatusValue = 'published' | 'unPublished';
+export type StatusValue = 'published' | 'unPublished' | 'all';
 
 // Define status option interface
 interface StatusOption {
@@ -26,26 +26,33 @@ interface StatusFilterDropdownProps {
   className?: string;
 }
 
-const StatusFilterDropdown: React.FC<StatusFilterDropdownProps> = ({ 
-  onFilterChange, 
+const StatusFilterDropdown: React.FC<StatusFilterDropdownProps> = ({
+  onFilterChange,
   initialStatus = null,
   className = ''
 }) => {
   const [selectedStatus, setSelectedStatus] = React.useState<StatusValue | null>(initialStatus);
 
   const statusOptions: StatusOption[] = [
-    { 
-      value: 'published', 
-      label: 'Published', 
+    {
+      value: 'all',
+      label: 'All',
+      colorClass: 'bg-gray-100 text-gray-700',
+      icon: Circle
+    },
+    {
+      value: 'published',
+      label: 'Published',
       colorClass: 'bg-green-100 text-green-700',
       icon: CircleDot
     },
-    { 
-      value: 'unPublished', 
-      label: 'Unpublished', 
+    {
+      value: 'unPublished',
+      label: 'Unpublished',
       colorClass: 'bg-red-100 text-red-700',
       icon: Circle
-    }
+    },
+
   ];
 
   const handleStatusChange = (status: StatusValue) => {
@@ -54,7 +61,7 @@ const StatusFilterDropdown: React.FC<StatusFilterDropdownProps> = ({
   };
 
   return (
-    <Select 
+    <Select
       value={selectedStatus || undefined}
       onValueChange={handleStatusChange}
     >
@@ -63,7 +70,7 @@ const StatusFilterDropdown: React.FC<StatusFilterDropdownProps> = ({
           {selectedStatus && (() => {
             const status = statusOptions.find(s => s.value === selectedStatus);
             if (!status) return null;
-            
+
             const Icon = status.icon;
             return (
               <div className="flex items-center">
@@ -78,8 +85,8 @@ const StatusFilterDropdown: React.FC<StatusFilterDropdownProps> = ({
         {statusOptions.map((status) => {
           const Icon = status.icon;
           return (
-            <SelectItem 
-              key={status.value} 
+            <SelectItem
+              key={status.value}
               value={status.value}
               className="cursor-pointer group"
             >

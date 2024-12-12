@@ -131,3 +131,8 @@ export interface FormFieldsType {
 }
 // Layout options
 export const layoutValues = Object.values(LAYOUT) as [string, ...string[]];
+
+export interface SelectOptions {
+    value: string;
+    label: string;
+  }

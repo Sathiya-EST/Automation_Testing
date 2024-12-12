@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import SessionExpiredModal from './SessionExpiredModal';
 import { useSignOutMutation } from '@/store/services/auth/logout';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { UI_ROUTES } from '@/constants/routes';
 
 
@@ -18,11 +18,11 @@ const navigationItems = [
         icon: DatabaseZap,
         items: [
             {
-                title: "Master",
+                title: "Master Form",
                 url: UI_ROUTES.MASTER
             },
             {
-                title: "Date",
+                title: "Master Data",
                 url: UI_ROUTES.MASTER_DATA
             }
         ],
@@ -60,10 +60,12 @@ const AppLayout = () => {
     const userRole = useSelector((state: RootState) => state.auth.userRole);
     const breadcrumbs = useSelector((state: RootState) => state.app.items);
     const [signOut] = useSignOutMutation();
+    const location = useLocation();
     const userData = {
         userName,
         userRole,
     };
+    const isMenuHidden = location.pathname === "/*" || location.pathname === "/404";
     const handleLogout = async () => {
         try {
             await signOut({}).unwrap();
@@ -75,21 +77,24 @@ const AppLayout = () => {
     return (
         <div className="flex h-screen bg-background text-foreground">
             {/* Sidebar */}
-            <aside className=" bg-card text-card-foreground  h-screen">
-                <div className="p-2">
-                    <div>
-                        <a href="#" className="block">
-                            <div className="flex items-center justify-center  rounded-lg ">
-                                <img src="/logo.svg" alt="Logo" className="w-10 h-10" />
-                            </div>
-                        </a>
+            {!isMenuHidden && (
+
+                <aside className=" bg-card text-card-foreground  h-screen">
+                    <div className="p-2">
+                        <div>
+                            <a href="#" className="block">
+                                <div className="flex items-center justify-center  rounded-lg ">
+                                    <img src="/logo.svg" alt="Logo" className="w-10 h-10" />
+                                </div>
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <Separator orientation="horizontal" />
-                <nav className="pt-2 border-r sticky top-0 z-10">
-                    <Menu items={navigationItems} />
-                </nav>
-            </aside>
+                    <Separator orientation="horizontal" />
+                    <nav className="pt-2 border-r sticky top-0 z-10">
+                        <Menu items={navigationItems} />
+                    </nav>
+                </aside>
+            )}
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-w-0">
@@ -101,10 +106,10 @@ const AppLayout = () => {
                 </header>
                 <Separator orientation="horizontal" />
                 {/* Main Content */}
-                <div className="flex-1 overflow-y-hiden p-4 bg-accent text-foreground ">
-                    <span className="inline-block w-auto my-1 ">
+                <div className="flex-1 overflow-y-auto p-4 bg-accent text-foreground ">
+                    {breadcrumbs.length > 0 && <span className="inline-block w-auto my-1 ">
                         <BreadcrumbComponent items={breadcrumbs} />
-                    </span>
+                    </span>}
 
                     <SessionExpiredModal
                         isOpen={isSessionExpired}

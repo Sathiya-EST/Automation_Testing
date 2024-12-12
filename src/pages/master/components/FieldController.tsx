@@ -13,6 +13,8 @@ import Text from '@/components/shared/Text';
 import SelectFieldOptions from '@/pages/master/components/SelectFieldOptions';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import SelectWithCustomInput from '@/pages/master/components/SelectWithCustomInput';
+import { useTranslation } from 'react-i18next';
+import { useGetAsyncFormFieldsQuery, useGetModuleOptionsQuery } from '@/store/services/master/form';
 
 
 
@@ -22,7 +24,7 @@ type FieldControllerProps = {
     handleFieldUpdate: (value: string | boolean | number | string[], fieldName: string) => void;
     handleAsyncFieldUpdate: (value: string | boolean | number, fieldName: string) => void;
     dataType: DataTypes[];
-
+    setValue: any;
 };
 
 const FieldController = ({
@@ -31,11 +33,26 @@ const FieldController = ({
     handleFieldUpdate,
     handleAsyncFieldUpdate,
     dataType,
+    setValue
 }: FieldControllerProps) => {
     const [fieldsConfig, setFieldsConfig] = useState<Field>();
+    const { t } = useTranslation();
+    const [selectedAsynModule, setSelectedAsyncModule] = useState<string | null>(null)
+    const [selectedAsynForm, setSelectedAsyncForm] = useState<string | null>(null)
+    const { data: ModuleOptions } = useGetModuleOptionsQuery({
+        pageNo: 1,
+        pageSize: 10,
+    });
+    const { data: FormOptions } = useGetModuleOptionsQuery({
+        pageNo: 1,
+        pageSize: 10,
+        selectedModuleName: selectedAsynModule ?? null
+    });
+
+    const { data: FieldOptions } = useGetAsyncFormFieldsQuery(selectedAsynForm ? selectedAsynForm : "");
 
     const { field: { value: selectedType, onChange } } = useController({
-        name: `fields[${fieldIndex}].field.type`,
+        name: `fields[${fieldIndex}].field.dataTypeName`,
         control,
     });
     const positiveOnly = useWatch({
@@ -47,7 +64,8 @@ const FieldController = ({
         control,
     });
     const DataTypeoptions = dataType.map(item => ({
-        value: item.dataType,
+        // value: item.dataType,
+        value: item.name,
         label: item.name
     }));
     const DefaultChoices = useWatch({
@@ -57,8 +75,9 @@ const FieldController = ({
 
     useEffect(() => {
         if (selectedType) {
-            const fieldConfig = dataType.find((field) => field.dataType === selectedType);
-            console.log("Found fieldConfig", fieldConfig);
+            const fieldConfig = dataType.find((field) => field.name === selectedType);
+            console.log(fieldConfig);
+            console.log(dataType);
 
             if (fieldConfig) {
                 setFieldsConfig(fieldConfig as Field);
@@ -68,9 +87,9 @@ const FieldController = ({
         }
     }, [selectedType, dataType]);
 
-    const ASYNC_FIELD = 'asynchronouslist';
-    const SELECT_FIELD = 'select';
-    const FILE_FIELD = 'upload';
+    const ASYNC_FIELD = 'Asynchronous List';
+    const SELECT_FIELD = 'List Box';
+    const FILE_FIELD = 'File Upload';
     const MAX_DEFAULTCHOICE = 3;
 
     const renderDefaultChoices = Array.isArray(DefaultChoices) && Array.isArray(DefaultChoices[fieldIndex])
@@ -78,15 +97,36 @@ const FieldController = ({
             ? DefaultChoices[fieldIndex].length > MAX_DEFAULTCHOICE
                 ? DefaultChoices[fieldIndex].slice(0, MAX_DEFAULTCHOICE).join(", ") + "..."
                 : DefaultChoices[fieldIndex].join(", ")
-            : "No options available"
-        : "Configure Select options";
+            : t('master.form.create.fieldController.selectField.noOptionLabel')
+        : t('master.form.create.fieldController.selectField.hasOptionsLabel');
 
+    const handleResetValue = (fieldIndex: number) => {
+        // setValue(`fields[${fieldIndex}].field.readOnly`, false);
+        // setValue(`fields[${fieldIndex}].field.required`, false);
+        // setValue(`fields[${fieldIndex}].field.min`, null);
+        // setValue(`fields[${fieldIndex}].field.max`, null);
+        // setValue(`fields[${fieldIndex}].field.pattern`, null);
+        // setValue(`fields[${fieldIndex}].field.formula`, null);
+        // setValue(`fields[${fieldIndex}].field.alphabetic`, false);
+        // setValue(`fields[${fieldIndex}].field.alphanumeric`, false);
+        // setValue(`fields[${fieldIndex}].field.positiveOnly`, undefined);
+        // setValue(`fields[${fieldIndex}].field.negativeOnly`, undefined);
+        // setValue(`fields[${fieldIndex}].field.multiple`, undefined);
+        // setValue(`fields[${fieldIndex}].field.asynchronousField`, null);
+        // setValue(`fields[${fieldIndex}].field.compute`, null);
+        // setValue(`fields[${fieldIndex}].field.uniqueValue`, false);
+        // setValue(`fields[${fieldIndex}].field.decimalLimit`, null);
+        // setValue(`fields[${fieldIndex}].field.defaultChoice`, null);
+        // setValue(`fields[${fieldIndex}].field.placeholder`, undefined);
+        // setValue(`fields[${fieldIndex}].field.defaultValue`, undefined);
+        console.log("No action");
 
+    }
 
     return (
         <Card>
             <CardHeader className=" font-semibold border-b-2">
-                Add New Field
+                {t('master.form.create.fieldController.title')}
             </CardHeader>
             <CardContent className="grid gap-2 overflow-y-auto p-2 pb-5 mb-1">
                 {/* Directly using parent form control */}
@@ -98,74 +138,39 @@ const FieldController = ({
                         render={({ field }) => (
                             <FormItem className="grid grid-cols-3 items-center gap-2">
                                 <FormLabel htmlFor="name" className="text-left font-normal">
-                                    Column Name
+                                    {t('master.form.create.fieldController.NameField.label')}
                                 </FormLabel>
                                 <div className="col-span-2 relative">
                                     <FormControl>
                                         <Input
                                             id="name"
                                             className="h-9 peer"
-                                            placeholder="Enter Column Name"
+                                            placeholder={t('master.form.create.fieldController.NameField.placeholder')}
                                             {...field}
                                             onChange={(e) => {
                                                 handleFieldUpdate(e.target.value, 'name');
                                                 field.onChange(e);
                                             }}
-                                        // autoFocus={field ? true : false}
-
                                         />
                                     </FormControl>
                                     <FormDescription
                                         className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
                                     >
-                                        Name of the Field
+                                        {t('master.form.create.fieldController.NameField.desc')}
                                     </FormDescription>
                                     <FormMessage />
                                 </div>
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={control}
-                        name={`fields[${fieldIndex}].dataTypeName`}
-                        render={({ field }) => (
-                            <FormItem className="hidden">
-                                <FormLabel htmlFor="dataTypeName" className="text-left font-normal">
-                                    Data type Name
-                                </FormLabel>
-                                <div className="col-span-2 relative">
-                                    <FormControl>
-                                        <Input
-                                            id="dataTypeName"
-                                            className="h-9 peer"
-                                            placeholder="Enter Column Name"
-                                            {...field}
-                                            onChange={(e) => {
-                                                handleFieldUpdate(e.target.value, 'dataTypeName');
-                                                field.onChange(e);
-                                            }}
-                                            value={''}
-                                        />
-                                    </FormControl>
-                                    <FormDescription
-                                        className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
-                                    >
-                                        Name of the Field
-                                    </FormDescription>
-                                    <FormMessage />
-                                </div>
-                            </FormItem>
-                        )}
-                    />
-
                     {/* Property Type Field */}
                     <FormField
                         control={control}
-                        name={`fields[${fieldIndex}].field.type`}
+                        name={`fields[${fieldIndex}].field.dataTypeName`}
                         render={({ field }) => (
-                            <FormItem className="grid grid-cols-3 items-center gap-2">
-                                <FormLabel htmlFor="type" className="text-left font-normal">
-                                    Property Type
+                            <FormItem className="grid grid-cols-3 items-center gap-2 relative">
+                                <FormLabel htmlFor="dataTypeName" className="text-left font-normal">
+                                    {t('master.form.create.fieldController.TypeField.label')}
                                 </FormLabel>
                                 <div className="col-span-2">
                                     <FormControl>
@@ -173,52 +178,22 @@ const FieldController = ({
                                             options={DataTypeoptions}
                                             className="h-9 peer"
                                             onChange={(value) => {
-                                                handleFieldUpdate(value, 'type');
+                                                handleResetValue(fieldIndex)
+                                                handleFieldUpdate(value, 'dataTypeName');
                                                 field.onChange(value);
                                             }}
                                             value={field.value}
-                                            placeholder="Select Data type"
+                                            placeholder={t('master.form.create.fieldController.TypeField.placeholder')}
                                         />
                                     </FormControl>
                                     <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                        Defines the data type for the field.
+                                        {t('master.form.create.fieldController.TypeField.desc')}
                                     </FormDescription>
                                     <FormMessage className="mt-1 text-sm text-red-600" />
                                 </div>
                             </FormItem>
                         )}
                     />
-
-                    {/* Description Field */}
-                    {/* <FormField
-                        control={control}
-                        name={`fields[${fieldIndex}].field.description`}
-                        render={({ field }) => (
-                            <FormItem className="grid grid-cols-3 items-center gap-2">
-                                <FormLabel htmlFor="description" className="text-left font-normal">
-                                    Description
-                                </FormLabel>
-                                <div className="col-span-2">
-                                    <FormControl>
-                                        <Textarea
-                                            id="description"
-                                            className="h-8 peer"
-                                            placeholder="Enter Description"
-                                            {...field}
-                                            onChange={(e) => {
-                                                handleFieldUpdate(e.target.value, 'description');
-                                                field.onChange(e);
-                                            }}
-                                        />
-                                    </FormControl>
-                                    <FormDescription className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                        Provides more info about the field.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </div>
-                            </FormItem>
-                        )}
-                    /> */}
 
                     {selectedType === SELECT_FIELD && (
                         <Popover>
@@ -229,7 +204,7 @@ const FieldController = ({
                                     return (
                                         <FormItem className="grid grid-cols-3 items-center gap-2">
                                             <FormLabel htmlFor="type" className="text-left font-normal">
-                                                Select Options
+                                                {t('master.form.create.fieldController.selectField.label')}
                                             </FormLabel>
                                             <div className="col-span-2">
                                                 <FormControl>
@@ -259,22 +234,21 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="type" className="text-left font-normal">
-                                        File Type
+                                        {t('master.form.create.fieldController.fileTypeField.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
                                             <SelectWithCustomInput
                                                 onChange={(value: string[]) => {
                                                     handleFieldUpdate(value, 'defaultChoice');
-                                                    console.log("Selected Value:", value);
                                                     field.onChange(value);
                                                 }}
-                                                placeholder="Select Data type"
+                                                placeholder={t('master.form.create.fieldController.fileTypeField.placeholder')}
                                                 value={field.value}
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Defines the file type for the field.
+                                            {t('master.form.create.fieldController.fileTypeField.desc')}
                                         </FormDescription>
                                         <FormMessage className="mt-1 text-sm text-red-600" />
                                     </div>
@@ -283,39 +257,67 @@ const FieldController = ({
                         />
                     )}
 
-
-
-
-
                     {/* Asynchoronous field Properties */}
                     {selectedType === ASYNC_FIELD && (
                         <>
-                            <Text className="font-semibold">Asynchronous Field Properties</Text>
+                            <Text className="font-semibold">{t('master.form.create.fieldController.asyncField.title')}</Text>
                             <FormField
                                 control={control}
-                                name={`fields[${fieldIndex}].asynchronousField.formName`}
+                                name={`fields[${fieldIndex}].field.asynchronousField.moduleName`}
+                                render={({ field }) => (
+                                    <FormItem className="grid grid-cols-3 items-center gap-2">
+                                        <FormLabel htmlFor="moduleName" className="text-left font-normal">
+                                            {t('master.form.create.fieldController.asyncField.moduleNameField.label')}
+                                        </FormLabel>
+                                        <div className="col-span-2 relative">
+                                            <FormControl>
+                                                <SelectDropdown
+                                                    options={ModuleOptions?.moduleOptions || []}
+                                                    className="h-9 peer"
+                                                    onChange={(value) => {
+                                                        field.onChange(value);
+                                                        setSelectedAsyncModule(value)
+                                                    }}
+                                                    value={field.value}
+                                                    placeholder={t('master.form.create.fieldController.asyncField.moduleNameField.placeholder')}
+                                                />
+                                            </FormControl>
+                                            <FormDescription
+                                                className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
+                                            >
+                                                {t('master.form.create.fieldController.asyncField.moduleNameField.desc')}
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </div>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={control}
+                                name={`fields[${fieldIndex}].field.asynchronousField.formName`}
                                 render={({ field }) => (
                                     <FormItem className="grid grid-cols-3 items-center gap-2">
                                         <FormLabel htmlFor="formName" className="text-left font-normal">
-                                            Form Name
+                                            {t('master.form.create.fieldController.asyncField.formNameField.label')}
                                         </FormLabel>
                                         <div className="col-span-2 relative">
                                             <FormControl>
-                                                <Input
-                                                    id="formName"
+                                                <SelectDropdown
+                                                    options={FormOptions?.formOptions || []}
                                                     className="h-9 peer"
-                                                    placeholder="Enter Form Name"
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        handleFieldUpdate(e.target.value, 'formName');
-                                                        field.onChange(e);
+                                                    onChange={(value) => {
+                                                        handleAsyncFieldUpdate(value, 'formName');
+                                                        field.onChange(value);
+                                                        setSelectedAsyncForm(value)
                                                     }}
+                                                    value={field.value}
+                                                    placeholder={t('master.form.create.fieldController.asyncField.formNameField.placeholder')}
                                                 />
                                             </FormControl>
                                             <FormDescription
                                                 className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
                                             >
-                                                Enter the name of the form containing the observed field.
+                                                {t('master.form.create.fieldController.asyncField.formNameField.desc')}
                                             </FormDescription>
                                             <FormMessage />
                                         </div>
@@ -324,60 +326,31 @@ const FieldController = ({
                             />
                             <FormField
                                 control={control}
-                                name={`fields[${fieldIndex}].asynchronousField.fieldName`}
+                                name={`fields[${fieldIndex}].field.asynchronousField.fieldName`}
                                 render={({ field }) => (
                                     <FormItem className="grid grid-cols-3 items-center gap-2">
                                         <FormLabel htmlFor="fieldName" className="text-left font-normal">
-                                            Field Name
+                                            {t('master.form.create.fieldController.asyncField.fieldNameField.label')}
                                         </FormLabel>
                                         <div className="col-span-2 relative">
                                             <FormControl>
-                                                <Input
-                                                    id="fieldName"
+                                                <SelectDropdown
+                                                    options={FieldOptions?.options || []}
                                                     className="h-9 peer"
-                                                    placeholder="Enter Field Name"
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        handleAsyncFieldUpdate(e.target.value, 'fieldName');
-                                                        field.onChange(e);
+                                                    onChange={(value) => {
+                                                        handleAsyncFieldUpdate(value, 'fieldName');
+                                                        field.onChange(value);
                                                     }}
+                                                    value={field.value}
+                                                    placeholder={t('master.form.create.fieldController.asyncField.fieldTypeField.placeholder')}
                                                 />
                                             </FormControl>
                                             <FormDescription
                                                 className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
                                             >
-                                                Enter the name of the field to be observed for changes or interactions.
+                                                {t('master.form.create.fieldController.asyncField.fieldNameField.desc')}
                                             </FormDescription>
                                             <FormMessage />
-                                        </div>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={control}
-                                name={`fields[${fieldIndex}].field.asynchronousField.fieldtype`}
-                                render={({ field }) => (
-                                    <FormItem className="grid grid-cols-3 items-center gap-2">
-                                        <FormLabel htmlFor="fieldtype" className="text-left font-normal">
-                                            Field Type
-                                        </FormLabel>
-                                        <div className="col-span-2">
-                                            <FormControl>
-                                                <SelectDropdown
-                                                    options={DataTypeoptions}
-                                                    className="h-9 peer"
-                                                    onChange={(value) => {
-                                                        handleAsyncFieldUpdate(value, 'fieldtype');
-                                                        field.onChange(value);
-                                                    }}
-                                                    value={field.value}
-                                                    placeholder="Select Field type"
-                                                />
-                                            </FormControl>
-                                            <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                                Defines the data type for the field.
-                                            </FormDescription>
-                                            <FormMessage className="mt-1 text-sm text-red-600" />
                                         </div>
                                     </FormItem>
                                 )}
@@ -394,7 +367,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="required" className="text-left font-normal">
-                                        Required
+                                        {t('master.form.create.fieldController.requiredField.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -409,7 +382,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            There must be a value in every row
+                                            {t('master.form.create.fieldController.requiredField.desc')}
                                         </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
@@ -425,7 +398,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="uniqueValue" className="text-left font-normal">
-                                        Unique
+                                        {t('master.form.create.fieldController.unique.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -440,7 +413,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            Different rows must have different values for this field
+                                            {t('master.form.create.fieldController.unique.desc')}
                                         </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
@@ -456,7 +429,7 @@ const FieldController = ({
                         render={({ field }) => (
                             <FormItem className="grid grid-cols-3 items-center gap-2">
                                 <FormLabel htmlFor="readOnly" className="text-left font-normal">
-                                    Read Only
+                                    {t('master.form.create.fieldController.readOnlyField.label')}
                                 </FormLabel>
                                 <div className="col-span-2 flex items-center">
                                     <FormControl className="flex-shrink-0">
@@ -470,7 +443,7 @@ const FieldController = ({
                                         />
                                     </FormControl>
                                     <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                        This field cannot be edited by users
+                                        {t('master.form.create.fieldController.readOnlyField.desc')}
                                     </FormDescription>
                                 </div>
                                 <FormMessage className="col-span-3" />
@@ -485,7 +458,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="alphabetic" className="text-left font-normal">
-                                        Alphabetic
+                                        {t('master.form.create.fieldController.alphabetic.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -499,7 +472,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            Letters only (a-z, A-Z), without spaces or special characters.
+                                            {t('master.form.create.fieldController.alphabetic.desc')}
                                         </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
@@ -515,7 +488,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="alphanumeric" className="text-left font-normal">
-                                        Alphanumeric
+                                        {t('master.form.create.fieldController.alphaneumeric.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -529,7 +502,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            Combination of letters (a-z, A-Z) and numbers (0-9), without spaces or special characters.
+                                            {t('master.form.create.fieldController.alphaneumeric.desc')}
                                         </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
@@ -545,7 +518,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="positiveOnly" className="text-left font-normal">
-                                        Positive only
+                                        {t('master.form.create.fieldController.positiveOnly.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -560,7 +533,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            Accept Positiove numers Only                                        </FormDescription>
+                                            {t('master.form.create.fieldController.positiveOnly.desc')}                                      </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
                                 </FormItem>
@@ -575,7 +548,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="negativeOnly" className="text-left font-normal">
-                                        Negative
+                                        {t('master.form.create.fieldController.negativeOnly.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -590,7 +563,8 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            Accept Negative numers also                                        </FormDescription>
+                                            {t('master.form.create.fieldController.negativeOnly.desc')}
+                                        </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
                                 </FormItem>
@@ -605,7 +579,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="multiple" className="text-left font-normal">
-                                        Multiple
+                                        {t('master.form.create.fieldController.multiple.label')}
                                     </FormLabel>
                                     <div className="col-span-2 flex items-center">
                                         <FormControl className="flex-shrink-0">
@@ -619,7 +593,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="ml-2 flex-grow text-sm text-gray-500">
-                                            Accept Positiove numers Only                                        </FormDescription>
+                                            {t('master.form.create.fieldController.multiple.desc')}                                       </FormDescription>
                                     </div>
                                     <FormMessage className="col-span-3" />
                                 </FormItem>
@@ -634,9 +608,9 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="placeholder" className="text-left font-normal">
-                                        Placeholder
+                                        {t('master.form.create.fieldController.placeholder.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative">
                                         <FormControl>
                                             <Input
                                                 id="placeholder"
@@ -649,7 +623,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Placeholder of the field
+                                            {t('master.form.create.fieldController.placeholder.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -665,7 +639,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="defaultValue" className="text-left font-normal">
-                                        DefaultValue
+                                        {t('master.form.create.fieldController.defaultValue.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -680,7 +654,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Default value for the field
+                                            {t('master.form.create.fieldController.defaultValue.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -696,7 +670,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="pattern" className="text-left font-normal">
-                                        Pattern
+                                        {t('master.form.create.fieldController.pattern.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -711,7 +685,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Format  input according to the (Regex) Pattern
+                                            {t('master.form.create.fieldController.pattern.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -727,7 +701,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="formula" className="text-left font-normal">
-                                        formula
+                                        {t('master.form.create.fieldController.formula.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -742,7 +716,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Formula to calculate the value
+                                            {t('master.form.create.fieldController.formula.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -758,7 +732,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="defaultChoice" className="text-left font-normal">
-                                        DefaultChoice
+                                        {t('master.form.create.fieldController.defaultChoice.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -773,7 +747,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Options for the Select field
+                                            {t('master.form.create.fieldController.defaultChoice.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -789,7 +763,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="decimalLimit" className="text-left font-normal">
-                                        DecimalLimit
+                                        {t('master.form.create.fieldController.decimalLimit.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -805,7 +779,7 @@ const FieldController = ({
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Decimal Limit for the Numeric value
+                                            {t('master.form.create.fieldController.decimalLimit.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -821,7 +795,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="min" className="text-left font-normal">
-                                        Min Length
+                                        {t('master.form.create.fieldController.min.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -833,13 +807,12 @@ const FieldController = ({
                                                     const numericValue = parseFloat(e.target.value);
                                                     handleFieldUpdate(numericValue, 'min');
                                                     field.onChange(numericValue);
-                                                    console.log(typeof numericValue, numericValue, "Numeric Value");
                                                 }}
                                                 value={field.value}
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Minimum number of characters in the string
+                                            {t('master.form.create.fieldController.min.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>
@@ -855,7 +828,7 @@ const FieldController = ({
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="max" className="text-left font-normal">
-                                        Max Length
+                                        {t('master.form.create.fieldController.max.label')}
                                     </FormLabel>
                                     <div className="col-span-2">
                                         <FormControl>
@@ -867,13 +840,12 @@ const FieldController = ({
                                                     const numericValue = parseFloat(e.target.value);
                                                     handleFieldUpdate(numericValue, 'max');
                                                     field.onChange(numericValue);
-                                                    console.log(typeof numericValue, numericValue, "Numeric Value");
                                                 }}
                                                 value={field.value}
                                             />
                                         </FormControl>
                                         <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            Maximum number of characters in the string
+                                            {t('master.form.create.fieldController.max.desc')}
                                         </FormDescription>
                                         <FormMessage />
                                     </div>

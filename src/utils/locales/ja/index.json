@@ -1,68 +1,280 @@
 {
     "login": {
         "title": "アカウントにログイン",
-        "description": "ダッシュボードにアクセスするには、認証情報を入力してください",
+        "description": "ダッシュボードにアクセスするために資格情報を入力してください",
         "userId": {
             "label": "ユーザー名",
-            "placeholder": "ユーザー名を入力",
+            "placeholder": "ユーザー名を入力してください",
             "errors": {
-                "min": "ユーザー名は4文字以上である必要があります",
-                "max": "ユーザー名は20文字以内でなければなりません",
-                "regex": "ユーザー名には、文字、数字、アンダーバーのみを使用できます",
+                "min": "ユーザー名は少なくとも4文字以上である必要があります",
+                "max": "ユーザー名は20文字を超えてはいけません",
+                "regex": "ユーザー名には文字、数字、アンダースコアのみを使用できます",
                 "required": "ユーザー名は必須です"
             }
         },
         "password": {
             "label": "パスワード",
-            "placeholder": "パスワードを入力",
+            "placeholder": "パスワードを入力してください",
             "errors": {
-                "min": "パスワードは8文字以上である必要があります",
+                "min": "パスワードは少なくとも8文字以上である必要があります",
                 "required": "パスワードは必須です",
-                "complexity": "パスワードは大文字、小文字、数字、特殊文字を含める必要があります"
+                "complexity": "パスワードには大文字、小文字、数字、特殊文字を含める必要があります"
             }
         },
         "forgotCredentials": {
-            "link": "ユーザー名またはパスワードをお忘れですか？",
-            "helperText": "ログイン情報を覚えていませんか？"
+            "link": "パスワードを忘れた場合",
+            "helperText": "ログイン情報を思い出せませんか？"
         },
         "createAccount": {
             "text": "アカウントを作成",
-            "helperText": "アカウントをまだお持ちでない方"
+            "helperText": "まだアカウントをお持ちではありませんか？"
+        },
+        "forgotPassword": {
+            "title": "パスワードを忘れましたか？",
+            "description": "問題ありません。リセット手順をお送りします",
+            "email": {
+                "label": "メールアドレス",
+                "placeholder": "メールアドレスを入力してください",
+                "errormessage": "有効なメールアドレスを入力してください"
+            },
+            "submit": "パスワードをリセット",
+            "back": "ログイン画面に戻る"
+        },
+        "changePassword": {
+            "title": "パスワードを変更しますか？",
+            "oldPassword": {
+                "label": "旧パスワード",
+                "placeholder": "旧パスワードを入力してください",
+                "errormessage": "無効なパスワードです"
+            },
+            "newPassword": {
+                "label": "新しいパスワード",
+                "placeholder": "新しいパスワードを入力してください",
+                "errormessage": "有効なパスワードを入力してください"
+            },
+            "confirmPassword": {
+                "label": "確認用パスワード",
+                "placeholder": "確認用パスワードを入力してください",
+                "errormessage": "確認用パスワードが一致しません"
+            },
+            "submit": "パスワードを変更",
+            "back": "キャンセル"
         },
         "socialLogin": {
-            "google": "Googleでログイン",
-            "microsoft": "Microsoftでログイン",
-            "apple": "Appleでログイン"
+            "google": "Googleで続行",
+            "microsoft": "Microsoftで続行",
+            "apple": "Appleで続行"
         },
         "submitButton": {
-            "login": "ログイン",
-            "loggingIn": "ログイン中...",
+            "login": "サインイン",
+            "loggingIn": "サインイン中...",
             "success": "ログイン成功",
             "error": "ログイン失敗"
         },
         "validationMessages": {
-            "generic": "入力内容を確認し、再度お試しください",
+            "generic": "無効な資格情報です",
             "networkError": "接続できません。インターネット接続を確認してください。",
-            "serverError": "サーバーエラーが発生しました。後でもう一度お試しください。",
-            "tooManyAttempts": "ログイン試行回数が多すぎます。しばらく経ってからもう一度お試しください。"
+            "serverError": "サーバーエラーです。後でもう一度試してください。",
+            "tooManyAttempts": "ログイン試行回数が多すぎます。後でもう一度試してください。"
         },
         "twoFactor": {
-            "label": "二段階認証コード",
-            "placeholder": "6桁のコードを入力",
+            "label": "二要素認証コード",
+            "placeholder": "6桁のコードを入力してください",
             "errors": {
-                "invalid": "認証コードが無効です",
+                "invalid": "無効な認証コードです",
                 "required": "認証コードは必須です"
             }
         },
         "rememberMe": {
             "label": "ログイン状態を保持",
-            "description": "このデバイスでサインイン状態を維持する"
+            "description": "このデバイスでログイン状態を保持します"
         }
     },
     "common": {
         "or": "または",
         "cancel": "キャンセル",
         "continue": "続行",
-        "back": "戻る"
+        "back": "戻る",
+        "update": "更新",
+        "generate": "生成",
+        "publish": "公開",
+        "search": "検索...",
+        "clear": "クリア"
+    },
+    "master": {
+        "form": {
+            "list": {
+                "title": "モジュール",
+                "createBtn": "フォームを作成",
+                "filterBtn": "ステータス",
+                "sortBtn": "並べ替え",
+                "viewBtn": "表示",
+                "tableHeader": {
+                    "formName": "フォーム名",
+                    "formDesc": "フォーム説明",
+                    "status": "ステータス",
+                    "action": "操作"
+                },
+                "statusFilter": {
+                    "published": "公開済み",
+                    "unPublished": "未公開"
+                }
+            },
+            "create": {
+                "title": "新しいフォームを作成",
+                "moduleName": {
+                    "label": "モジュール名",
+                    "placeholder": "フォーム名を入力してください",
+                    "errormessage": "有効なフォーム名を入力してください"
+                },
+                "formName": {
+                    "label": "フォーム名",
+                    "placeholder": "フォーム名を入力してください",
+                    "errormessage": "有効なフォーム名を入力してください"
+                },
+                "formDescription": {
+                    "label": "説明",
+                    "placeholder": "フォームの説明を入力してください",
+                    "errormessage": "有効な説明を入力してください"
+                },
+                "formLayout": {
+                    "label": "レイアウトを選択"
+                },
+                "fieldController": {
+                    "title": "新しいフィールドを追加",
+                    "NameField": {
+                        "label": "フィールド名",
+                        "placeholder": "フィールド名を入力してください",
+                        "desc": "フィールドの名前",
+                        "errormessage": {
+                            "alreadyExists": "フィールド名は既に存在します",
+                            "required": "フィールド名は必須です",
+                            "error": "有効なフィールド名を入力してください"
+                        }
+                    },
+                    "TypeField": {
+                        "label": "プロパティ種別",
+                        "placeholder": "データ型を選択",
+                        "errormessage": "データ型は必須です",
+                        "desc": "フィールドのデータ型を定義します。"
+                    },
+                    "DataTypeField": {
+                        "label": "プロパティ データ型",
+                        "placeholder": "データ型を選択",
+                        "errormessage": "データ型は必須です"
+                    },
+                    "readOnlyField": {
+                        "label": "読み取り専用",
+                        "desc": "このフィールドは編集できません"
+                    },
+                    "selectField": {
+                        "label": "選択オプション",
+                        "placeholder": "オプションを選択",
+                        "errormessage": "選択オプションは必須です",
+                        "desc": "フィールドの選択オプション",
+                        "hasOptionsLabel": "選択オプションを設定",
+                        "noOptionLabel": "オプションを追加",
+                        "hasOptionstitile": "オプション",
+                        "noOptionstitile": "オプションがまだ追加されていません。「オプションを追加」をクリックしてください",
+                        "addOptionBtn": "オプションを追加",
+                        "AddOptionDesc": "選択フィールド用のオプションを追加"
+                    },
+                    "fileTypeField": {
+                        "label": "ファイル種別",
+                        "placeholder": "ファイル種別を選択",
+                        "errormessage": "ファイル種別は必須です",
+                        "desc": "フィールドのファイル種別を定義します。",
+                        "hasNoType": "ファイル種別が見つかりません",
+                        "addBtn": "追加"
+                    },
+                    "asyncField": {
+                        "title": "非同期フィールドのプロパティ",
+                        "moduleNameField": {
+                            "label": "モジュール名",
+                            "placeholder": "モジュール名を選択",
+                            "desc": "監視対象フィールドを含むフォームの名前を入力してください。"
+                        },
+                        "formNameField": {
+                            "label": "フォーム名",
+                            "placeholder": "フォーム名を選択",
+                            "desc": "監視対象フィールドを含むフォームの名前を入力してください。"
+                        },
+                        "fieldNameField": {
+                            "label": "フィールド名",
+                            "placeholder": "フィールド名を入力",
+                            "desc": "監視対象のフィールド名を入力してください。"
+                        },
+                        "fieldTypeField": {
+                            "label": "フィールド種別",
+                            "placeholder": "フィールド種別を入力",
+                            "desc": "フィールドのデータ型を定義します。"
+                        }
+                    },
+                    "requiredField": {
+                        "label": "必須",
+                        "desc": "フォーム送信に必要なフィールドであるかを示します。"
+                    },
+                    "unique": {
+                        "label": "ユニーク",
+                        "desc": "フィールド値が一意である必要があるかを示します。"
+                    },
+                    "alphabetic": {
+                        "label": "アルファベット",
+                        "desc": "スペースや特殊文字なしの文字のみ（a-z、A-Z）。"
+                    },
+                    "alphaneumeric": {
+                        "label": "英数字",
+                        "desc": "スペースや特殊文字なしの文字と数字の組み合わせ（a-z、A-Z、0-9）。"
+                    },
+                    "positiveOnly": {
+                        "label": "正の数のみ",
+                        "desc": "正の数のみ受け入れます。"
+                    },
+                    "negativeOnly": {
+                        "label": "負の数のみ",
+                        "desc": "負の数のみ受け入れます。"
+                    },
+                    "multiple": {
+                        "label": "複数選択",
+                        "desc": "複数選択を許可します。"
+                    },
+                    "placeholder": {
+                        "label": "プレースホルダー",
+                        "desc": "フィールドのプレースホルダーテキスト"
+                    },
+                    "defaultValue": {
+                        "label": "デフォルト値",
+                        "desc": "フィールドのデフォルト値"
+                    },
+                    "pattern": {
+                        "label": "パターン",
+                        "desc": "(正規表現)パターンに従って入力を書式設定"
+                    },
+                    "formula": {
+                        "label": "計算式",
+                        "desc": "値を計算するための計算式"
+                    },
+                    "defaultChoice": {
+                        "label": "デフォルト選択",
+                        "desc": "フィールドまたはフィールド種別のデフォルトオプション"
+                    },
+                    "decimalLimit": {
+                        "label": "小数点以下桁数",
+                        "desc": "数値の小数点以下の桁数"
+                    },
+                    "min": {
+                        "label": "最小長さ",
+                        "desc": "フィールドの最小長さ/値"
+                    },
+                    "max": {
+                        "label": "最大長さ",
+                        "desc": "フィールドの最大長さ/値"
+                    }
+                }
+            },
+            "update": {},
+            "preview": {},
+            "publish": {}
+        }
     }
 }

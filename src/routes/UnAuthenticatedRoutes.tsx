@@ -6,7 +6,7 @@ import { Route } from 'react-router-dom'
 
 const UnAuthenticatedRoutes = (
     <>
-        <Route path={'/*'} element={<LoginPage />}></Route>
+        {/* <Route path={'/*'} element={<LoginPage />}></Route> */}
         <Route path={UI_ROUTES.LOGIN} element={<LoginPage />}></Route>
         <Route path={UI_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />}></Route>
         <Route path={UI_ROUTES.CHANGE_PASSWORD} element={<ChangePassword />}></Route>

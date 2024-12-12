@@ -30,7 +30,8 @@ interface MasterColumns {
     isPublished: boolean
 }
 
-const Master = () => {
+const Master = () => {    
+
     const [getModule, { data, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
     const { toast } = useToast();
     const { t } = useTranslation();
@@ -242,10 +243,24 @@ const Master = () => {
     };
 
     const handleStatusChange = (status: StatusValue) => {
-        // Handle filter logic
-        console.log(status);
-        // handleAddFilter()
+        const key = 'isPublished';
+        const operator = 'EQUAL';
+        const field_type = 'BOOLEAN';
+        const value = status === 'published' ? true : false;
+
+        if (status === 'all') {
+            setRequestParams((prevParams) => {
+                const updatedFilters = prevParams.filters.filter(filter => filter.key !== key);
+                return {
+                    ...prevParams,
+                    filters: updatedFilters,
+                };
+            });
+        } else {
+            handleAddFilter(key, operator, field_type, value);
+        }
     };
+
     // Error Handling Components
     const renderErrorAlert = (errorMessage: string) => (
         <Alert variant="destructive">

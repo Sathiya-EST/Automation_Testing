@@ -3,19 +3,20 @@ import { FormDescription, FormLabel, FormMessage } from "../../../components/ui/
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { PlusIcon, TrashIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SelectFieldOptions = ({ control, fieldIndex }: { control: any; fieldIndex: number }) => {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `fields.${fieldIndex}.field.defaultChoice`,
     });
-
+    const { t } = useTranslation();
     return (
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-300">
             <FormLabel className="text-lg font-medium text-gray-700 mb-2">Options</FormLabel>
             <div className="space-y-4">
                 {fields.length === 0 && (
-                    <p className="text-sm text-gray-500">No options added yet. Click "Add Option" to begin.</p>
+                    <p className="text-sm text-gray-500">{t('master.form.create.fieldController.selectField.noOptionstitile')}</p>
                 )}
                 {fields.map((option, index) => (
                     <div key={option.id} className="flex items-center gap-4">
@@ -53,11 +54,11 @@ const SelectFieldOptions = ({ control, fieldIndex }: { control: any; fieldIndex:
                     onClick={() => append('')}
                 >
                     <PlusIcon className="w-5 h-5" />
-                    Add Option
+                    {t('master.form.create.fieldController.selectField.addOptionBtn')}
                 </Button>
             </div>
             <FormDescription className="mt-2 text-sm text-gray-600">
-                Add options for the select field type.
+            {t('master.form.create.fieldController.selectField.AddOptionDesc')}
             </FormDescription>
             <FormMessage />
         </div>

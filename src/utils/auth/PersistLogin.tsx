@@ -12,7 +12,7 @@ const PersistLogin: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(true);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [getNewToken] = useGetNewTokenMutation(); 
+    const [getNewToken] = useGetNewTokenMutation();
     const { accessToken, refreshToken } = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ const PersistLogin: React.FC = () => {
 
             if (!accessToken && refreshToken) {
                 try {
-                    const response = await getNewToken({}).unwrap(); 
+                    const response = await getNewToken({}).unwrap();
 
                     if (response && response.accessToken) {
                         dispatch(

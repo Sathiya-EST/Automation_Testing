@@ -17,6 +17,7 @@ import FieldController from './FieldController';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import FormUpload from '@/assets/FormUpload';
 import { DataTypes, layoutValues } from '@/types/data';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -39,7 +40,7 @@ export const FormSchema = z.object({
             name: z.string().min(1, 'Field name is required'),
             field: z.object({
                 dataTypeName: z.string().optional(),
-                type: z.string(),
+                // type: z.string(),
                 min: z.number().int().optional(),
                 max: z.number().int().optional(),
                 negativeOnly: z.boolean().optional(),
@@ -128,14 +129,14 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                 {
                     name: "",
                     field: {
-                        dataTypeName: "",
+                        // dataTypeName: "",
 
                     },
                 },
             ],
         },
     });
-
+    const { t } = useTranslation();
     const [focusedField, setFocusedField] = useState<number | null>(0);
     const [isFormCreated, setIsFormCreated] = useState(false);
     const [selectedValue, setSelectedValue] = useState<string>(LAYOUT.GRID_1);
@@ -223,7 +224,6 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
         <>
             <Dialog open={isFormCreated} onOpenChange={setIsFormCreated}>
                 <Form {...form}>
-                    {/* {JSON.stringify(dataType)} */}
                     <form className="space-x-4 w-full" onSubmit={form.handleSubmit(onSubmit)}>
                         <div className="flex gap-4">
                             <section className="flex-[4]">
@@ -233,9 +233,9 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                             <Text className="font-semibold">{moduleName}</Text>
                                         </CardTitle>
                                         <div className="flex items-center justify-between">
-                                            <Text className="font-semibold">Create New Table</Text>
+                                            <Text className="font-semibold">{t('master.form.create.title')}</Text>
                                             {/* <DialogTrigger asChild> */}
-                                            <Button type='submit'>Generate</Button>
+                                            <Button type='submit'>{t('common.generate')}</Button>
                                             {/* </DialogTrigger> */}
                                         </div>
                                     </CardHeader>
@@ -245,9 +245,9 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                             name="moduleName"
                                             render={({ field }) => (
                                                 <FormItem className="hidden">
-                                                    <FormLabel>Module Name</FormLabel>
+                                                    <FormLabel>{t('master.form.create.moduleName.label')}</FormLabel>
                                                     <FormControl>
-                                                        <Input  {...field} value={moduleName} />
+                                                        <Input placeholder={t('master.form.create.formName.placeholder')} {...field} value={moduleName} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -259,9 +259,9 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                                 name="formName"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Form Name</FormLabel>
+                                                        <FormLabel>{t('master.form.create.formName.label')}</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Enter Form Name" autoFocus {...field} />
+                                                            <Input placeholder={t('master.form.create.formName.placeholder')} autoFocus {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -272,9 +272,9 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                                 name="formDescription"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Description</FormLabel>
+                                                        <FormLabel>{t('master.form.create.formDescription.label')}</FormLabel>
                                                         <FormControl>
-                                                            <Textarea placeholder="Enter Form Description" {...field} />
+                                                            <Textarea placeholder={t('master.form.create.formDescription.placeholder')} {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -285,7 +285,7 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                                 name="formLayout"
                                                 render={() => (
                                                     <FormItem className="flex items-center gap-4 h-auto">
-                                                        <FormLabel className="flex-shrink-0">Choose Layout</FormLabel>
+                                                        <FormLabel className="flex-shrink-0">{t('master.form.create.formLayout.label')}</FormLabel>
                                                         <div className="flex gap-4">
                                                             <div
                                                                 className="cursor-pointer"
@@ -342,6 +342,7 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                         handleFieldUpdate={handleFieldUpdate}
                                         handleAsyncFieldUpdate={handleAsyncFieldUpdate}
                                         dataType={dataType}
+                                        setValue={form.setValue}
                                     />
                                 </aside>
                             )}

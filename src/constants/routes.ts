@@ -6,6 +6,8 @@ export const UI_ROUTES = {
     FORGOT_PASSWORD: '/forgot-password',
     CHANGE_PASSWORD: '/change-password',
     APP_SETTINGS: '/settings',
+    ACCESS_DENIED: '/access-denied',
+    PAGE_NOT_FOUND: '404',
     MASTER: MASTER,
     MASTER_FORM_CREATE: `${MASTER}/create`,
     MASTER_FORM_PREVIEW: `${MASTER}/preview`,

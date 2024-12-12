@@ -98,7 +98,8 @@
         "update": "Update",
         "generate": "Generate",
         "publish": "Publish",
-        "search": "Search..."
+        "search": "Search...",
+        "clear": "Clear"
     },
     "master": {
         "form": {
@@ -119,7 +120,158 @@
                     "unPublished": "UnPublished"
                 }
             },
-            "create": {},
+            "create": {
+                "title": "Create New Form",
+                "moduleName": {
+                    "label": "Module Name",
+                    "placeholder": "Enter Form Name",
+                    "errormessage": "Enter valid Form Name"
+                },
+                "formName": {
+                    "label": " Form Name",
+                    "placeholder": "Enter Form Name",
+                    "errormessage": "Enter valid Form Name"
+                },
+                "formDescription": {
+                    "label": " Description",
+                    "placeholder": "Enter Form Description",
+                    "errormessage": "Enter valid Form Description"
+                },
+                "formLayout": {
+                    "label": " Choose Layout"
+                },
+                "fieldController": {
+                    "title": "Add New Field",
+                    "NameField": {
+                        "label": "Field Name",
+                        "placeholder": "Enter Field Name",
+                        "desc": "Name of the Field",
+                        "errormessage": {
+                            "alreadyExists": "Field Name already exists",
+                            "required": "Field Name is required",
+                            "error": "Enter valid Field Name"
+                        }
+                    },
+                    "TypeField": {
+                        "label": "Property Type",
+                        "placeholder": "Select Data Type",
+                        "errormessage": "Data Type is required",
+                        "desc": "Defines the data type for the field."
+                    },
+                    "DataTypeField": {
+                        "label": "Property Data Type",
+                        "placeholder": "Select Data Type",
+                        "errormessage": "Data Type is required"
+                    },
+                    "readOnlyField": {
+                        "label": "Read Only",
+                        "desc": "This field cannot be edited"
+                    },
+                    "selectField": {
+                        "label": "Select Options",
+                        "placeholder": "Select Options",
+                        "errormessage": "Select Options is required",
+                        "desc": "Select options for the field",
+                        "hasOptionsLabel": "Configure Select options",
+                        "noOptionLabel": "Add Option",
+                        "hasOptionstitile": "Options",
+                        "noOptionstitile": "No options added yet. Click Add Option to begin",
+                        "addOptionBtn": "Add Option",
+                        "AddOptionDesc": "Add Options for the select field type"
+                    },
+                    "fileTypeField": {
+                        "label": "File Type",
+                        "placeholder": "Select File Type",
+                        "errormessage": "File Type is required",
+                        "desc": " Defines the file type for the field.",
+                        "hasNoType": "No File types found",
+                        "addBtn": "Add"
+                    },
+                    "asyncField": {
+                        "title": "Asynchronous Field Properties",
+                        "moduleNameField": {
+                            "label": "Module Name",
+                            "placeholder": "Select Module Name",
+                            "desc": "Enter the name of the form containing the observed field."
+                        },
+                        "formNameField": {
+                            "label": "Form Name",
+                            "placeholder": "Select Form Name",
+                            "desc": "Enter the name of the form containing the observed field."
+                        },
+                        "fieldNameField": {
+                            "label": "Field Name",
+                            "placeholder": "Enter Field Name",
+                            "desc": "Enter the name of the field to be observed."
+                        },
+                        "fieldTypeField": {
+                            "label": "Field Type",
+                            "placeholder": "Enter Field Type",
+                            "desc": "Defines the data type for the field."
+                        }
+                    },
+                    "requiredField": {
+                        "label": "Required",
+                        "desc": "Indicates whether the field is required for form submission."
+                    },
+                    "unique": {
+                        "label": "Unique",
+                        "desc": "Indicates whether the field value should be unique."
+                    },
+                    "alphabetic": {
+                        "label": "Alphabetic",
+                        "desc": " Letters only (a-z, A-Z), without spaces or special characters."
+                    },
+                    "alphaneumeric": {
+                        "label": "Alphanumeric",
+                        "desc": "Combination of letters (a-z, A-Z) and numbers (0-9), without spaces or special characters."
+                    },
+                    "positiveOnly": {
+                        "label": "Positive Only",
+                        "desc": "Accept Positiove number Only "
+                    },
+                    "negativeOnly": {
+                        "label": "Negative Only",
+                        "desc": "Accept Negative number Only "
+                    },
+                    "multiple": {
+                        "label": "Multiple",
+                        "desc": "Allow Multiple Selection "
+                    },
+                    "placeholder": {
+                        "label": "Placeholder",
+                        "desc": "Placeholder Text for the field"
+                    },
+                    "defaultValue": {
+                        "label": "DefaultValue",
+                        "desc": "DefaultValue  of the field"
+                    },
+                    "pattern": {
+                        "label": "Pattern",
+                        "desc": "Format  input according to the (Regex) Pattern"
+                    },
+                    "formula": {
+                        "label": "Formula",
+                        "desc": "Formula to calculate the value"
+                    },
+                    "defaultChoice": {
+                        "label": "DefaultChoice",
+                        "desc": "Default Options for the field or field types"
+                    },
+                    "decimalLimit": {
+                        "label": "Decimal Limit",
+                        "desc": "Decimal Limit for the Numeric value"
+                    },
+                    "min": {
+                        "label": "Min Length",
+                        "desc": "Minimum length/value for the field"
+                    },
+                    "max": {
+                        "label": "Max Length",
+                        "desc": "Maximun length/value for the field"
+                    }
+                }
+            },
             "update": {},
             "preview": {},
             "publish": {}

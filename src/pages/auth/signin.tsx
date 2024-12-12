@@ -55,7 +55,7 @@ const LoginPage = () => {
                 isError={!!errorMessage}
                 handleForgotPassword={handleForgotPassword}
             />
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
+            {/* {errorMessage && <div className="error-message">{errorMessage}</div>} */}
         </div>
     );
 };
