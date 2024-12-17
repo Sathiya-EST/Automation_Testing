@@ -1,6 +1,6 @@
 import * as React from "react";
 import { format as formatDate, getYear } from "date-fns";
-import { CalendarDays, CalendarIcon, Clock } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,13 +12,14 @@ import {
 import TimePicker from "./TimePicker";
 
 interface DateTimePickerProps {
-    selectedDateTime?: string; // Expecting string for selectedDateTime
-    onChange: (date: string | undefined) => void; // Expecting a string as the updated date
+    selectedDateTime?: string;
+    onChange: (date: string | undefined) => void;
     placeholder?: string;
     className?: string;
     format?: string;
     type?: "date" | "month" | "year" | "datetime" | "time";
     timeFormat?: 12 | 24;
+    readOnly?: boolean
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -28,7 +29,8 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     className,
     format,
     type = "datetime",
-    timeFormat=12
+    timeFormat = 12,
+    readOnly = false
 }) => {
     const getDefaultFormat = () => {
         switch (type) {
@@ -66,7 +68,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
                     ? new Date(getYear(date), date.getMonth(), 1)
                     : date;
 
-        onChange(formatDate(updatedDate, displayFormat)); 
+        onChange(formatDate(updatedDate, displayFormat));
     };
 
     const handleTimeChange = (time: string) => {
@@ -92,6 +94,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
                         className
                     )}
                     aria-label="Open date and time picker"
+                    disabled={readOnly}
                 >
                     <CalendarDays className="mr-2 h-4 w-4 text-gray-500" />
                     {renderDisplayValue()}
@@ -115,8 +118,8 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
                         />
                         <div className="w-full flex justify-center pb-1">
                             <TimePicker
-                        value={selectedDateTime ? selectedDateTime.slice(-5) : ''}
-                        onChange={handleTimeChange}
+                                value={selectedDateTime ? selectedDateTime.slice(-5) : ''}
+                                onChange={handleTimeChange}
                                 format={timeFormat}
                             />
                         </div>

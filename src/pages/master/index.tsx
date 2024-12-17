@@ -1,8 +1,8 @@
 import useBreadcrumb from "@/hooks/useBreadCrumb";
-import { BreadcrumbItemType, TableRequestParams } from "@/types/data";
+import { BreadcrumbItemType, GetReqParams, TableRequestParams } from "@/types/data";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import ModuleList from "./components/ModuleList";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useGetModuleMutation, usePostModuleMutation } from "@/store/services/master/module";
 import { UI_ROUTES } from "@/constants/routes";
@@ -11,18 +11,15 @@ import { ToastAction } from "@/components/ui/toast";
 import { useGetFormsQuery } from "@/store/services/master/form";
 import AdvancedTable from "@/components/shared/Table";
 import Spinner from "@/components/shared/Spinner";
-import { Eye, Plus, AlertTriangle, ChevronDown } from "lucide-react";
+import { Eye, Plus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/shared/Search";
 import Text from "@/components/shared/Text";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatusFilterDropdown, { StatusValue } from "./components/StatusFilter";
 
-type Props = {};
 interface MasterColumns {
     displayName: string;
     formDescription: string;
@@ -30,21 +27,21 @@ interface MasterColumns {
     isPublished: boolean
 }
 
-const Master = () => {    
+const Master = () => {
 
     const [getModule, { data, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
     const { toast } = useToast();
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [sort, setSort] = useState([
         { key: 'createdOn', order: 'ASC' }
     ]);
-    const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
     const [filters, setFilters] = useState([]);
     const [selectedModule, setSelectedModule] = useState<string>('');
-    const [requestParams, setRequestParams] = useState<TableRequestParams>({
+    const [requestParams, setRequestParams] = useState<GetReqParams>({
         pageNo: 1,
         pageSize: 10,
         sort: [{ key: 'createdOn', order: 'ASC' }],
@@ -60,7 +57,6 @@ const Master = () => {
             : [],
     });
 
-    const navigate = useNavigate();
     const [postModule, { isLoading: moduleAddLoading, isError: moduleAddErr }] = usePostModuleMutation();
     const {
         data: formData,
@@ -72,14 +68,14 @@ const Master = () => {
         {
             accessorKey: 'displayName',
             header: t('master.form.list.tableHeader.formName'),
-            initiallyVisible: true
+            // initiallyVisible: true
         },
         {
             accessorKey: 'formDescription',
             header: t('master.form.list.tableHeader.formDesc'),
             maxSize: 500,
             size: 400,
-            initiallyVisible: false
+            // initiallyVisible: false
         },
         // {
         //     accessorKey: 'createdBy',
@@ -93,7 +89,7 @@ const Master = () => {
                     {info.getValue() ? 'Published' : 'unPublished'}
                 </Badge>
             ),
-            initiallyVisible: true
+            // initiallyVisible: true
 
         },
         {
@@ -112,13 +108,13 @@ const Master = () => {
                     </Button>
                 );
             },
-            initiallyVisible: true
+            // initiallyVisible: true
 
         }
 
     ];
 
-    const onRequestParamsChange = (updatedParams: Partial<TableRequestParams>) => {
+    const onRequestParamsChange = (updatedParams: Partial<GetReqParams>) => {
         setRequestParams((prevParams) => ({
             ...prevParams,
             ...updatedParams,
@@ -204,9 +200,7 @@ const Master = () => {
         navigate(`${UI_ROUTES.MASTER_FORM_CREATE}`, { state: { selectedModule } });
     };
 
-    const handleAddFilter = (key: string, operator: string, field_type: string, value: any) => {
-
-
+    const handleAddFilter = (key: string, operator: 'LIKE' | 'EQUAL', field_type: 'STRING' | 'BOOLEAN', value: string | boolean) => {
         setRequestParams((prevParams) => {
             const existingFilterIndex = prevParams.filters.findIndex(filter => filter.key === key);
 

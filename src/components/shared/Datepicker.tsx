@@ -17,6 +17,7 @@ interface DatePickerProps {
   className?: string;
   format?: string;
   type?: "date" | "month" | "year";
+  readOnly?: boolean
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -26,6 +27,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   className,
   format,
   type = "date",
+  readOnly
 }) => {
   const getDefaultFormat = () => {
     switch (type) {
@@ -65,27 +67,30 @@ const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-[240px] justify-start text-left font-normal",
-            !selectedDate && "text-muted-foreground",
-            className
-          )}
-          aria-label="Open date picker"
-        >
-          <CalendarDays className="mr-2 h-4 w-4 text-gray-500" />
-          {renderDisplayValue()}
-        </Button>
+        <div>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-[240px] justify-start text-left font-normal",
+              !selectedDate && "text-muted-foreground",
+              className
+            )}
+            aria-label="Open date picker"
+            disabled={readOnly}
+          >
+            <CalendarDays className="mr-2 h-4 w-4 text-gray-500" />
+            {renderDisplayValue()}
+          </Button>
+        </div>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      {!readOnly && <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={handleCalendarChange}
           initialFocus
         />
-      </PopoverContent>
+      </PopoverContent>}
     </Popover>
   );
 };

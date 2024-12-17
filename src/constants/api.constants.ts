@@ -16,12 +16,26 @@ export const MASTER_API = {
     GET_MODULES: `${MASTER_API_BASE_URL}/module/list`,
     LOG: `${MASTER_API_BASE_URL}/log`,
     CREATE_MODULE: `${MASTER_API_BASE_URL}/module`,
-    // Forms API Path
+    // Forms List
     GET_FORMS_BY_MODULE: `${MASTER_API_BASE_URL}/form/template/get`,
+    EXPORT_AS_EXCEL: `${MASTER_API_BASE_URL}/form/excel`,
+    DOWNLOAD_CSV: `${MASTER_API_BASE_URL}/form/bulk/insert/file`,
+    BULK_INSERT: `${MASTER_API_BASE_URL}/form/bulk/insert`,
+    //Form
     GET_DATA_TYPES: `${MASTER_API_BASE_URL}/form/datatype`,
     CREATE_FORM: `${MASTER_API_BASE_URL}/form/template`,
     PREVIEW_FORM: `${MASTER_API_BASE_URL}/form/template/view`,
     GET_ASYNCDATA: `${MASTER_API_BASE_URL}/form/get`,
     UPDATE_FORM: `${MASTER_API_BASE_URL}/form/template/add/fields`,
+    PUBLISH_FORM: `${MASTER_API_BASE_URL}/form/template/publish`,
+    GET_ROLES: `${MASTER_API_BASE_URL}/form/get`,
+
+    //Form Data 
+    GET_FORM_RECORD_LIST: `${MASTER_API_BASE_URL}/form/get`,
+    GET_FORMDATA_COLUMNS: `${MASTER_API_BASE_URL}/form/template/view`,
+    GET_FORM_RECORD_VIEW: `${MASTER_API_BASE_URL}/form/view`,
+    ADD_RECORD: `${MASTER_API_BASE_URL}/form`,
+    UPDATE_RECORD: `${MASTER_API_BASE_URL}/form`,
+    DELETE_RECORD: `${MASTER_API_BASE_URL}/form/delete`
 }
 

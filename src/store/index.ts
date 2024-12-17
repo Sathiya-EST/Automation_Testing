@@ -6,7 +6,7 @@ import { masterApi } from './services/master/module';
 import authReducer from './slice/authSlice'
 import appReducer from './slice/appSlice'
 import { formApi } from './services/master/form';
-
+import { isPlain } from '@reduxjs/toolkit';
 const store = configureStore({
   reducer: {
     [authApi.reducerPath]: authApi.reducer,
@@ -17,7 +17,16 @@ const store = configureStore({
     app: appReducer
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['FormApi/executeMutation/fulfilled'],
+        ignoredPaths: ['FormApi.mutations'],
+        isSerializable: (value: any) => {
+          if (value instanceof Blob) return true;
+          return isPlain(value);
+        }
+      }
+    })
       .concat(authApi.middleware)
       .concat(revokeApi.middleware)
       .concat(masterApi.middleware)

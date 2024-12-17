@@ -14,7 +14,7 @@ export const UI_ROUTES = {
     MASTER_FORM_PUBLISH: `${MASTER}/publish`,
     MASTER_FORM_ACCESS: `${MASTER}/access`,
     MASTER_DATA: `${MASTER}/data`,
-    MASTER_DATA_FORM: `${MASTER}/data/form`,
+    MASTER_DATA_CREATE: `${MASTER}/data/create`,
     PROCESS: PROCESS,
-
+    MASTER_DATA_CRUD: `${MASTER}/data/crud`
 };

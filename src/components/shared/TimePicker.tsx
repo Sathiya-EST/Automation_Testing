@@ -7,9 +7,10 @@ interface TimePickerProps {
     format: 12 | 24;
     value: string;
     onChange: (time: string) => void;
+    readOnly?: boolean;
 }
 
-const TimePicker: React.FC<TimePickerProps> = ({ format = 12, value, onChange }) => {
+const TimePicker: React.FC<TimePickerProps> = ({ format = 12, value, onChange, readOnly = false }) => {
     const [hour, setHour] = useState("01");
     const [minute, setMinute] = useState("00");
     const [period, setPeriod] = useState("AM");
@@ -31,6 +32,7 @@ const TimePicker: React.FC<TimePickerProps> = ({ format = 12, value, onChange })
     };
 
     const handleBlur = (value: string, type: "hour" | "minute" | "period") => {
+        if (readOnly) return;
         let formattedValue = value;
 
         if (type === "hour") {
@@ -78,51 +80,54 @@ const TimePicker: React.FC<TimePickerProps> = ({ format = 12, value, onChange })
                     <button
                         type="button"
                         className="px-4 py-2 border rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2  flex items-center"
+                        disabled={readOnly}
                     >
                         <Clock className="mr-2 text-foreground" />
                         {`${hour}:${minute} ${format === 24 ? "" : period}`}
                     </button>
                 </PopoverTrigger>
-                <PopoverContent align="start" side="bottom" className="w-64 p-4">
-                    <div className="grid grid-cols-3 gap-4">
-                        {/* Hour Input */}
-                        <div className="flex flex-col items-center">
-                            <Input
-                                type="text"
-                                value={hour}
-                                onChange={(e) => setHour(e.target.value)}
-                                onBlur={(e) => handleBlur(e.target.value, "hour")}
-                                maxLength={2}
-                            />
-                            <label className="text-xs text-gray-500 mt-1">Hour</label>
-                        </div>
-
-                        {/* Minute Input */}
-                        <div className="flex flex-col items-center">
-                            <Input
-                                type="text"
-                                value={minute}
-                                onChange={(e) => setMinute(e.target.value)}
-                                onBlur={(e) => handleBlur(e.target.value, "minute")}
-                                maxLength={2}
-                            />
-                            <label className="text-xs text-gray-500 mt-1">Minute</label>
-                        </div>
-
-                        {format !== 24 && (
+                {!readOnly &&
+                    <PopoverContent align="start" side="bottom" className="w-64 p-4">
+                        <div className="grid grid-cols-3 gap-4">
+                            {/* Hour Input */}
                             <div className="flex flex-col items-center">
                                 <Input
                                     type="text"
-                                    value={period}
-                                    onChange={(e) => setPeriod(e.target.value)}
-                                    onBlur={(e) => handleBlur(e.target.value, "period")}
+                                    value={hour}
+                                    onChange={(e) => setHour(e.target.value)}
+                                    onBlur={(e) => handleBlur(e.target.value, "hour")}
                                     maxLength={2}
                                 />
-                                <label className="text-xs text-gray-500 mt-1">AM/PM</label>
+                                <label className="text-xs text-gray-500 mt-1">Hour</label>
                             </div>
-                        )}
-                    </div>
-                </PopoverContent>
+
+                            {/* Minute Input */}
+                            <div className="flex flex-col items-center">
+                                <Input
+                                    type="text"
+                                    value={minute}
+                                    onChange={(e) => setMinute(e.target.value)}
+                                    onBlur={(e) => handleBlur(e.target.value, "minute")}
+                                    maxLength={2}
+                                />
+                                <label className="text-xs text-gray-500 mt-1">Minute</label>
+                            </div>
+
+                            {format !== 24 && (
+                                <div className="flex flex-col items-center">
+                                    <Input
+                                        type="text"
+                                        value={period}
+                                        onChange={(e) => setPeriod(e.target.value)}
+                                        onBlur={(e) => handleBlur(e.target.value, "period")}
+                                        maxLength={2}
+                                    />
+                                    <label className="text-xs text-gray-500 mt-1">AM/PM</label>
+                                </div>
+                            )}
+                        </div>
+                    </PopoverContent>
+                }
             </Popover>
         </div>
     );

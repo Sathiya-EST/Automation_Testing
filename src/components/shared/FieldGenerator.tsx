@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Control, Controller, FieldValues } from "react-hook-form";
-import { Label } from "../ui/label";
+import { Control, useFormContext } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Checkbox } from "../ui/checkbox";
 import DatePicker from "./Datepicker";
@@ -10,8 +9,7 @@ import DateTimePicker from "./DateTimepicker";
 import { CaseSensitive, File, Hash } from "lucide-react";
 import SelectDropdown from "./DropDown";
 import { FormFieldType } from "@/types/data";
-
-
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 
 interface FormProps {
     fields: FormFieldType[];
@@ -25,14 +23,14 @@ interface FormProps {
         query: string
     ) => Promise<{ options: { label: string; value: string }[]; totalPages: number }>;
     layout: string;
+    formAction?: 'view' | 'update' | 'add'
 }
 
-const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsyncOptions, layout }) => {
-
+const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsyncOptions, layout, formAction }) => {
+    const { formState: { errors } } = useFormContext();
     const [asyncDataOptions, setAsyncDataOptions] = useState<{ label: string; value: string }[]>([]);
     const [totalAsyncOptions, setTotalAsyncOptions] = useState(0);
     const [asyncOptionsLoading, setAsyncOptionsLoading] = useState(false);
-
     const getGridClass = (layout: string) => {
         switch (layout) {
             case "GRID_1":
@@ -63,8 +61,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
             setAsyncOptionsLoading(false);
         }
     };
-
-
     const renderField = (field: FormFieldType) => {
         const { name, label, field: fieldProps } = field;
         const {
@@ -78,179 +74,353 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
             asynchronousField,
         } = fieldProps;
 
+        // const isReadOnly = formAction === "view" || readOnly;
+        const isReadOnly = formAction === "add" ? false : formAction === "view" ? true : readOnly;
+        const fieldError: any = errors[name];
+
         switch (dataTypeName) {
             case "Text Input":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={defaultValue || ""}
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={defaultValue || ""}
+                    //         render={({ field }) => (
+                    //             <div className="relative">
+                    //                 <Input {...field} type="text" required={required} placeholder={placeholder} className="pl-10" disabled={isReadOnly} />
+                    //                 <CaseSensitive size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+
+                    //             </div>
+                    //         )}
+
+                    //     />
+                    //     {fieldError && (
+                    //         <p className="text-red-500 text-sm mt-1">{fieldError.message}</p>
+                    //     )}
+                    // </div>
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <div className="relative">
-                                    <Input {...field} type="text" required={required} placeholder={placeholder} className="pl-10" readOnly={readOnly} />
+                                    <Input {...field} type="text" required={required} placeholder={placeholder} className="pl-10" disabled={isReadOnly} defaultValue={defaultValue} />
                                     <CaseSensitive size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
-                            )}
 
-                        />
-                    </div>
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
 
             case "Whole Number":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={defaultValue || ""}
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={defaultValue || ""}
+                    //         render={({ field }) => (
+                    //             <div className="relative">
+                    //                 <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} />
+                    //                 <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                    //             </div>
+                    //         )}
+                    //     />
+                    // </div>
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <div className="relative">
-                                    <Input {...field} type="number" placeholder={placeholder} className="pl-10" />
+                                    <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} defaultValue={defaultValue} />
                                     <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
-                            )}
-                        />
-                    </div>
-                );
+
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
+
+                )
             case "Decimal Number":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={defaultValue || ""}
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={defaultValue || ""}
+                    //         render={({ field }) => (
+                    //             <div className="relative">
+                    //                 <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} />
+                    //                 <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                    //             </div>
+                    //         )}
+                    //     />
+                    // </div>
+
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <div className="relative">
-                                    <Input {...field} type="number" placeholder={placeholder} className="pl-10" />
+                                    <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} defaultValue={defaultValue} />
                                     <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
-                            )}
-                        />
-                    </div>
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
             case "List Box":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={defaultChoice?.[0] || ""}
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={defaultChoice?.[0] || ""}
+                    //         render={({ field }) => (
+                    //             <SelectDropdown
+                    //                 {...field}
+                    //                 options={defaultChoice?.map((option) => ({ label: option, value: option })) || []}
+                    //                 readOnly={isReadOnly}
+                    //             // multiple={multiple ?? false}
+                    //             />
+                    //         )}
+                    //     />
+                    // </div>
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <SelectDropdown
                                     {...field}
                                     options={defaultChoice?.map((option) => ({ label: option, value: option })) || []}
+                                    readOnly={isReadOnly}
                                 // multiple={multiple ?? false}
                                 />
-                            )}
-                        />
-                    </div>
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
 
             case "Check Box / Boolean":
                 return (
-                    <div key={name} className="flex items-center space-x-2 py-2">
-                        <Label
-                            htmlFor={name}
-                            className="flex items-center space-x-2 cursor-pointer">
+                    // <div key={name} className="flex items-center space-x-2 py-2">
+                    //     <Label
+                    //         htmlFor={name}
+                    //         className="flex items-center space-x-2 cursor-pointer">
 
-                            {/* Checkbox Controller */}
-                            <Controller
-                                name={name}
-                                control={control}
-                                defaultValue={false}
-                                render={({ field }) => (
+                    //         {/* Checkbox Controller */}
+                    //         <Controller
+                    //             name={name}
+                    //             control={control}
+                    //             defaultValue={false}
+                    //             render={({ field }) => (
+                    //                 <Checkbox
+                    //                     {...field}
+                    //                     disabled={isReadOnly}
+                    //                 />
+                    //             )}
+                    //         />
+
+                    //         {/* Label text */}
+                    //         <span className="text-sm">{label}</span>
+                    //     </Label>
+                    // </div>
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <div className="flex items-center space-x-2 cursor-pointer">
+                                <FormControl>
                                     <Checkbox
                                         {...field}
+                                        disabled={isReadOnly}
                                     />
-                                )}
-                            />
+                                </FormControl>
+                                <FormLabel htmlFor={name} >{label}</FormLabel>
 
-                            {/* Label text */}
-                            <span className="text-sm">{label}</span>
-                        </Label>
-                    </div>
-
+                            </div>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
 
             case "Date":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={null}
-                            render={({ field }) => <DatePicker selectedDate={field.value} onChange={field.onChange} />}
-                        />
-                    </div>
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={null}
+                    //         render={({ field }) => <DatePicker selectedDate={field.value} onChange={field.onChange} readOnly={isReadOnly} />}
+                    //     />
+                    // </div>
+
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
+                                <DatePicker selectedDate={field.value} onChange={field.onChange} readOnly={isReadOnly} />
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
 
             case "Date Time":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={null}
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={null}
+                    //         render={({ field }) => (
+                    //             <DateTimePicker
+                    //                 selectedDateTime={field.value}
+                    //                 onChange={field.onChange}
+                    //                 placeholder="Select date and time"
+                    //                 readOnly={isReadOnly}
+                    //             />
+                    //         )}
+                    //     />
+                    // </div>
+
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <DateTimePicker
                                     selectedDateTime={field.value}
                                     onChange={field.onChange}
                                     placeholder="Select date and time"
+                                    readOnly={isReadOnly}
                                 />
-                            )}
-                        />
-                    </div>
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
-            case "File Upload":
+            case "upload":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={null}
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={null}
+                    //         render={({ field }) => (
+                    //             <div className="relative">
+                    //                 <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} readOnly={isReadOnly} />
+                    //                 <File size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                    //             </div>
+                    //         )}
+                    //     />
+                    // </div>
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <div className="relative">
-                                    <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} />
+                                    <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} readOnly={isReadOnly} defaultValue={defaultValue} />
                                     <File size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
-                            )}
-                        />
-                    </div>
 
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
             case "time":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={null}
-                            render={({ field }) => (
-                                <div className="relative">
-                                    <TimePicker format={12} value={field.value} onChange={field.onChange} />
-                                </div>
-                            )}
-                        />
-                    </div>
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={null}
+                    //         render={({ field }) => (
+                    //             <div className="relative">
+                    //                 <TimePicker format={12} value={field.value} onChange={field.onChange} readOnly={isReadOnly} />
+                    //             </div>
+                    //         )}
+                    //     />
+                    // </div>
+
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
+                                <TimePicker format={12} value={field.value} onChange={field.onChange} readOnly={isReadOnly} />
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
             case "Asynchronous List":
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue=""
-                            render={({ field }) => (
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue=""
+                    //         render={({ field }) => (
+                    //             <AsyncSelectDropdown
+                    //                 {...field}
+                    //                 formName={asynchronousField?.formName ?? ""}
+                    //                 fieldName={asynchronousField?.fieldName ?? ""}
+                    //                 options={asyncDataOptions}
+                    //                 isLoading={asyncOptionsLoading}
+                    //                 totalPages={totalAsyncOptions || 0}
+                    //                 fetchOptions={handleFetchOptions}
+                    //                 placeholder="Select an option"
+                    //                 readOnly={isReadOnly}
+                    //             // multiple={multiple ?? false}
+                    //             />
+
+                    //         )}
+                    //     />
+                    // </div>
+
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
                                 <AsyncSelectDropdown
                                     {...field}
                                     formName={asynchronousField?.formName ?? ""}
@@ -260,24 +430,41 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                                     totalPages={totalAsyncOptions || 0}
                                     fetchOptions={handleFetchOptions}
                                     placeholder="Select an option"
+                                    readOnly={isReadOnly}
                                 // multiple={multiple ?? false}
                                 />
-                            )}
-                        />
-                    </div>
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
 
             default:
                 return (
-                    <div key={name} className="field-container">
-                        <Label htmlFor={name}>{label}</Label>
-                        <Controller
-                            name={name}
-                            control={control}
-                            defaultValue={defaultValue || ""}
-                            render={({ field }) => <Input {...field} type="text" />}
-                        />
-                    </div>
+                    // <div key={name} className="field-container">
+                    //     <Label htmlFor={name}>{label}</Label>
+                    //     <Controller
+                    //         name={name}
+                    //         control={control}
+                    //         defaultValue={defaultValue || ""}
+                    //         render={({ field }) => <Input {...field} type="text" readOnly={isReadOnly} />}
+                    //     />
+                    // </div>
+                    <FormField key={name} control={control} name={name} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel htmlFor={name}>{label}</FormLabel>
+                            <FormControl>
+                                <Input {...field} type="text" readOnly={isReadOnly} defaultValue={defaultValue} />
+                            </FormControl>
+                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            <FormMessage>
+                                {fieldError?.message ? fieldError.message : null}
+                            </FormMessage>
+                        </FormItem>)}
+                    />
                 );
         }
     };

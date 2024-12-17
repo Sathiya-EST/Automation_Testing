@@ -31,7 +31,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import TableSettingPopover, { TableSettings } from '@/pages/master/components/TableSettings';
 import PinningControls from './PinningControl';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../ui/pagination';
-import { TableRequestParams } from '@/types/data';
+import { GetReqParams, TableRequestParams } from '@/types/data';
 import { cn } from '@/lib/utils';
 
 
@@ -44,8 +44,8 @@ interface AdvancedTableProps<T> {
   }>;
   data: T[];
   totalCount: number;
-  requestParams: TableRequestParams;
-  onRequestParamsChange?: (params: TableRequestParams) => void;
+  requestParams: GetReqParams;
+  onRequestParamsChange?: (params: GetReqParams) => void;
   width?: string;
   maxW?: string;
   height?: string;
@@ -103,7 +103,7 @@ function AdvancedTable<T>({
     setPagination(newPagination);
 
     if (onRequestParamsChange) {
-      const newParams: TableRequestParams = {
+      const newParams: GetReqParams = {
         ...requestParams,
         pageNo: newPagination.pageIndex + 1,
         pageSize: newPagination.pageSize,

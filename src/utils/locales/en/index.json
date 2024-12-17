@@ -276,6 +276,26 @@
             "preview": {},
             "publish": {}
         },
-        "data": {}
+        "data": {
+            "formData": {
+                "list": {
+                    "title": "Modules",
+                    "createBtn": "Add New Entry",
+                    "filterBtn": "Status",
+                    "sortBtn": "Sort",
+                    "viewBtn": "View",
+                    "tableHeader": {
+                        "formName": "Form Name",
+                        "formDesc": "Form Description",
+                        "status": "Status",
+                        "action": "Action"
+                    },
+                    "statusFilter": {
+                        "published": "Published",
+                        "unPublished": "UnPublished"
+                    }
+                }
+            }
+        }
     }
 }

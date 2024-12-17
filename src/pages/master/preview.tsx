@@ -1,7 +1,7 @@
 import { useMemo, useState, Suspense, lazy, useEffect } from 'react';
 import { UI_ROUTES } from '@/constants/routes';
 import useBreadcrumb from '@/hooks/useBreadCrumb';
-import { BreadcrumbItemType, layoutValues, SelectOptions } from '@/types/data';
+import { BreadcrumbItemType, SelectOptions } from '@/types/data';
 import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,8 +16,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { BeforeAfterToggle } from '@/components/shared/PositionToggle';
 import { z } from 'zod';
 import { POSITION } from '@/constants/app.constants';
-import { Input } from '@/components/ui/input';
-import Spinner from '@/components/shared/Spinner';
 import { Separator } from '@/components/ui/separator';
 import SelectDropdown from '@/components/shared/DropDown';
 
@@ -210,34 +208,6 @@ const MasterFormPreview = () => {
         }
     };
 
-    // const handleFieldUpdate = (value: string | string[] | number | boolean, fieldName: string) => {
-    //     const currentFields = form.getValues("fields");
-
-    //     const updatedFields = currentFields.map((field) => {
-    //         if (field.name === fieldName) {
-    //             let updatedValue = value;
-
-    //             if (fieldName === 'defaultChoice') {
-    //                 const normalizedValue = Array.isArray(value)
-    //                     ? value.map((v) => String(v))
-    //                     : [String(value)];
-
-    //                 updatedValue = Array.from(new Set(normalizedValue));
-    //             }
-
-    //             return {
-    //                 ...field,
-    //                 field: {
-    //                     ...field.field,
-    //                     [fieldName]: updatedValue
-    //                 }
-    //             };
-    //         }
-    //         return field;
-    //     });
-
-    //     form.setValue("fields", updatedFields);
-    // };
     const handleFieldUpdate = (value: string | string[] | number | boolean, fieldName: string) => {
         const currentFields = form.getValues("fields");
 
@@ -300,25 +270,25 @@ const MasterFormPreview = () => {
 
     // Handle form submission
     const onSubmit = (data: any) => {
-        console.log('Form Data Submitted:', data);
         updateForm({ formName, data }).unwrap();
     };
 
-    // Error handling and loading state
     if (isLoading) {
         return <div>Loading...</div>;
     }
 
-    if (formError) {
-        return <div>Error fetching form data: {formError?.message}</div>;
-    }
+    // if (formError) {
+    //     return <div>Error fetching form data: {formError?.message}</div>;
+    // }
 
-    const handlePublish=()=>{
-        navigate(UI_ROUTES.MASTER_FORM_PUBLISH)
+    const handlePublish = () => {
+        navigate(UI_ROUTES.MASTER_FORM_PUBLISH, {
+            state: { moduleName: selectedModule, formName: formName },
+        })
     }
     return (
         <div>
-            <Suspense fallback={<div>Loading Field Generator...</div>}>
+            <Suspense fallback={<div>Loading Form...</div>}>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <div className='flex flex-col lg:flex-row justify-between space-y-4 lg:space-y-0 lg:space-x-4'>

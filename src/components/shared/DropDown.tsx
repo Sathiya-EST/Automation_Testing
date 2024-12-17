@@ -21,6 +21,7 @@ interface SelectDropdownProps {
     value?: string;
     onChange?: (value: string) => void;
     className?: string;
+    readOnly?: boolean
 }
 
 const SelectDropdown: React.FC<SelectDropdownProps> = ({
@@ -29,7 +30,8 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
     placeholder,
     value,
     onChange,
-    className = ''
+    className = '',
+    readOnly = false
 }) => {
     const handleChange = (selectedValue: string) => {
         onChange?.(selectedValue);
@@ -38,7 +40,7 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
     return (
         <div className={`grid gap-2 w-full ${className}`}>
             {label && <label className="font-medium leading-none">{label}</label>}
-            <Select value={value} onValueChange={handleChange}>
+            <Select value={value} onValueChange={handleChange} disabled={readOnly}>
                 <SelectTrigger className="w-full">
                     <SelectValue
                         placeholder={placeholder}

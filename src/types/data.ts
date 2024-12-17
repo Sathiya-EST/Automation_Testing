@@ -135,4 +135,98 @@ export const layoutValues = Object.values(LAYOUT) as [string, ...string[]];
 export interface SelectOptions {
     value: string;
     label: string;
-  }
+}
+type AccessDetails = {
+    fullAccess: boolean;
+    specificAccess?: {
+        DEPARTMENT: string[];
+        ROLE: string[];
+        USER: string[];
+    };
+};
+export interface publishDataType {
+    isPublished: boolean;
+    deleteAccess: AccessDetails;
+    updateAccess: AccessDetails;
+    createAccess: AccessDetails;
+    viewAccess: AccessDetails;
+}
+
+export interface ResponseType {
+    data: any[];
+    totalRecords: number;
+}
+
+interface SortOption {
+    key: string;
+    order: 'ASC' | 'DESC';
+}
+
+interface Filter {
+    key: string;
+    operator: 'EQUAL' | 'LIKE';
+    value: string | boolean;
+    field_type: 'BOOLEAN' | 'STRING';
+}
+
+export interface GetReqParams {
+    pageNo: number;
+    pageSize: number;
+    sort: SortOption[];
+    filters: Filter[];
+}
+
+type ColumnField = {
+    dataTypeName: string;
+    type: string;
+    placeholder: string | null;
+    required: boolean | null;
+    readOnly: boolean | null;
+    min: number | null;
+    max: number | null;
+    pattern?: string | null;
+    defaultValue?: any;
+    alphabetic?: boolean | null;
+    alphanumeric?: boolean | null;
+    defaultChoice?: any;
+    uniqueValue?: boolean | null;
+    decimalLimit?: number | null;
+    positiveOnly?: boolean | null;
+    negativeOnly?: boolean | null;
+    multiple?: boolean | null;
+    asynchronousField?: boolean | null;
+};
+
+export type Column = {
+    name: string;
+    label: string;
+    field: ColumnField;
+};
+
+export interface FormViewData {
+    // columnData: never[];
+    formIdPk: string;
+    formName: string;
+    moduleName: string;
+    formDescription: string;
+    formLayout: "GRID_1" | "GRID_2" | "GRID_3";
+    displayName: string;
+    fields: Column[];
+    createRow: any;
+    deleteRow: any;
+    updateRow: any;
+    cancelRow: any;
+    isPublished: any;
+};
+
+export interface ColumnData {
+    accessorKey: string;
+    header: string;
+    isId: boolean;
+}
+
+export interface FileUploadData {
+    fileName: string;
+    fileExtension: string;
+    file: string;
+}

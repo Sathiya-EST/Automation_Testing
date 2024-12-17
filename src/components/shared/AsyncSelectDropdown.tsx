@@ -16,6 +16,7 @@ interface AsyncSelectDropdownProps {
     isLoading: boolean;
     totalPages: number;
     fetchOptions: (formName: string, fieldName: string, pageNo: number, pageSize: number, query: string) => void;
+    readOnly?: boolean
 }
 
 const AsyncSelectDropdown = ({
@@ -27,7 +28,8 @@ const AsyncSelectDropdown = ({
     options,
     isLoading,
     totalPages,
-    fetchOptions
+    fetchOptions,
+    readOnly
 }: AsyncSelectDropdownProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [pageNo, setPageNo] = useState(1)
@@ -52,6 +54,7 @@ const AsyncSelectDropdown = ({
                                 variant="outline"
                                 role="combobox"
                                 className={cn("w-full justify-between", !value && "text-muted-foreground")}
+                                disabled={readOnly} 
                             >
                                 {selectedRecord ? (
                                     <p className="font-normal">{selectedRecord.label}</p>
@@ -66,61 +69,65 @@ const AsyncSelectDropdown = ({
                             </Button>
                         </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                        <Command>
-                            <CommandInput
-                                placeholder="Search records..."
-                                className="h-9"
-                                value={searchQuery}
-                                onValueChange={(newValue) => setSearchQuery(newValue)}
-                            />
-                            <CommandList>
-                                {isLoading ? (
-                                    <div className="flex justify-center items-center p-4">
-                                        <Loader2 className="animate-spin text-primary" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <CommandEmpty>No records found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {filteredOptions.map((option) => (
-                                                <CommandItem
-                                                    key={option.value}
-                                                    value={option.label}
-                                                    onSelect={() => onChange(option.value)}
-                                                >
-                                                    {option.label}
-                                                    {option.value === value && <Check className="ml-auto opacity-100" />}
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </>
-                                )}
-                            </CommandList>
-                        </Command>
-                        <div className="flex justify-between p-2 border-t border-gray-200">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setPageNo(pageNo - 1)}
-                                disabled={pageNo === 1}
-                            >
-                                <ChevronLeft />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setPageNo(pageNo + 1)}
-                                disabled={pageNo === totalPages}
-                            >
-                                <ChevronRight />
-                            </Button>
-                        </div>
-                    </PopoverContent>
+                    {!readOnly && ( // Disable popover content if readOnly
+                        <PopoverContent className="w-[200px] p-0">
+                            <Command>
+                                <CommandInput
+                                    placeholder="Search records..."
+                                    className="h-9"
+                                    value={searchQuery}
+                                    onValueChange={(newValue) => setSearchQuery(newValue)}
+                                    autoFocus
+                                />
+                                <CommandList>
+                                    {isLoading ? (
+                                        <div className="flex justify-center items-center p-4">
+                                            <Loader2 className="animate-spin text-primary" />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <CommandEmpty>No records found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {filteredOptions.map((option) => (
+                                                    <CommandItem
+                                                        key={option.value}
+                                                        value={option.label}
+                                                        onSelect={() => onChange(option.value)}
+                                                    >
+                                                        {option.label}
+                                                        {option.value === value && <Check className="ml-auto opacity-100" />}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </>
+                                    )}
+                                </CommandList>
+                            </Command>
+                            <div className="flex justify-between p-2 border-t border-gray-200">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setPageNo(pageNo - 1)}
+                                    disabled={pageNo === 1 || readOnly} // Disable pagination if readOnly
+                                >
+                                    <ChevronLeft />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setPageNo(pageNo + 1)}
+                                    disabled={pageNo === totalPages || readOnly} // Disable pagination if readOnly
+                                >
+                                    <ChevronRight />
+                                </Button>
+                            </div>
+                        </PopoverContent>
+                    )}
                 </Popover>
                 <FormMessage />
             </FormItem>
         </div>
+
     );
 };
 
