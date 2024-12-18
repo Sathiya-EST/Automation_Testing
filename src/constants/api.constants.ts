@@ -21,6 +21,7 @@ export const MASTER_API = {
     EXPORT_AS_EXCEL: `${MASTER_API_BASE_URL}/form/excel`,
     DOWNLOAD_CSV: `${MASTER_API_BASE_URL}/form/bulk/insert/file`,
     BULK_INSERT: `${MASTER_API_BASE_URL}/form/bulk/insert`,
+    DWLD_ERR_REPORT: `${MASTER_API_BASE_URL}/form/bulk/insert/download`,
     //Form
     GET_DATA_TYPES: `${MASTER_API_BASE_URL}/form/datatype`,
     CREATE_FORM: `${MASTER_API_BASE_URL}/form/template`,

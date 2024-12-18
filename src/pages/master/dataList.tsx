@@ -10,7 +10,7 @@ import useBreadcrumb from '@/hooks/useBreadCrumb';
 import { BreadcrumbItemType, FileUploadData, GetReqParams } from '@/types/data';
 import ModuleList from './components/ModuleList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, AlertCircleIcon, AlertTriangle, Download, Eye, FileDown, FileSpreadsheet, FileX2, Plus } from 'lucide-react';
+import { AlertCircleIcon, AlertTriangle, Download, Eye, FileDown, Plus } from 'lucide-react';
 import { useGetModuleMutation } from '@/store/services/master/module';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -25,9 +25,8 @@ import FileUploader from './components/CSVFileUpload';
 import CSVUploadIcon from '@/assets/fileUpload';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { downLoadCSVTemplate, exportAsExcel, uploadCSV } from '@/utils/useCSVDownload';
+import { downLoadCSVTemplate, dwldErrReport, exportAsExcel, uploadCSV } from '@/utils/useCSVDownload';
 import { MASTER_API } from '@/constants/api.constants';
-import { AlertDialogFooter } from '@/components/ui/alert-dialog';
 
 interface MasterColumns {
   displayName: string;
@@ -44,6 +43,7 @@ const DataList: React.FC = () => {
   const navigate = useNavigate();
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
+  const [isDwldErrReport, setIsDwldErrReport] = useState<boolean>(false)
   const [pageNo, setPageNo] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState([
@@ -195,6 +195,7 @@ const DataList: React.FC = () => {
 
   const handleFileUpload = async (fileData: FileUploadData) => {
     const uploadResult = await uploadCSV(fileData);
+    setIsDwldErrReport(false)
     if (!uploadResult.success) {
       toast({
         title: "Bulk Upload Error",
@@ -224,6 +225,9 @@ const DataList: React.FC = () => {
     } else {
       console.log('File uploaded successfully!');
     }
+    if (uploadResult.statusCode === 400) {
+      setIsDwldErrReport(true)
+    }
   };
 
   const handleExportFormRecord = () => {
@@ -246,6 +250,10 @@ const DataList: React.FC = () => {
     downLoadCSVTemplate(downloadCSVFileUrl, defaultDwldTemplateFileName)
   };
 
+  const handleDwldErrReport = () => {
+    dwldErrReport(formColumnData?.data.displayName || '')
+
+  }
   return (
     <div>
       <ResizablePanelGroup
@@ -261,9 +269,7 @@ const DataList: React.FC = () => {
           ) : data ? (
             <ModuleList
               data={data.data}
-              // handleModuleSelect={handleModuleClick}
               handleFormSelect={handleFormSelect}
-            // showForm={true}
             />
           ) : (
             <div>No modules available.</div>
@@ -304,22 +310,23 @@ const DataList: React.FC = () => {
                   acceptedFileTypes={['.csv']}
                   title="CSV Uploader"
                   onFileUpload={handleFileUpload}
+                  defaultFileName={formColumnData?.data.displayName}
                 />
-                <Alert className="flex items-center p-3 bg-red-50 border-l-4 border-red-500 rounded-md">
-                  <AlertCircleIcon className="w-5 h-5" color='red' />
-                  <div className="flex-1">
-                    <AlertTitle className="text-sm font-semibold text-red-700">Bulk Upload Error</AlertTitle>
-                    <AlertDescription className="text-xs text-red-600">
-                      Some data requires corrections.
-                      <span className="font-medium"> Download the error report</span>, fix issues, and re-upload.
-                    </AlertDescription>
-                  </div>
-                  <Button className="bg-red-500 hover:bg-red-600 text-white pl-3">
-                    Download
-                  </Button>
-                </Alert>
-
-
+                {isDwldErrReport && (
+                  <Alert className="flex items-center p-3 bg-red-50 border-l-4 border-red-500 rounded-md">
+                    <AlertCircleIcon className="w-5 h-5" color='red' />
+                    <div className="flex-1">
+                      <AlertTitle className="text-sm font-semibold text-red-700">Bulk Upload Error</AlertTitle>
+                      <AlertDescription className="text-xs text-red-600">
+                        Some data requires corrections.
+                        <span className="font-medium"> Download the error report</span>, fix issues, and re-upload.
+                      </AlertDescription>
+                    </div>
+                    <Button className="bg-red-500 hover:bg-red-600 text-white pl-3" onClick={handleDwldErrReport}>
+                      Download
+                    </Button>
+                  </Alert>
+                )}
               </>
             </DialogContent>
             <div className="p-4 space-y-1 bg-card ">

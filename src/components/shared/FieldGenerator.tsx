@@ -81,25 +81,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
         switch (dataTypeName) {
             case "Text Input":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={defaultValue || ""}
-                    //         render={({ field }) => (
-                    //             <div className="relative">
-                    //                 <Input {...field} type="text" required={required} placeholder={placeholder} className="pl-10" disabled={isReadOnly} />
-                    //                 <CaseSensitive size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-
-                    //             </div>
-                    //         )}
-
-                    //     />
-                    //     {fieldError && (
-                    //         <p className="text-red-500 text-sm mt-1">{fieldError.message}</p>
-                    //     )}
-                    // </div>
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -120,20 +101,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
 
             case "Whole Number":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={defaultValue || ""}
-                    //         render={({ field }) => (
-                    //             <div className="relative">
-                    //                 <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} />
-                    //                 <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                    //             </div>
-                    //         )}
-                    //     />
-                    // </div>
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -154,20 +121,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                 )
             case "Decimal Number":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={defaultValue || ""}
-                    //         render={({ field }) => (
-                    //             <div className="relative">
-                    //                 <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} />
-                    //                 <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                    //             </div>
-                    //         )}
-                    //     />
-                    // </div>
 
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
@@ -187,22 +140,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                 );
             case "List Box":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={defaultChoice?.[0] || ""}
-                    //         render={({ field }) => (
-                    //             <SelectDropdown
-                    //                 {...field}
-                    //                 options={defaultChoice?.map((option) => ({ label: option, value: option })) || []}
-                    //                 readOnly={isReadOnly}
-                    //             // multiple={multiple ?? false}
-                    //             />
-                    //         )}
-                    //     />
-                    // </div>
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -224,28 +161,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
 
             case "Check Box / Boolean":
                 return (
-                    // <div key={name} className="flex items-center space-x-2 py-2">
-                    //     <Label
-                    //         htmlFor={name}
-                    //         className="flex items-center space-x-2 cursor-pointer">
-
-                    //         {/* Checkbox Controller */}
-                    //         <Controller
-                    //             name={name}
-                    //             control={control}
-                    //             defaultValue={false}
-                    //             render={({ field }) => (
-                    //                 <Checkbox
-                    //                     {...field}
-                    //                     disabled={isReadOnly}
-                    //                 />
-                    //             )}
-                    //         />
-
-                    //         {/* Label text */}
-                    //         <span className="text-sm">{label}</span>
-                    //     </Label>
-                    // </div>
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <div className="flex items-center space-x-2 cursor-pointer">
@@ -268,16 +183,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
 
             case "Date":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={null}
-                    //         render={({ field }) => <DatePicker selectedDate={field.value} onChange={field.onChange} readOnly={isReadOnly} />}
-                    //     />
-                    // </div>
-
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -294,23 +199,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
 
             case "Date Time":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={null}
-                    //         render={({ field }) => (
-                    //             <DateTimePicker
-                    //                 selectedDateTime={field.value}
-                    //                 onChange={field.onChange}
-                    //                 placeholder="Select date and time"
-                    //                 readOnly={isReadOnly}
-                    //             />
-                    //         )}
-                    //     />
-                    // </div>
-
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -329,28 +217,16 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         </FormItem>)}
                     />
                 );
-            case "upload":
+            case "File Upload":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={null}
-                    //         render={({ field }) => (
-                    //             <div className="relative">
-                    //                 <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} readOnly={isReadOnly} />
-                    //                 <File size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                    //             </div>
-                    //         )}
-                    //     />
-                    // </div>
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} readOnly={isReadOnly} defaultValue={defaultValue} />
+                                    <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} readOnly={isReadOnly}
+                                    // defaultValue={defaultValue}
+                                    />
                                     <File size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
 
@@ -364,20 +240,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                 );
             case "time":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={null}
-                    //         render={({ field }) => (
-                    //             <div className="relative">
-                    //                 <TimePicker format={12} value={field.value} onChange={field.onChange} readOnly={isReadOnly} />
-                    //             </div>
-                    //         )}
-                    //     />
-                    // </div>
-
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -393,30 +255,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                 );
             case "Asynchronous List":
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue=""
-                    //         render={({ field }) => (
-                    //             <AsyncSelectDropdown
-                    //                 {...field}
-                    //                 formName={asynchronousField?.formName ?? ""}
-                    //                 fieldName={asynchronousField?.fieldName ?? ""}
-                    //                 options={asyncDataOptions}
-                    //                 isLoading={asyncOptionsLoading}
-                    //                 totalPages={totalAsyncOptions || 0}
-                    //                 fetchOptions={handleFetchOptions}
-                    //                 placeholder="Select an option"
-                    //                 readOnly={isReadOnly}
-                    //             // multiple={multiple ?? false}
-                    //             />
-
-                    //         )}
-                    //     />
-                    // </div>
-
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
@@ -444,15 +282,6 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
 
             default:
                 return (
-                    // <div key={name} className="field-container">
-                    //     <Label htmlFor={name}>{label}</Label>
-                    //     <Controller
-                    //         name={name}
-                    //         control={control}
-                    //         defaultValue={defaultValue || ""}
-                    //         render={({ field }) => <Input {...field} type="text" readOnly={isReadOnly} />}
-                    //     />
-                    // </div>
                     <FormField key={name} control={control} name={name} render={({ field }) => (
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>

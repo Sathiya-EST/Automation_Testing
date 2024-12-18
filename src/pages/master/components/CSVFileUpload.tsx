@@ -14,7 +14,7 @@ interface FileUploaderProps {
     onFileRemove?: () => void;
     className?: string;
     validateFile?: (file: File) => boolean;
-    errMessage?: string;
+    defaultFileName?: string;
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
@@ -23,7 +23,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     onFileUpload,
     onFileRemove,
     validateFile,
-    errMessage
+    defaultFileName
 }) => {
     const [dragActive, setDragActive] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -86,7 +86,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                 const base64String = await convertToBase64(selectedFile);
 
                 const fileData: FileUploadData = {
-                    fileName: selectedFile.name.split('.')[0],
+                    // fileName: selectedFile.name.split('.')[0],
+                    fileName: defaultFileName || selectedFile.name.split('.')[0],
                     fileExtension: selectedFile.name.split('.').pop() || '',
                     file: base64String.split(',')[1]
                 };
