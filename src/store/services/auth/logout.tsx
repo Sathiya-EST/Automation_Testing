@@ -1,6 +1,6 @@
 import { USER_API } from '@/constants/api.constants';
 import { clearTokens } from '@/store/slice/authSlice';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import baseQueryWithAuth from '../baseQueryHook';
 
 export const revokeApi = createApi({
@@ -15,12 +15,14 @@ export const revokeApi = createApi({
             async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                    dispatch(clearTokens());
+
                 } catch (error) {
                     console.error('Logout failed:', error);
+                } finally {
+                    dispatch(clearTokens());
                 }
             },
-        }),/* ({ baseUrl: USER_API.LOGOUT }) */
+        }),
     }),
 });
 

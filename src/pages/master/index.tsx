@@ -1,17 +1,17 @@
 import useBreadcrumb from "@/hooks/useBreadCrumb";
-import { BreadcrumbItemType, GetReqParams, TableRequestParams } from "@/types/data";
+import { Filter, GetReqParams } from "@/types/data";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import ModuleList from "./components/ModuleList";
 import { useNavigate } from "react-router-dom";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useGetModuleMutation, usePostModuleMutation } from "@/store/services/master/module";
 import { UI_ROUTES } from "@/constants/routes";
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useGetFormsQuery } from "@/store/services/master/form";
 import AdvancedTable from "@/components/shared/Table";
 import Spinner from "@/components/shared/Spinner";
-import { Eye, Plus, AlertTriangle } from "lucide-react";
+import { Eye, Plus, AlertTriangle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/shared/Search";
 import Text from "@/components/shared/Text";
@@ -19,138 +19,105 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import StatusFilterDropdown, { StatusValue } from "./components/StatusFilter";
-
+import ErrorAlert from "@/components/shared/ErrorAlert";
+import ModuleSelectionPlaceholder from "./components/ModuleSelectionInfo";
+import { useMediaQuery } from 'react-responsive';
 interface MasterColumns {
     displayName: string;
     formDescription: string;
     formName: string;
-    isPublished: boolean
+    isPublished: boolean;
 }
 
 const Master = () => {
-
-    const [getModule, { data, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
     const { toast } = useToast();
     const { t } = useTranslation();
     const navigate = useNavigate();
-
-    const [pageNo, setPageNo] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [sort, setSort] = useState([
-        { key: 'createdOn', order: 'ASC' }
-    ]);
-    const [filters, setFilters] = useState([]);
-    const [selectedModule, setSelectedModule] = useState<string>('');
-    const [requestParams, setRequestParams] = useState<GetReqParams>({
+    const [moduleSearchVal, setModuleSearchVal] = useState("");
+    const [selectedModule, setSelectedModule] = useState<string | null>('');
+    const [formReqParams, setFormReqParams] = useState<GetReqParams>({
         pageNo: 1,
         pageSize: 10,
-        sort: [{ key: 'createdOn', order: 'ASC' }],
-        filters: selectedModule
-            ? [
-                {
-                    key: "moduleName",
-                    operator: "EQUAL",
-                    field_type: "STRING",
-                    value: selectedModule,
-                },
-            ]
-            : [],
+        sort: [{ key: "createdOn", order: "ASC" }],
+        filters: [],
+    });
+    const [isModuleSelected, setIsModuleSelected] = useState(false);
+    const [moduleReqParams, setModuleReqParams] = useState<GetReqParams>({
+        pageNo: 1,
+        pageSize: 10,
+        sort: [{ key: "createdOn", order: "ASC" }],
+        filters: [],
     });
 
-    const [postModule, { isLoading: moduleAddLoading, isError: moduleAddErr }] = usePostModuleMutation();
+    // Breadcrumbs
+    useBreadcrumb(
+        useMemo(
+            () => [
+                { type: "link", title: "Master", path: UI_ROUTES.MASTER, isActive: false },
+                { type: "page", title: "Form", isActive: true },
+            ],
+            []
+        )
+    );
+
+    const [getModule, { data: moduleData, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
+    const [postModule, { isLoading: moduleAddLoading }] = usePostModuleMutation();
     const {
         data: formData,
         isLoading: formLoading,
-        error: formError
-    } = useGetFormsQuery(requestParams);
+        error: formError,
+    } = useGetFormsQuery(formReqParams);
 
     const columns = [
         {
-            accessorKey: 'displayName',
-            header: t('master.form.list.tableHeader.formName'),
-            // initiallyVisible: true
+            accessorKey: "displayName",
+            header: t("master.form.list.tableHeader.formName"),
         },
         {
-            accessorKey: 'formDescription',
-            header: t('master.form.list.tableHeader.formDesc'),
+            accessorKey: "formDescription",
+            header: t("master.form.list.tableHeader.formDesc"),
             maxSize: 500,
             size: 400,
-            // initiallyVisible: false
         },
-        // {
-        //     accessorKey: 'createdBy',
-        //     header: 'Created By',
-        // },
         {
-            accessorKey: 'isPublished',
-            header: t('master.form.list.tableHeader.status'),
-            cell: (info: any) => (
-                <Badge className={`text-xs text-white ${info.getValue() ? 'bg-green-400 text-green-900 hover:bg-green-600' : 'bg-red-400 text-red-900 hover:bg-red-600'}`}>
-                    {info.getValue() ? 'Published' : 'unPublished'}
+            accessorKey: "isPublished",
+            header: t("master.form.list.tableHeader.status"),
+            cell: ({ getValue }: any) => (
+                <Badge
+                    className={`text-xs text-white ${getValue() ? "bg-green-300 hover:bg-green-100 text-green-800" : "bg-red-300 hover:bg-red-200 text-red-800"}`}
+                >
+                    {getValue() ? "Published" : "Unpublished"}
                 </Badge>
             ),
-            // initiallyVisible: true
-
         },
         {
-            accessorKey: 'action',
-            header: t('master.form.list.tableHeader.action'),
-            cell: (info: any) => {
-                const formName = info.row.original.formName;
-                return (
-                    <Button
-                        variant="default"
-                        className="text-white text-[10px] h-[32px] rounded flex items-center justify-center px-4 py-1 border-none"
-                        onClick={() => handleView(formName)}
-                    >
-                        <Eye className="w-4 h-4" />
-                        View
-                    </Button>
-                );
-            },
-            // initiallyVisible: true
-
-        }
-
+            accessorKey: "action",
+            header: t("master.form.list.tableHeader.action"),
+            cell: ({ row }: any) => (
+                <Button
+                    variant="default"
+                    className="text-white text-[10px] h-[32px] px-4"
+                    onClick={() => handleView(row.original.formName)}
+                >
+                    <Eye className="w-4 h-4" />
+                    View
+                </Button>
+            ),
+        },
     ];
 
-    const onRequestParamsChange = (updatedParams: Partial<GetReqParams>) => {
-        setRequestParams((prevParams) => ({
-            ...prevParams,
-            ...updatedParams,
-        }));
-    };
-
-    const updatedRoutes: BreadcrumbItemType[] = useMemo(() => [
-        { type: 'link', title: 'Master', path: UI_ROUTES.MASTER, isActive: false },
-        { type: 'page', title: 'Form', isActive: true },
-    ], []);
-
-    useBreadcrumb(updatedRoutes);
-
-    const handleAddModule = async (ModuleData: { moduleName: string, moduleDescription?: string }) => {
+    const handleAddModule = async (moduleData: { moduleName: string; moduleDescription?: string }) => {
         try {
-            await postModule(ModuleData).unwrap();
-
-            toast({
-                title: "Module Added Successfully",
-                variant: "success",
-            });
-
-            // Refresh the module list
-            await getModule({ pageNo, pageSize, sort, filters });
+            await postModule(moduleData).unwrap();
+            toast({ title: "Module Added Successfully", variant: "success" });
+            await getModule(moduleReqParams);
         } catch (err) {
-            console.error("Failed to add module:", err);
-
             toast({
                 title: "Error Adding Module",
                 description: "Failed to add module. Please try again.",
                 variant: "destructive",
                 action: (
-                    <ToastAction
-                        altText="Try again"
-                        onClick={() => handleAddModule(ModuleData)}
-                    >
+                    <ToastAction altText="Retry" onClick={() => handleAddModule(moduleData)}>
                         Retry
                     </ToastAction>
                 ),
@@ -160,185 +127,346 @@ const Master = () => {
 
     const handleModuleClick = useCallback((moduleName: string) => {
         setSelectedModule(moduleName);
-        const key = 'moduleName';
-        const operator = 'EQUAL';
-        const field_type = 'STRING';
-        const value = moduleName;
-        handleAddFilter(key, operator, field_type, value);
+        setFormReqParams({
+            pageNo: 1,
+            pageSize: 10,
+            sort: [{ key: "createdOn", order: "ASC" }],
+            filters: [],
+        })
+        handleAddFormFilter("moduleName", "EQUAL", "STRING", moduleName);
     }, []);
 
-    const fetchModules = useCallback(async () => {
-        try {
-            await getModule({ pageNo, pageSize, sort, filters });
-        } catch (err) {
-            toast({
-                title: "Error Fetching Modules",
-                description: "Failed to load modules. Please refresh the page.",
-                variant: "destructive",
-                action: (
-                    <ToastAction
-                        altText="Retry"
-                        onClick={fetchModules}
-                    >
-                        Retry
-                    </ToastAction>
-                ),
-            });
-            console.error('Failed to fetch modules', err);
-        }
-    }, [getModule, pageNo, pageSize, sort, filters, toast]);
+    const handleAddFormFilter = (key: string, operator: "LIKE" | "EQUAL", fieldType: "STRING" | "BOOLEAN", value: string | boolean) => {
+        setFormReqParams((prev) => {
+            const filters = prev.filters.filter((f) => f.key !== key);
+            return { ...prev, filters: [...filters, { key, operator, field_type: fieldType, value }] };
+        });
+    };
 
-    useEffect(() => {
-        fetchModules();
-    }, [fetchModules]);
+    const handleSearch = (query: string) => {
+        handleAddFormFilter("default_search_criteria", "LIKE", "STRING", query);
+    };
+
+    const handleStatusChange = (status: StatusValue) => {
+        if (status === "all") {
+            setFormReqParams((prev) => ({
+                ...prev,
+                filters: prev.filters.filter((filter) => filter.key !== "isPublished"),
+            }));
+        } else {
+            handleAddFormFilter("isPublished", "EQUAL", "BOOLEAN", status === "published");
+        }
+    };
 
     const handleView = (formName: string) => {
         navigate(UI_ROUTES.MASTER_FORM_PREVIEW, { state: { formName, selectedModule } });
     };
 
     const handleCreate = () => {
-        navigate(`${UI_ROUTES.MASTER_FORM_CREATE}`, { state: { selectedModule } });
+        navigate(UI_ROUTES.MASTER_FORM_CREATE, { state: { selectedModule } });
     };
 
-    const handleAddFilter = (key: string, operator: 'LIKE' | 'EQUAL', field_type: 'STRING' | 'BOOLEAN', value: string | boolean) => {
-        setRequestParams((prevParams) => {
-            const existingFilterIndex = prevParams.filters.findIndex(filter => filter.key === key);
+    useEffect(() => {
+        (async () => {
+            try {
+                await getModule(moduleReqParams);
+            } catch (err) {
+                toast({
+                    title: "Error Fetching Modules",
+                    description: "Failed to load modules. Please refresh the page.",
+                    variant: "destructive",
+                    action: (
+                        <ToastAction altText="Retry" onClick={() => getModule(moduleReqParams)}>
+                            Retry
+                        </ToastAction>
+                    ),
+                });
+            }
+        })();
+    }, [getModule, moduleReqParams, toast]);
 
-            if (existingFilterIndex !== -1) {
-                const updatedFilters = [...prevParams.filters];
-                updatedFilters[existingFilterIndex] = {
-                    ...updatedFilters[existingFilterIndex],
-                    value,
-                };
+    const handleModuleSearch = (searchVal: string) => {
+        setModuleSearchVal(searchVal)
+        const key = "moduleName";
+        const operator = "LIKE";
+        const fieldType = "STRING";
 
+        setModuleReqParams((prev) => {
+            // Remove the `moduleName` key filter if the value is empty
+            const filters = prev.filters.filter((f) => f.key !== key);
+
+            if (searchVal.trim() === "") {
+                // If the search value is empty, return the updated filters without adding a new one
                 return {
-                    ...prevParams,
-                    filters: updatedFilters,
+                    ...prev,
+                    filters,
                 };
             }
 
+            // Otherwise, add the new filter
+            const newFilter: Filter = {
+                key,
+                operator,
+                field_type: fieldType,
+                value: searchVal,
+            };
+
             return {
-                ...prevParams,
-                filters: [
-                    ...prevParams.filters,
-                    { key, operator, field_type, value },
-                ],
+                ...prev,
+                filters: [...filters, newFilter],
             };
         });
     };
+    const isMobileOrTablet = useMediaQuery({ query: '(max-width: 768px)' });
 
-    const handleSearch = (query: string) => {
-        const key = 'default_search_criteria';
-        const operator = 'LIKE';
-        const field_type = 'STRING';
-        const value = query;
-
-        handleAddFilter(key, operator, field_type, value);
+    const handleBackToModuleList = () => {
+        setIsModuleSelected(false);
+        setSelectedModule(null);
     };
-
-    const handleStatusChange = (status: StatusValue) => {
-        const key = 'isPublished';
-        const operator = 'EQUAL';
-        const field_type = 'BOOLEAN';
-        const value = status === 'published' ? true : false;
-
-        if (status === 'all') {
-            setRequestParams((prevParams) => {
-                const updatedFilters = prevParams.filters.filter(filter => filter.key !== key);
-                return {
-                    ...prevParams,
-                    filters: updatedFilters,
-                };
-            });
-        } else {
-            handleAddFilter(key, operator, field_type, value);
-        }
-    };
-
-    // Error Handling Components
-    const renderErrorAlert = (errorMessage: string) => (
-        <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-                {errorMessage}
-            </AlertDescription>
-        </Alert>
-    );
-
     return (
-        <div>
+        // <div className="h-auto">
+        //     <ResizablePanelGroup
+        //         direction="horizontal"
+        //         className="max-w-full rounded-lg border flex h-full"
+        //     >
+        //         <ResizablePanel
+        //             defaultSize={20}
+        //             className="h-full min-h-full overflow-auto"
+        //         >
+        //             {moduleLoading ? (
+        //                 <Spinner />
+        //             ) : moduleError ? (
+        //                 <ErrorAlert message="Failed to load modules" />
+        //             ) : moduleData ? (
+        //                 <ModuleList
+        //                     data={moduleData.data}
+        //                     handleModuleSelect={handleModuleClick}
+        //                     showForm={false}
+        //                     onAddModule={handleAddModule}
+        //                     initialActiveModule={selectedModule}
+        //                     onPageChange={(curPage: number) => { setModuleReqParams(prev => ({ ...prev, pageNo: curPage })) }}
+        //                     currentPage={moduleReqParams.pageNo}
+        //                     totalRecords={moduleData.totalRecords}
+        //                     itemsPerPage={moduleReqParams.pageSize}
+        //                     onSearch={handleModuleSearch}
+        //                     initialSearchVal={moduleSearchVal}
+        //                 />
+        //             ) : (
+        //                 <div>No modules available.</div>
+        //             )}
+        //         </ResizablePanel>
+        //         <ResizableHandle withHandle />
+        //         <ResizablePanel
+        //             defaultSize={80}
+        //             className="h-full min-h-full overflow-auto bg-background"
+        //         >
+        //             {!selectedModule ? (
+        //                 <ModuleSelectionPlaceholder />
+        //             ) : (
+        //                 <div className="p-4 space-y-1 bg-card h-full">
+        //                     <Text className="text-lg font-bold">{selectedModule}</Text>
+        //                     <div className="flex items-center space-x-4">
+        //                         <SearchInput onSearch={handleSearch} className="flex-1" />
+        //                         <StatusFilterDropdown onFilterChange={handleStatusChange} />
+        //                         <Button
+        //                             variant="default"
+        //                             className="rounded text-white"
+        //                             onClick={handleCreate}
+        //                             disabled={moduleAddLoading}
+        //                         >
+        //                             <Plus size={18} strokeWidth={3} />
+        //                             {t("master.form.list.createBtn")}
+        //                         </Button>
+        //                     </div>
+
+        //                     <div className="pt-1 h-[calc(100%-100px)]">
+        //                         {formError && <ErrorAlert message="Failed to load form data" />}
+        //                         {formLoading ? (
+        //                             <Spinner />
+        //                         ) : formData?.data?.length ? (
+        //                             <AdvancedTable<MasterColumns>
+        //                                 columns={columns}
+        //                                 data={formData.data}
+        //                                 totalCount={formData.totalRecords}
+        //                                 requestParams={formReqParams}
+        //                                 onRequestParamsChange={setFormReqParams}
+        //                             />
+        //                         ) : (
+        //                             <Alert>
+        //                                 <AlertTriangle className="h-4 w-4" />
+        //                                 <AlertTitle>No Data</AlertTitle>
+        //                                 <AlertDescription>No forms found for the selected module.</AlertDescription>
+        //                             </Alert>
+        //                         )}
+        //                     </div>
+        //                 </div>
+        //             )}
+        //         </ResizablePanel>
+        //     </ResizablePanelGroup>
+        // </div>
+        <div className="h-auto">
             <ResizablePanelGroup
                 direction="horizontal"
-                className="max-w-full rounded-lg border flex"
+                className="max-w-full rounded-lg border flex h-full"
             >
-                {/* First Panel (Module List) */}
-                <ResizablePanel defaultSize={20} className="h-full flex-grow">
-                    {moduleLoading ? (
-                        <Spinner />
-                    ) : moduleError ? (
-                        renderErrorAlert("Failed to load modules")
-                    ) : data ? (
-                        <ModuleList
-                            data={data.data}
-                            handleModuleSelect={handleModuleClick}
-                            showForm={false}
-                            onAddModule={handleAddModule}
-                        />
-                    ) : (
-                        <div>No modules available.</div>
-                    )}
-                </ResizablePanel>
-
-                {/* Resizable Handle */}
-                <ResizableHandle withHandle />
-
-                {/* Second Panel (Form/Detail View) */}
-                <ResizablePanel defaultSize={80} className="h-full bg-background flex-grow">
-                    <div className="p-4 space-y-1 bg-card ">
-                        <Text className="text-lg font-bold">{selectedModule}</Text>
-                        <div className="flex items-center space-x-4">
-                            <SearchInput
-                                onSearch={(query: string) => handleSearch(query)}
-                                className="flex-1"
+                {!isMobileOrTablet && (
+                    <ResizablePanel
+                        defaultSize={20}
+                        className="h-full min-h-full overflow-auto"
+                    >
+                        {moduleLoading ? (
+                            <Spinner />
+                        ) : moduleError ? (
+                            <ErrorAlert message="Failed to load modules" />
+                        ) : moduleData ? (
+                            <ModuleList
+                                data={moduleData.data}
+                                handleModuleSelect={(moduleName: string) => {
+                                    handleModuleClick(moduleName);
+                                    setIsModuleSelected(true);
+                                }}
+                                showForm={false}
+                                onAddModule={handleAddModule}
+                                initialActiveModule={selectedModule || ''}
+                                onPageChange={(curPage: number) => {
+                                    setModuleReqParams((prev) => ({ ...prev, pageNo: curPage }));
+                                }}
+                                currentPage={moduleReqParams.pageNo}
+                                totalRecords={moduleData.totalRecords}
+                                itemsPerPage={moduleReqParams.pageSize}
+                                onSearch={handleModuleSearch}
+                                initialSearchVal={moduleSearchVal}
                             />
-                            <StatusFilterDropdown onFilterChange={handleStatusChange} />
+                        ) : (
+                            <div>No modules available.</div>
+                        )}
+                    </ResizablePanel>
+                )}
 
-                            <Button
-                                variant="default"
-                                className="rounded text-white"
-                                onClick={handleCreate}
-                                disabled={moduleAddLoading}
-                            >
-                                <Plus size={18} strokeWidth={3} />
-                                {t('master.form.list.createBtn')}
-                            </Button>
+                {/* Resizable Handle between Panels */}
+                {!isMobileOrTablet && <ResizableHandle withHandle />}
+
+                {/* Right Panel: Module Details or Table */}
+                <ResizablePanel
+                    defaultSize={isMobileOrTablet ? 100 : 80} // Full screen on mobile/tablet
+                    className="h-full min-h-full overflow-auto bg-background"
+                >
+                    {/* Back Button on Mobile/Tablets */}
+                    {isMobileOrTablet && isModuleSelected && (
+                        <Button
+                            onClick={handleBackToModuleList}
+                            className="p-2 rounded m-1"
+                            variant="ghost"
+                        >
+                            <ArrowLeft />
+                        </Button>
+                    )}
+
+                    {isMobileOrTablet ? (
+                        !isModuleSelected ? (
+                            <ModuleList
+                                data={moduleData?.data || []}
+                                handleModuleSelect={(moduleName: string) => {
+                                    handleModuleClick(moduleName);
+                                    setIsModuleSelected(true);
+                                }}
+                                showForm={false}
+                                onAddModule={handleAddModule}
+                                initialActiveModule={selectedModule || ''}
+                                onPageChange={(curPage: number) => {
+                                    setModuleReqParams((prev) => ({ ...prev, pageNo: curPage }));
+                                }}
+                                currentPage={moduleReqParams.pageNo}
+                                totalRecords={moduleData?.totalRecords || 0}
+                                itemsPerPage={moduleReqParams.pageSize}
+                                onSearch={handleModuleSearch}
+                                initialSearchVal={moduleSearchVal}
+                            />
+                        ) : (
+                            <div className="p-4 space-y-1 bg-card h-full">
+                                <Text className="text-lg font-bold">{selectedModule}</Text>
+                                <div className="flex items-center space-x-4">
+                                    <SearchInput onSearch={handleSearch} className="flex-1" />
+                                    <StatusFilterDropdown onFilterChange={handleStatusChange} />
+                                    <Button
+                                        variant="default"
+                                        className="rounded text-white"
+                                        onClick={handleCreate}
+                                        disabled={moduleAddLoading}
+                                    >
+                                        <Plus size={18} strokeWidth={3} />
+                                        {!isMobileOrTablet && t("master.form.list.createBtn")}
+                                    </Button>
+                                </div>
+
+                                <div className="pt-1 h-[calc(100%-100px)]">
+                                    {formError && <ErrorAlert message="Failed to load form data" />}
+                                    {formLoading ? (
+                                        <Spinner />
+                                    ) : formData?.data?.length ? (
+                                        <AdvancedTable<MasterColumns>
+                                            columns={columns}
+                                            data={formData.data}
+                                            totalCount={formData.totalRecords}
+                                            requestParams={formReqParams}
+                                            onRequestParamsChange={setFormReqParams}
+                                        />
+                                    ) : (
+                                        <Alert>
+                                            <AlertTriangle className="h-4 w-4" />
+                                            <AlertTitle>No Data</AlertTitle>
+                                            <AlertDescription>
+                                                No forms found for the selected module.
+                                            </AlertDescription>
+                                        </Alert>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    ) : !selectedModule ? (
+                        // Show ModuleSelectionPlaceholder on larger screens when no module is selected
+                        <ModuleSelectionPlaceholder />
+                    ) : (
+                        <div className="p-4 space-y-1 bg-card h-full">
+                            <Text className="text-lg font-bold">{selectedModule}</Text>
+                            <div className="flex items-center space-x-4">
+                                <SearchInput onSearch={handleSearch} className="flex-1" />
+                                <StatusFilterDropdown onFilterChange={handleStatusChange} />
+                                <Button
+                                    variant="default"
+                                    className="rounded text-white"
+                                    onClick={handleCreate}
+                                    disabled={moduleAddLoading}
+                                >
+                                    <Plus size={18} strokeWidth={3} />
+                                    {t("master.form.list.createBtn")}
+                                </Button>
+                            </div>
+
+                            <div className="pt-1 h-[calc(100%-100px)]">
+                                {formError && <ErrorAlert message="Failed to load form data" />}
+                                {formLoading ? (
+                                    <Spinner />
+                                ) : formData?.data?.length ? (
+                                    <AdvancedTable<MasterColumns>
+                                        columns={columns}
+                                        data={formData.data}
+                                        totalCount={formData.totalRecords}
+                                        requestParams={formReqParams}
+                                        onRequestParamsChange={setFormReqParams}
+                                    />
+                                ) : (
+                                    <Alert>
+                                        <AlertTriangle className="h-4 w-4" />
+                                        <AlertTitle>No Data</AlertTitle>
+                                        <AlertDescription>
+                                            No forms found for the selected module.
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
                         </div>
-                        <div className="pt-1">
-                            {/* Error Handling for Form Data */}
-                            {formError && renderErrorAlert("Failed to load form data")}
-
-                            {formLoading && <Spinner />}
-
-                            {formData && formData.data && formData.data.length > 0 ? (
-                                <AdvancedTable<MasterColumns>
-                                    columns={columns}
-                                    data={formData.data}
-                                    totalCount={formData?.totalRecords || 5}
-                                    requestParams={requestParams}
-                                    onRequestParamsChange={onRequestParamsChange}
-                                />
-                            ) : (
-                                <Alert>
-                                    <AlertTriangle className="h-4 w-4" />
-                                    <AlertTitle>No Data</AlertTitle>
-                                    <AlertDescription>
-                                        No forms found for the selected module.
-                                    </AlertDescription>
-                                </Alert>
-                            )}
-                        </div>
-                    </div>
+                    )}
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>

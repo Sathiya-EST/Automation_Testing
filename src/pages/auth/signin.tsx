@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { LoginForm } from "./components/signinContainer";
 import { useSignInMutation } from "@/store/services/auth/login";
-import { Button } from "@/components/ui/button";
-import AppLayout from "@/components/Applayout";
 import { useNavigate } from "react-router-dom";
 import { UI_ROUTES } from "@/constants/routes";
 import { setTokens } from "@/store/slice/authSlice";
 import { useDispatch } from "react-redux";
+import { useLoginRedirect } from "@/hooks/useLoginRedirect";
+import Spinner from "@/components/shared/Spinner";
 
 interface SignInData {
     userId: string;
@@ -26,7 +26,15 @@ const LoginPage = () => {
     const dispatch = useDispatch();
     const [signIn] = useSignInMutation<SignInResponse>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const { isAuthenticated, loading } = useLoginRedirect();
 
+    if (loading) {
+        return <Spinner />;
+    }
+
+    if (isAuthenticated) {
+        return null;
+    }
     const handleLogin = async (data: SignInData) => {
         try {
             const result = await signIn(data).unwrap();
@@ -55,7 +63,6 @@ const LoginPage = () => {
                 isError={!!errorMessage}
                 handleForgotPassword={handleForgotPassword}
             />
-            {/* {errorMessage && <div className="error-message">{errorMessage}</div>} */}
         </div>
     );
 };

@@ -1,4 +1,3 @@
-// src/store/breadcrumbSlice.ts
 import { BreadcrumbItemType } from '@/types/data';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 

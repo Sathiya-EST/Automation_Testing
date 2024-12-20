@@ -9,6 +9,7 @@ export const UI_ROUTES = {
     ACCESS_DENIED: '/access-denied',
     PAGE_NOT_FOUND: '404',
     MASTER: MASTER,
+    MASTER_FORM: `${MASTER}/form`,
     MASTER_FORM_CREATE: `${MASTER}/create`,
     MASTER_FORM_PREVIEW: `${MASTER}/preview`,
     MASTER_FORM_PUBLISH: `${MASTER}/publish`,

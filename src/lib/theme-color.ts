@@ -21,7 +21,7 @@ const themes = {
             destructiveForeground: "210 20% 96%",
             border: "210 20% 90%",
             input: "210 20% 90%",
-            ring: "204 83% 44%", // Matching primary color
+            ring: "204 83% 44%", 
             radius: "0.5rem",
         },
         dark: {
@@ -407,20 +407,6 @@ const themes = {
         },
     },
 };
-
-// export default function setGlobalColorTheme(
-//     themeMode: 'light' | 'dark',
-//     color: ThemeColors,
-// ) {
-
-//     const theme = themes[color][themeMode] as {
-//         [key: string]: string;
-//     }
-
-//     for (const key in theme) {
-//         document.documentElement.style.setProperty(`--${key}`, theme[key])
-//     }
-// }
 
 export default function setGlobalColorTheme(
     theme: "light" | "dark",

@@ -35,7 +35,8 @@ const authSlice = createSlice({
             state.isExpired = false;
             state.userName = action.payload.userName;
             state.userRole = action.payload.userRole;
-
+            localStorage.setItem("userName", action.payload.userName || '')
+            localStorage.setItem("userRole", action.payload.userRole || '')
             storeToken(state.accessToken, state.refreshToken);
         },
         clearTokens: (state) => {
@@ -44,7 +45,6 @@ const authSlice = createSlice({
             state.isExpired = false;
             state.userName = null;
             state.userRole = null;
-
             removeTokens();
         },
         setIsExpired: (state, action: PayloadAction<boolean>) => {

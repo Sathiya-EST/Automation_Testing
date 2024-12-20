@@ -162,7 +162,7 @@ interface SortOption {
     order: 'ASC' | 'DESC';
 }
 
-interface Filter {
+export interface Filter {
     key: string;
     operator: 'EQUAL' | 'LIKE';
     value: string | boolean;

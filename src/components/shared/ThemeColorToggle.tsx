@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { ThemeColors } from "@/types/style/theme";
 
 const availableThemeColors = [
+    { name: 'LightBlue', light: "bg-blue-400", dark: "bg-blue-600" },
     { name: 'Zinc', light: "bg-zinc-900", dark: "bg-zinc-700" },
     { name: 'Rose', light: "bg-rose-900", dark: "bg-rose-700" },
     { name: 'Blue', light: "bg-blue-900", dark: "bg-blue-700" },
@@ -19,7 +20,6 @@ const availableThemeColors = [
     { name: 'Red', light: "bg-red-900", dark: "bg-red-700" },
     { name: 'Yellow', light: "bg-yellow-900", dark: "bg-yellow-700" },
     { name: 'Violet', light: "bg-violet-900", dark: "bg-violet-700" },
-    { name: 'LightBlue', light: "bg-blue-400", dark: "bg-blue-600" },
 ]
 export function ThemeColorToggle() {
     const { themeColor, setThemeColor } = useThemeContext();

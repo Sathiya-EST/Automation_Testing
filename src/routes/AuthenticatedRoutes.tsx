@@ -23,24 +23,27 @@ const AuthenticatedRoutes = (
         <Route element={
             <AppLayout />
         }>
-            <Route path={UI_ROUTES.MASTER} element={<Master />}>
-                <Route path="form/:moduleId" element={<FormList />} />
-                {/* <Route path="data/:moduleId" element={<DataList />} /> */}
-            </Route>
+            {/* Master module */}
+            {/* Master Form Routes */}
+            <Route path={UI_ROUTES.MASTER} element={<Master />} />
+            <Route path={UI_ROUTES.MASTER_FORM} element={<FormList />} />
             <Route path={UI_ROUTES.MASTER_FORM_CREATE} element={<CreateForm />} />
             <Route path={UI_ROUTES.MASTER_FORM_ACCESS} element={<MyTableComponent />} />
             <Route path={UI_ROUTES.MASTER_FORM_PUBLISH} element={<ProtectedRoute component={PublishForm} roles={['DEVELOPER']} />} />
-            {/* <Route path={UI_ROUTES.MASTER_FORM_PUBLISH} element={<PublishForm />} /> */}
             <Route path={UI_ROUTES.MASTER_FORM_PREVIEW} element={<MasterFormPreview />} />
 
+            {/* Master Data Routes */}
             <Route path={UI_ROUTES.MASTER_DATA} element={<DataList />} />
             <Route path={UI_ROUTES.MASTER_DATA_CREATE} element={<DataForm />} />
             <Route path={UI_ROUTES.MASTER_DATA_CRUD} element={<MasterDataCrud />} />
 
+            {/* Common Routes */}
             <Route path={UI_ROUTES.APP_SETTINGS} element={<Settings />} />
             <Route path={UI_ROUTES.ACCESS_DENIED} element={<AccessDenied />} />
             <Route path={UI_ROUTES.PAGE_NOT_FOUND} element={<PageNotFound />} />
+            {/* <Route path="*" element={<Navigate to={UI_ROUTES.PAGE_NOT_FOUND} replace />} /> */}
             <Route path="*" element={<Navigate to={UI_ROUTES.PAGE_NOT_FOUND} replace />} />
+            <Route path="/" element={<Navigate to={UI_ROUTES.MASTER} replace />} />
         </Route>
     </Route>
 )

@@ -12,14 +12,14 @@ export default function ThemeDataProvider({
 }: ThemeProviderProps) {
     const getSavedThemeColor = () => {
         try {
-            return (localStorage.getItem("themeColor") as ThemeColors) || "Zinc";
+            return (localStorage.getItem("themeColor") as ThemeColors) || "LightBlue";
         } catch (error) {
-            "Zinc" as ThemeColors;
+            "LightBlue" as ThemeColors;
         }
     };
 
     const [themeColor, setThemeColor] = useState<ThemeColors>(
-        getSavedThemeColor() as ThemeColors || 'Blue',
+        getSavedThemeColor() as ThemeColors || 'LightBlue',
     );
     const [isMounted, setIsMounted] = useState(false);
     const { theme } = useTheme();

@@ -3,10 +3,13 @@ import AppProviders from './contexts/AppProvider';
 import UnAuthenticatedRoutes from './routes/UnAuthenticatedRoutes';
 import AuthenticatedRoutes from './routes/AuthenticatedRoutes';
 function App() {
-  // const { t } = useTranslation();
   return (
     <AppProviders>
-      <Router>
+      <Router
+        future={{
+          v7_startTransition: true,
+        }}
+      >
         <Routes>
           {UnAuthenticatedRoutes}
           {AuthenticatedRoutes}

@@ -113,6 +113,7 @@ export function LoginForm({
                                     type={showPassword ? "text" : "password"}
                                     placeholder={t('login.password.placeholder')}
                                     {...register('password')}
+                                    autoComplete="password"
                                 />
                                 <button
                                     type="button"

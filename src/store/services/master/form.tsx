@@ -327,9 +327,6 @@ export const {
     useGetFormListDataQuery,
     useGetFormListColumnsQuery,
     useGetFormRecordQuery,
-    // useExportFormRecordMutation,
-    // useDownLoadCSVTemplateMutation,
-    // useBulkInsertCSVMutation,
     useAddRecordMutation,
     useUpdateRecordMutation,
     useDeleteRecordMutation

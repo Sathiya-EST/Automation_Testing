@@ -1,7 +1,7 @@
 {
     "login": {
         "title": "Login to Your Account",
-        "description": "Enter your credentials to access your dashboard",
+        "description": "Enter your credentials",
         "userId": {
             "label": "Username",
             "placeholder": "Enter your username",

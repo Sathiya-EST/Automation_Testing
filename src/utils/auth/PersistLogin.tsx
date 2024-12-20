@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { setTokens } from '@/store/slice/authSlice';
+import { clearTokens, setTokens } from '@/store/slice/authSlice';
 import Spinner from '@/components/shared/Spinner';
 import { useGetNewTokenMutation } from '@/store/services/auth/login';
 
@@ -48,6 +48,7 @@ const PersistLogin: React.FC = () => {
                     console.error('Failed to refresh token:', error);
                     setIsAuthenticated(false);
                     navigate(UI_ROUTES.LOGIN);
+                    dispatch(clearTokens());
                 }
 
                 setLoading(false);

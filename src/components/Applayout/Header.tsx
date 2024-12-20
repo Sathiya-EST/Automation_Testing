@@ -52,18 +52,18 @@ const Header = ({ userData, handleLogout }: HeaderProps) => {
 
                     <PopoverContent className="flex flex-col p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 w-48 rounded-lg shadow-lg">
                         <Link
-                            to="/change-password"
+                            to={UI_ROUTES.CHANGE_PASSWORD}
                             className="py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-300"
                         >
                             Change Password
                         </Link>
 
-                        <Link
+                        {/* <Link
                             to="/reset-password"
                             className="py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-300"
                         >
                             Reset Password
-                        </Link>
+                        </Link> */}
 
                         <Link
                             to={UI_ROUTES.LOGIN}

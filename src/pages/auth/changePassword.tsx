@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,7 @@ interface ChangePasswordForm {
     confirmPassword: string;
 }
 
-const ChangePassword = (props: Props) => {
+const ChangePassword = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,9 +30,10 @@ const ChangePassword = (props: Props) => {
 
     const onSubmit = async (data: ChangePasswordForm) => {
         setIsSubmitting(true);
+        console.log(data);
 
         try {
-            await new Promise((resolve) => setTimeout(resolve, 2000)); // Mock API call
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             alert(t('login.changePassword.success'));
             navigate(UI_ROUTES.LOGIN);
         } catch (error) {
@@ -63,6 +64,7 @@ const ChangePassword = (props: Props) => {
                 {...register(id, validationRules)}
                 aria-invalid={!!errors[id]}
                 aria-describedby={`${id}-error`}
+                autoComplete='off'
             />
             {errors[id] && (
                 <p id={`${id}-error`} className="text-red-500 text-sm">

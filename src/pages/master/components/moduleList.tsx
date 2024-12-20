@@ -1,5 +1,5 @@
-import React, { useState, useCallback, memo } from "react";
-import { ChevronDown, ChevronUp, Database, Plus } from "lucide-react";
+import React, { useState, useCallback, useEffect, memo } from "react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Database, Plus } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -14,6 +14,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import ModuleIcon from "@/assets/module_icon";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import SearchInput from "@/components/shared/Search";
 
 interface FormItem {
   formId: string;
@@ -117,6 +119,14 @@ interface ModuleListProps {
   handleFormSelect?: (formId: string, moduleId: string) => void;
   onAddModule?: (moduleData: Omit<ModuleData, 'moduleIdPk'>) => void;
   showForm?: boolean;
+  initialActiveModule?: string;
+  initialActiveForm?: string;
+  itemsPerPage?: number;
+  onPageChange: (page: number) => void;
+  currentPage: number
+  totalRecords: number
+  onSearch: (searchVal: string) => void;
+  initialSearchVal: string
 }
 
 const ModuleList: React.FC<ModuleListProps> = memo(({
@@ -124,9 +134,34 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
   handleModuleSelect,
   handleFormSelect,
   onAddModule,
-  showForm = true
+  showForm = true,
+  initialActiveModule,
+  initialActiveForm,
+  itemsPerPage = 5,
+  onPageChange,
+  currentPage = 1,
+  totalRecords,
+  onSearch,
+  initialSearchVal
 }) => {
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
+  const [activeModule, setActiveModule] = useState<string | null>(initialActiveModule || null);
+  const [activeForm, setActiveForm] = useState<string | null>(initialActiveForm || null);
+
+  const totalPages = Math.ceil(totalRecords / itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      onPageChange(page);
+    }
+  };
+
+
+  useEffect(() => {
+    if (initialActiveModule) {
+      setOpenModules((prev) => ({ ...prev, [initialActiveModule]: true }));
+    }
+  }, [initialActiveModule]);
 
   const toggleModule = useCallback((moduleId: string) => {
     setOpenModules((prev) => ({
@@ -137,12 +172,20 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
 
   const handleModuleClick = useCallback((moduleIdPk: string, moduleName: string) => {
     toggleModule(moduleIdPk);
+    setActiveModule(moduleName);
+    setActiveForm(null);
     handleModuleSelect && handleModuleSelect(moduleName);
   }, [handleModuleSelect, toggleModule]);
 
+  const handleFormClick = useCallback((formId: string, moduleId: string, moduleName: string) => {
+    setActiveModule(moduleName);
+    setActiveForm(formId);
+    handleFormSelect && handleFormSelect(formId, moduleId);
+  }, [handleFormSelect]);
+
   return (
     <div className="h-auto overflow-y-auto">
-      <SidebarProvider className="bg-white dark:bg-gray-950">
+      <SidebarProvider className="bg-card dark:bg-gray-950">
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
             <Text className="font-semibold">Modules</Text>
@@ -150,11 +193,13 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
               <AddModuleDialog onAddModule={onAddModule} />
             )}
           </SidebarGroupLabel>
+          <SearchInput onSearch={onSearch} placeholder="Search Module..." initialValue={initialSearchVal} />
           <SidebarMenu>
             {data.map((module) => (
               <Collapsible
                 key={module.moduleIdPk}
                 open={!!openModules[module.moduleIdPk]}
+                className="mt-1"
               >
                 <SidebarMenuItem>
                   <SidebarMenuButton
@@ -164,10 +209,10 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
                   >
                     <Button
                       variant="ghost"
-                      className="flex items-center justify-between w-full rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className={`flex items-center justify-between w-full rounded-r-full hover:bg-gray-100 dark:hover:bg-gray-800 ${activeModule === module.moduleName ? 'text-primary hover:text-primary dark:bg-gray-700' : ''}`}
                     >
                       <div className="flex items-center gap-2">
-                        <ModuleIcon className="text-gray-500 flex-shrink-0" size={18} />
+                        <ModuleIcon size={18} />
                         <span className="align-middle truncate max-w-[200px]">
                           {module.moduleName}
                         </span>
@@ -186,8 +231,8 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
                               <SidebarMenuSubButton asChild>
                                 <Button
                                   variant="ghost"
-                                  className="flex items-center justify-between w-full rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-                                  onClick={() => handleFormSelect && handleFormSelect(form.formId, module.moduleName)}
+                                  className={`flex items-center justify-between w-full rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${activeForm === form.formId ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+                                  onClick={() => handleFormClick(form.formId, module.moduleIdPk, module.moduleName)}
                                 >
                                   <span className="ml-2 truncate max-w-[180px]">
                                     {form.formName}
@@ -203,13 +248,37 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
                 </SidebarMenuItem>
               </Collapsible>
             ))}
+
+            <SidebarFooter>
+              <div className="flex justify-between items-center py-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft />
+                </Button>
+                {/* <span>{`Page ${currentPage} of ${totalPages}`}</span> */}
+                <Button
+                  variant="ghost"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+            </SidebarFooter>
           </SidebarMenu>
+
         </SidebarGroup>
+        {/* Pagination Controls */}
       </SidebarProvider>
+
+
     </div>
   );
 });
 
-ModuleList.displayName = 'ModuleList';
+// ModuleList.displayName = 'ModuleList';
 
 export default ModuleList;

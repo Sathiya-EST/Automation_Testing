@@ -33,6 +33,7 @@ import PinningControls from './PinningControl';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../ui/pagination';
 import { GetReqParams, TableRequestParams } from '@/types/data';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from 'react-responsive';
 
 
 interface AdvancedTableProps<T> {
@@ -94,7 +95,6 @@ function AdvancedTable<T>({
     }
   };
 
-  // Handle pagination and parameter changes
   const handlePaginationChange = (updaterOrValue: PaginationState | ((oldState: PaginationState) => PaginationState)) => {
     const newPagination = typeof updaterOrValue === 'function'
       ? updaterOrValue(pagination)
@@ -116,7 +116,6 @@ function AdvancedTable<T>({
 
   const columnHelper = createColumnHelper<T>();
 
-  // Prepare table columns
   const tableColumns = useMemo(() =>
     columns.map(col =>
       columnHelper.accessor(col.accessorKey as any, {
@@ -129,7 +128,6 @@ function AdvancedTable<T>({
   );
 
 
-  // Table instance with Tanstack
   const table = useReactTable({
     data,
     columns: tableColumns,
@@ -171,14 +169,42 @@ function AdvancedTable<T>({
       zIndex: isPinned ? 1 : 0,
     }
   }
+  const isMobileOrTablet = useMediaQuery({ query: '(max-width: 768px)' });
 
   const PaginationControls = ({ pagination, table }: { pagination: { pageIndex: number; pageSize: number }; table: any }) => {
+    const totalPages = table.getPageCount();
+    const currentPage = pagination.pageIndex;
 
+    let pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      pageNumbers = [...Array(totalPages)].map((_, index) => index);
+    } else {
+      pageNumbers.push(0);
+      if (currentPage > 2 && currentPage < totalPages - 3) {
+        pageNumbers.push('...');
+      }
+      const start = Math.max(1, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pageNumbers.push(i);
+      }
+
+      if (currentPage < totalPages - 3) {
+        pageNumbers.push('...');
+      }
+
+      if (currentPage !== totalPages - 1) {
+        pageNumbers.push(totalPages - 1);
+      }
+    }
     return (
       <Pagination>
         <div className="grid grid-cols-3 items-center w-full gap-4">
           {/* Left Section: Rows per page */}
-          <div className="flex items-center space-x-2">
+          {!isMobileOrTablet && <div className="flex items-center space-x-2">
             <span className="text-sm">Rows per page:</span>
             <Select
               value={pagination.pageSize.toString()}
@@ -198,7 +224,8 @@ function AdvancedTable<T>({
               </SelectContent>
             </Select>
             <span className="text-sm text-slate-400">of {totalCount}</span>
-          </div>
+          </div>}
+
 
           {/* Center Section: Pagination Controls */}
           <PaginationContent className="flex items-center justify-center space-x-1">
@@ -209,38 +236,43 @@ function AdvancedTable<T>({
                 onClick={() => table.previousPage()}
                 className={cn(
                   'text-xs',
-                  !table.getCanPreviousPage() && "pointer-events-none opacity-50"
+                  !table.getCanPreviousPage() && 'pointer-events-none opacity-50'
                 )}
               />
             </PaginationItem>
-
-            {/* Page Number Items */}
-            {[...Array(table.getPageCount())].map((_, index) => {
-              const pageIndex = index + 1;
-              return (
-                <PaginationItem key={pageIndex}>
-                  <PaginationLink
-                    href="#"
-                    isActive={pagination.pageIndex === index}
-                    onClick={() => table.setPageIndex(index)}
-                    className={cn(
-                      "w-8 h-8 p-0 hover:bg-primary/10 text-xs flex items-center justify-center",
-                      pagination.pageIndex === index
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : ""
-                    )}
-                  >
-                    {pageIndex}
-                  </PaginationLink>
-                </PaginationItem>
-              );
-            })}
-
-            {/* Ellipsis for pages beyond the current set */}
-            {pagination.pageIndex < table.getPageCount() - 3 && (
+            {isMobileOrTablet ? (
               <PaginationItem>
-                <PaginationEllipsis />
+                <span className="text-xs font-medium">
+                  {pagination.pageIndex + 1}/{table.getPageCount()}
+                </span>
               </PaginationItem>
+            ) : (
+              pageNumbers.map((page, index) => {
+                if (page === '...') {
+                  return (
+                    <PaginationItem key={index}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      isActive={pagination.pageIndex === page}
+                      onClick={() => table.setPageIndex(page)}
+                      className={cn(
+                        'w-8 h-8 p-0 hover:bg-primary/10 text-xs flex items-center justify-center',
+                        pagination.pageIndex === page
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          : ''
+                      )}
+                    >
+                      {Number(page) + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })
             )}
 
             {/* Next Page Button */}
@@ -250,119 +282,23 @@ function AdvancedTable<T>({
                 onClick={() => table.nextPage()}
                 className={cn(
                   'text-xs',
-                  !table.getCanNextPage() && "pointer-events-none opacity-50"
+                  !table.getCanNextPage() && 'pointer-events-none opacity-50'
                 )}
               />
             </PaginationItem>
           </PaginationContent>
 
-          {/* Right Section: Placeholder for potential additional controls */}
-          <div className="flex justify-end">
-            {/* You can add additional controls here if needed */}
-          </div>
         </div>
       </Pagination>
     );
   }
+
   const columnHeaders = table.getAllLeafColumns().map((column, index) => ({
     ...column,
     index,
   }));
 
   return (
-    // <div className="flex flex-col h-[400px]">
-    //   <div className="flex-grow overflow-auto">
-    //     <table className="relative w-full border">
-    //       <thead>
-    //         <tr>
-    //           <th className="sticky top-0 px-6 py-3 text-red-900 bg-red-300">Header</th>
-    //           <th className="sticky top-0 px-6 py-3 text-red-900 bg-red-300">Header</th>
-    //           <th className="sticky top-0 px-6 py-3 text-red-900 bg-red-300">Header</th>
-    //         </tr>
-    //       </thead>
-    //       <tbody className="divide-y bg-red-100">
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //       </tbody>
-    //       <thead>
-    //         <tr>
-    //           <th className="sticky top-0 px-6 py-3 text-green-900 bg-green-300">Header</th>
-    //           <th className="sticky top-0 px-6 py-3 text-green-900 bg-green-300">Header</th>
-    //           <th className="sticky top-0 px-6 py-3 text-green-900 bg-green-300">Header</th>
-    //         </tr>
-    //       </thead>
-    //       <tbody className="divide-y bg-green-100">
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //         <tr>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //           <td className="px-6 py-4 text-center">Column</td>
-    //         </tr>
-    //       </tbody>
-    //       <thead>
-    //         <tr>
-    //           <th className="sticky top-0 px-6 py-3 text-blue-900 bg-blue-300">Header</th>
-    //           <th className="sticky top-0 px-6 py-3 text-blue-900 bg-blue-300">Header</th>
-    //           <th className="sticky top-0 px-6 py-3 text-blue-900 bg-blue-300">Header</th>
-    //         </tr>
-    //       </thead>
-
-
-    //     </table>
-    //   </div>
-    // </div>
     <div className="flex flex-col h-[400px]">
       <div className="flex-grow overflow-auto">
         <Table className="text-xs relative  w-full border">
@@ -477,7 +413,8 @@ function AdvancedTable<T>({
       <PaginationControls pagination={pagination} table={table} />
 
     </div>
-  );
+
+  )
 }
 
 export default AdvancedTable;
