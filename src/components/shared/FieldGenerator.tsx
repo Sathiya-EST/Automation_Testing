@@ -10,6 +10,8 @@ import { CaseSensitive, File, Hash } from "lucide-react";
 import SelectDropdown from "./DropDown";
 import { FormFieldType } from "@/types/data";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import CustomSelect from "./CustomSelect";
+import CustomAsyncSelect from "./CustomAsyncSelect";
 
 interface FormProps {
     fields: FormFieldType[];
@@ -144,9 +146,10 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
-                                <SelectDropdown
+                                <CustomSelect
                                     {...field}
-                                    options={defaultChoice?.map((option) => ({ label: option, value: option })) || []}
+                                    options={defaultChoice || []}
+                                    // options={defaultChoice?.map((option) => ({ label: option, value: option })) || []}
                                     readOnly={isReadOnly}
                                 // multiple={multiple ?? false}
                                 />
@@ -259,7 +262,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
-                                <AsyncSelectDropdown
+                                <CustomAsyncSelect
                                     {...field}
                                     formName={asynchronousField?.formName ?? ""}
                                     fieldName={asynchronousField?.fieldName ?? ""}

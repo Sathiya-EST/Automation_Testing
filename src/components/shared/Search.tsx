@@ -9,7 +9,6 @@ interface SearchInputProps {
 
 const SearchInput: React.FC<SearchInputProps> = ({ onSearch, placeholder = "Search...", className, initialValue }) => {
     const [query, setQuery] = useState(initialValue || "");
-
     const handleBlur = () => {
         onSearch(query);
     };

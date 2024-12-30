@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/resizable';
 import { UI_ROUTES } from '@/constants/routes';
 import useBreadcrumb from '@/hooks/useBreadCrumb';
-import { BreadcrumbItemType, FileUploadData, GetReqParams } from '@/types/data';
+import { BreadcrumbItemType, FileUploadData, Filter, GetReqParams } from '@/types/data';
 import ModuleList from './components/ModuleList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircleIcon, AlertTriangle, Download, Eye, FileDown, Plus } from 'lucide-react';
@@ -37,20 +37,22 @@ interface MasterColumns {
 
 const DataList: React.FC = () => {
 
-  const [getModule, { data, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
   const { toast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [getModule, { data: moduleData, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
+
+  const [moduleSearchVal, setModuleSearchVal] = useState("");
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [isDwldErrReport, setIsDwldErrReport] = useState<boolean>(false)
-  const [pageNo, setPageNo] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState([
-    { key: 'createdOn', order: 'ASC' }
-  ]);
-  const [filters, setFilters] = useState([]);
-  const [requestParams, setRequestParams] = useState<GetReqParams>({
+  const [moduleReqParams, setModuleReqParams] = useState<GetReqParams>({
+    pageNo: 1,
+    pageSize: 10,
+    sort: [{ key: "createdOn", order: "ASC" }],
+    filters: [],
+  });
+  const [formReqParams, setFormReqParams] = useState<GetReqParams>({
     pageNo: 1,
     pageSize: 10,
     sort: [],
@@ -66,15 +68,26 @@ const DataList: React.FC = () => {
       : [],
   });
 
-  const updatedRoutes: BreadcrumbItemType[] = useMemo(() => [
-    { type: 'link', title: 'Master', path: UI_ROUTES.MASTER, isActive: false },
-    { type: 'page', title: 'Data', isActive: true },
-  ], []);
+  // Breadcrumbs
+  useBreadcrumb(
+    useMemo(
+      () => [
+        { type: 'link', title: 'Master', path: UI_ROUTES.MASTER_DATA, isActive: false },
+        { type: 'page', title: 'Data', isActive: true },
+      ],
+      []
+    )
+  );
+  // Redirect if no module selected
+  useMemo(() => {
+    if (!selectedModule) {
+      navigate(UI_ROUTES.MASTER);
+    }
+  }, [selectedModule, navigate]);
 
-  useBreadcrumb(updatedRoutes);
 
   const { data: formRecords, error: recordError, isLoading: recordLoading } = useGetFormListDataQuery({
-    reqParams: requestParams,
+    reqParams: formReqParams,
     formName: selectedForm && selectedForm || '',
   });
 
@@ -104,8 +117,8 @@ const DataList: React.FC = () => {
     });
     return columns;
   }, [formColumnData]);
-  const onRequestParamsChange = (updatedParams: Partial<GetReqParams>) => {
-    setRequestParams((prevParams) => ({
+  const onFormRequestParamsChange = (updatedParams: Partial<GetReqParams>) => {
+    setFormReqParams((prevParams) => ({
       ...prevParams,
       ...updatedParams,
     }));
@@ -116,30 +129,26 @@ const DataList: React.FC = () => {
     setSelectedModule(moduleName);
     console.log(formName, moduleName);
   }, [])
-  const fetchModules = useCallback(async () => {
-    try {
-      await getModule({ pageNo, pageSize, sort, filters });
-    } catch (err) {
-      toast({
-        title: "Error Fetching Modules",
-        description: "Failed to load modules. Please refresh the page.",
-        variant: "destructive",
-        action: (
-          <ToastAction
-            altText="Retry"
-            onClick={fetchModules}
-          >
-            Retry
-          </ToastAction>
-        ),
-      });
-      console.error('Failed to fetch modules', err);
-    }
-  }, [getModule, pageNo, pageSize, sort, filters, toast]);
-
   useEffect(() => {
-    fetchModules();
-  }, [fetchModules]);
+    (async () => {
+      try {
+        await getModule(moduleReqParams);
+      } catch (err) {
+        toast({
+          title: "Error Fetching Modules",
+          description: "Failed to load modules. Please refresh the page.",
+          variant: "destructive",
+          action: (
+            <ToastAction altText="Retry" onClick={() => getModule(moduleReqParams)}>
+              Retry
+            </ToastAction>
+          ),
+        });
+      }
+    })();
+  }, [getModule, moduleReqParams, toast]);
+
+
   const handleView = (formId: string) => {
     navigate(UI_ROUTES.MASTER_DATA_CRUD, { state: { formName: selectedForm, selectedModule, formId } });
   };
@@ -254,6 +263,39 @@ const DataList: React.FC = () => {
     dwldErrReport(formColumnData?.data.displayName || '')
 
   }
+
+  const handleModuleSearch = (searchVal: string) => {
+    setModuleSearchVal(searchVal)
+    const key = "moduleName";
+    const operator = "LIKE";
+    const fieldType = "STRING";
+
+    setModuleReqParams((prev) => {
+      // Remove the `moduleName` key filter if the value is empty
+      const filters = prev.filters.filter((f) => f.key !== key);
+
+      if (searchVal.trim() === "") {
+        // If the search value is empty, return the updated filters without adding a new one
+        return {
+          ...prev,
+          filters,
+        };
+      }
+
+      // Otherwise, add the new filter
+      const newFilter: Filter = {
+        key,
+        operator,
+        field_type: fieldType,
+        value: searchVal,
+      };
+
+      return {
+        ...prev,
+        filters: [...filters, newFilter],
+      };
+    });
+  };
   return (
     <div>
       <ResizablePanelGroup
@@ -266,10 +308,18 @@ const DataList: React.FC = () => {
             <Spinner />
           ) : moduleError ? (
             renderErrorAlert("Failed to load modules")
-          ) : data ? (
+          ) : moduleData ? (
             <ModuleList
-              data={data.data}
+              data={moduleData.data}
               handleFormSelect={handleFormSelect}
+              onPageChange={function (page: number): void {
+                throw new Error('Function not implemented.');
+              }}
+              currentPage={moduleReqParams.pageNo}
+              totalRecords={moduleData.totalRecords}
+              itemsPerPage={moduleReqParams.pageSize}
+              onSearch={handleModuleSearch}
+              initialSearchVal={moduleSearchVal}
             />
           ) : (
             <div>No modules available.</div>
@@ -361,8 +411,8 @@ const DataList: React.FC = () => {
                     columns={updatedColumns ?? []}
                     data={formRecords.data}
                     totalCount={formRecords?.totalRecords || 5}
-                    requestParams={requestParams}
-                    onRequestParamsChange={onRequestParamsChange}
+                    requestParams={formReqParams}
+                    onRequestParamsChange={onFormRequestParamsChange}
                   />
                 ) : (
                   <Alert>

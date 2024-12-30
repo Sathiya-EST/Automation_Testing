@@ -5,6 +5,7 @@ import { revokeApi } from './services/auth/logout';
 import { masterApi } from './services/master/module';
 import authReducer from './slice/authSlice'
 import appReducer from './slice/appSlice'
+import masterReducer from './slice/masterSlice'
 import { formApi } from './services/master/form';
 import { isPlain } from '@reduxjs/toolkit';
 const store = configureStore({
@@ -14,7 +15,8 @@ const store = configureStore({
     [masterApi.reducerPath]: masterApi.reducer,
     [formApi.reducerPath]: formApi.reducer,
     auth: authReducer,
-    app: appReducer
+    app: appReducer,
+    master: masterReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

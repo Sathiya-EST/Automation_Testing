@@ -105,9 +105,11 @@ const MasterDataCrud = () => {
             return { options: [], totalPages: 0 };
         }
     };
+    
     useEffect(() => {
         form.reset(formRecordData)
     }, [formRecordData])
+
     const onSubmit = async (data: any) => {
         try {
             const { default_id_pk, ...submitData } = data;

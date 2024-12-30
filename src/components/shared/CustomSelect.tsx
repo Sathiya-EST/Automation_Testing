@@ -9,44 +9,46 @@ import {
     SelectValue
 } from "@/components/ui/select";
 
-export interface SelectOption {
-    value: string;
-    label: string;
-}
-
 interface SelectDropdownProps {
     label?: string;
     placeholder?: string;
-    options: SelectOption[];
-    value?: string;
-    onChange?: (value: string) => void;
+    options: string[]; // Accepts an array of strings
+    value?: string[]; // Outputs and accepts values in string array format
+    onChange?: (value: string[]) => void;
     className?: string;
     readOnly?: boolean;
 }
 
-const SelectDropdown: React.FC<SelectDropdownProps> = ({
+const CustomSelect: React.FC<SelectDropdownProps> = ({
     label,
     options,
     placeholder,
-    value,
+    value = [], // Default to an empty array
     onChange,
     className = '',
     readOnly = false
 }) => {
     const handleChange = (selectedValue: string) => {
-        onChange?.(selectedValue);
+        // Ensure the value is always an array
+        const updatedValues = [selectedValue];
+        onChange?.(updatedValues);
     };
 
-    const filteredOptions = options.filter(option => option.value !== '' && option.value !== null);
+    // Filter out empty strings or invalid options
+    const filteredOptions = options.filter(option => option.trim() !== '');
 
     return (
         <div className={`grid gap-2 w-full ${className}`}>
             {label && <label className="font-medium leading-none">{label}</label>}
-            <Select value={value} onValueChange={handleChange} disabled={readOnly}>
+            <Select
+                value={value.length > 0 ? value[0] : undefined} // Select requires a single value
+                onValueChange={handleChange}
+                disabled={readOnly}
+            >
                 <SelectTrigger className="w-full">
                     <SelectValue
                         placeholder={placeholder}
-                        className={`${!value ? 'text-red-500' : ''}`}
+                        className={`${value.length === 0 ? 'text-red-500' : ''}`}
                     />
                 </SelectTrigger>
                 <SelectContent>
@@ -54,8 +56,8 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
                         {label && <SelectLabel>{label}</SelectLabel>}
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
+                                <SelectItem key={option} value={option}>
+                                    {option}
                                 </SelectItem>
                             ))
                         ) : (
@@ -68,4 +70,4 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
     );
 };
 
-export default SelectDropdown;
+export default CustomSelect;

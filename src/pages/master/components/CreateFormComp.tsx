@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { LAYOUT } from '@/constants/app.constants';
+import { FILE_FIELD, LAYOUT, SELECT_FIELD, validDataTypes } from '@/constants/app.constants';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import DynamicField from './DynamicField';
@@ -18,7 +18,6 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import FormUpload from '@/assets/FormUpload';
 import { DataTypes, layoutValues } from '@/types/data';
 import { useTranslation } from 'react-i18next';
-
 
 
 export const FormSchema = z.object({
@@ -39,8 +38,7 @@ export const FormSchema = z.object({
         z.object({
             name: z.string().min(1, 'Field name is required'),
             field: z.object({
-                dataTypeName: z.string().optional(),
-                // type: z.string(),
+                dataTypeName: z.string().min(1, { message: 'Field type is required' }),
                 min: z.number().int().optional(),
                 max: z.number().int().optional(),
                 negativeOnly: z.boolean().optional(),
@@ -60,26 +58,54 @@ export const FormSchema = z.object({
                 asynchronousField: z.object({
                     formName: z.string(),
                     fieldName: z.string(),
-                    fieldType: z.string(),
+                    fieldType: z.string().optional(),
                 }).optional(),
-                // options: z.array(z.string()).optional(),
-                compute: z.array(
-                    z.object({
-                        fromField: z.string(),
-                        toField: z.string(),
-                        toCustomValue: z.object({}).optional(),
-                        condition: z.string(),
-                        value: z.object({}).optional(),
-                        elseValue: z.object({}).optional(),
-                    })
-                ).optional(),
+                // compute: z.array(
+                //     z.object({
+                //         fromField: z.string(),
+                //         toField: z.string(),
+                //         toCustomValue: z.object({}).optional(),
+                //         condition: z.string(),
+                //         value: z.object({}).optional(),
+                //         elseValue: z.object({}).optional(),
+                //     })
+                // ).optional(),
             }).superRefine((data, ctx) => {
+                if (data.dataTypeName && !validDataTypes.includes(data.dataTypeName)) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        path: ['dataTypeName'],
+                        message: "This field type is not yet implemented. Please choose another field type.",
+                    });
+                }
+
                 if (data.negativeOnly) {
+                    if (data.min !== undefined && data.min >= 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['min'],
+                            message: "Min value must be negative when negativeOnly is true.",
+                        });
+                    }
+                    if (data.max !== undefined && data.max >= 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['max'],
+                            message: "Max value must be negative when negativeOnly is true.",
+                        });
+                    }
                     if (data.min !== undefined && data.max !== undefined && data.min > data.max) {
                         ctx.addIssue({
                             code: 'custom',
                             path: ['min'],
                             message: "Min value must be less than Max value when negativeOnly is true.",
+                        });
+                    }
+                    if (data.defaultValue && parseFloat(data.defaultValue) >= 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['defaultValue'],
+                            message: "Default value must be negative when negativeOnly is true.",
                         });
                     }
                 } else {
@@ -105,17 +131,36 @@ export const FormSchema = z.object({
                         });
                     }
                 }
-            }),
+                // Validate defaultChoice for ListBox and File Upload
+                if ([SELECT_FIELD, FILE_FIELD].includes(data.dataTypeName)) {
+                    if (!data.defaultChoice || data.defaultChoice.length === 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['defaultChoice'],
+                            message: "Default Choice is required",
+                        });
+                    }
+                }
+            })
         })
     ).min(1, 'At least one field is required.'),
 });
 
 export type FormType = z.infer<typeof FormSchema>;
+/**
+ * Master Form Create Component
+ * 
+ * Manages dynamic form create functionality
+ * Key Features:
+ * - Form template create
+ * - Validation through Zod schema
+ */
 interface CreateFormProps {
     moduleName: string
     dataType: DataTypes[]
     handleCreateForm: (data: FormType) => void
 }
+
 const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handleCreateForm }) => {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -125,35 +170,34 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
             formDescription: "",
             formLayout: "GRID_1",
             formPurpose: "MASTER",
-            fields: [
-                {
-                    name: "",
-                    field: {
-                        // dataTypeName: "",
-
-                    },
-                },
-            ],
+            fields: [{}],
         },
     });
     const { t } = useTranslation();
     const [focusedField, setFocusedField] = useState<number | null>(0);
     const [isFormCreated, setIsFormCreated] = useState(false);
     const [selectedValue, setSelectedValue] = useState<string>(LAYOUT.GRID_1);
+    const [isFormControllerOpen, setIsFormControllerOpen] = useState(false)
 
     const handleLayoutClick = (value: string) => {
         setSelectedValue(value);
         form.setValue("formLayout", value);
     };
 
-    const onSubmit = (data: FormType) => {
-        handleCreateForm(data);
-        setIsFormCreated(true);
+    const onSubmit = async (data: FormType) => {
+        try {
+            handleCreateForm(data);
+            setIsFormCreated(true);
+        } catch (error: any) {
+            console.error("Error creating form:", error);
+        }
     };
+
     const errors = form.formState.errors;
     console.log("errors", errors);
     const handleFieldFocus = (index: number) => {
         setFocusedField(index);
+        setIsFormControllerOpen(true)
     };
 
     const handleFieldUpdate = (value: string | string[] | number | boolean, fieldName: string) => {
@@ -184,8 +228,6 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
 
         form.setValue("fields", updatedFields);
     };
-
-
 
     const handleAsyncFieldUpdate = (value: string | number | boolean, fieldName: string) => {
         const currentFields = form.getValues("fields");
@@ -219,6 +261,32 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
             setFocusedField(focusedField - 1);
         }
     };
+
+    const handleDataTypeChange = useCallback((fieldIndex: number) => {
+        const fields = form.getValues('fields');
+        const fieldData = fields[fieldIndex];
+        const fieldsToSetFalse = ['readOnly', 'required', 'uniqueValue', 'positiveOnly', 'multiple', 'negativeOnly', 'alphabetic', 'alphanumeric'];
+        const keysToRemove = ['asynchronousField', 'decimalLimit', 'min', 'max', 'pattern', 'defaultChoice', 'defaultValue', 'placeholder'];
+
+        const updatedField = {
+            ...fieldData,
+            field: {
+                ...Object.fromEntries(
+                    Object.entries(fieldData.field).filter(([key]) => !keysToRemove.includes(key))
+                ),
+                ...fieldsToSetFalse.reduce((acc, key) => {
+                    acc[key] = false;
+                    return acc;
+                }, {} as Record<string, boolean>),
+                dataTypeName: fieldData.field?.dataTypeName || ''
+            },
+        };
+        form.resetField(`fields.${fieldIndex}`, {
+            defaultValue: updatedField,
+        });
+        setFocusedField(null);
+        setFocusedField(fieldIndex);
+    }, [form]);
 
     return (
         <>
@@ -334,7 +402,7 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                 </Card>
                             </section>
                             {focusedField !== null && (
-                                <aside className="flex-[2]">
+                                <aside className={`${isFormControllerOpen ? 'flex-[2]' : ''} `}>
                                     <FieldController
                                         key={`field-controller-${focusedField}`}
                                         control={form.control}
@@ -342,7 +410,9 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                         handleFieldUpdate={handleFieldUpdate}
                                         handleAsyncFieldUpdate={handleAsyncFieldUpdate}
                                         dataType={dataType}
-                                        setValue={form.setValue}
+                                        onDataTypeChange={handleDataTypeChange}
+                                        isOpen={isFormControllerOpen}
+                                        onClose={() => setIsFormControllerOpen(false)}
                                     />
                                 </aside>
                             )}

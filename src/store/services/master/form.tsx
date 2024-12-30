@@ -89,6 +89,9 @@ export const formApi = createApi({
                 method: 'POST',
                 body: data,
             }),
+            transformErrorResponse: (error: any) => {
+                return error?.data || { message: "Error Occured" };
+            },
         }),
 
         getFormPreview: builder.query<FormFieldsType, string>({

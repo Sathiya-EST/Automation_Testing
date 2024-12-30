@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Check, CircleDot, Circle, LucideIcon } from "lucide-react";
+import { Check, CircleDot, Circle, LucideIcon, Ban, CircleCheckBig } from "lucide-react";
 
 // Define status type
 export type StatusValue = 'published' | 'unPublished' | 'all';
@@ -44,13 +44,13 @@ const StatusFilterDropdown: React.FC<StatusFilterDropdownProps> = ({
       value: 'published',
       label: 'Published',
       colorClass: 'bg-green-100 text-green-700',
-      icon: CircleDot
+      icon: CircleCheckBig
     },
     {
       value: 'unPublished',
       label: 'Unpublished',
       colorClass: 'bg-red-100 text-red-700',
-      icon: Circle
+      icon: Ban
     },
 
   ];

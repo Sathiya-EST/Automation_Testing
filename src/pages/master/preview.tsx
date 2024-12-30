@@ -1,7 +1,7 @@
-import { useMemo, useState, Suspense, lazy, useEffect } from 'react';
+import { useMemo, useState, Suspense, lazy, useEffect, useCallback, useRef } from 'react';
 import { UI_ROUTES } from '@/constants/routes';
 import useBreadcrumb from '@/hooks/useBreadCrumb';
-import { BreadcrumbItemType, SelectOptions } from '@/types/data';
+import { SelectOptions } from '@/types/data';
 import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +15,12 @@ import DynamicField from './components/DynamicField';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BeforeAfterToggle } from '@/components/shared/PositionToggle';
 import { z } from 'zod';
-import { POSITION } from '@/constants/app.constants';
+import { FILE_FIELD, POSITION, SELECT_FIELD, validDataTypes } from '@/constants/app.constants';
 import { Separator } from '@/components/ui/separator';
 import SelectDropdown from '@/components/shared/DropDown';
+import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/use-toast';
+import Flex from '@/components/shared/Flex';
 
 // Lazy load the FieldGenerator component
 const FieldGenerator = lazy(() => import('@/components/shared/FieldGenerator'));
@@ -25,16 +28,12 @@ const FieldGenerator = lazy(() => import('@/components/shared/FieldGenerator'));
 export const FormEditSchema = z.object({
     position: z.enum([POSITION.BEFORE, POSITION.AFTER]),
     // fieldName: z.string().optional(),
-    fieldName: z.string()
-        .min(3, 'Field name must be at least 3 characters')
-        .max(50, 'Field name cannot exceed 50 characters')
-        .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, 'Field name must be a valid identifier'),
+    fieldName: z.string(),
     fields: z.array(
         z.object({
             name: z.string().min(1, 'Field name is required'),
             field: z.object({
-                dataTypeName: z.string().optional(),
-                // type: z.string(),
+                dataTypeName: z.string().min(1, { message: 'Field type is required' }),
                 min: z.number().int().optional(),
                 max: z.number().int().optional(),
                 negativeOnly: z.boolean().optional(),
@@ -46,7 +45,9 @@ export const FormEditSchema = z.object({
                 defaultValue: z.string().optional(),
                 alphabetic: z.boolean().optional(),
                 alphanumeric: z.boolean().optional(),
-                defaultChoice: z.array(z.string()).optional(),
+                defaultChoice: z.array(z.string().min(1)).optional().refine((val) => val?.every(item => item.trim() !== ''), {
+                    message: "defaultChoice should not contain empty or whitespace-only strings",
+                }).optional(),
                 uniqueValue: z.boolean().optional(),
                 decimalLimit: z.number().int().min(0).optional(),
                 positiveOnly: z.boolean().optional(),
@@ -54,25 +55,54 @@ export const FormEditSchema = z.object({
                 asynchronousField: z.object({
                     formName: z.string(),
                     fieldName: z.string(),
-                    // fieldType: z.string(),
+                    fieldType: z.string().optional(),
                 }).optional(),
-                compute: z.array(
-                    z.object({
-                        fromField: z.string(),
-                        toField: z.string(),
-                        toCustomValue: z.object({}).optional(),
-                        condition: z.string(),
-                        value: z.object({}).optional(),
-                        elseValue: z.object({}).optional(),
-                    })
-                ).optional(),
+                // compute: z.array(
+                //     z.object({
+                //         fromField: z.string(),
+                //         toField: z.string(),
+                //         toCustomValue: z.object({}).optional(),
+                //         condition: z.string(),
+                //         value: z.object({}).optional(),
+                //         elseValue: z.object({}).optional(),
+                //     })
+                // ).optional(),
             }).superRefine((data, ctx) => {
+                if (data.dataTypeName && !validDataTypes.includes(data.dataTypeName)) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        path: ['dataTypeName'],
+                        message: "This field type is not yet implemented. Please choose another field type.",
+                    });
+                }
+
                 if (data.negativeOnly) {
+                    if (data.min !== undefined && data.min >= 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['min'],
+                            message: "Min value must be negative when negativeOnly is true.",
+                        });
+                    }
+                    if (data.max !== undefined && data.max >= 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['max'],
+                            message: "Max value must be negative when negativeOnly is true.",
+                        });
+                    }
                     if (data.min !== undefined && data.max !== undefined && data.min > data.max) {
                         ctx.addIssue({
                             code: 'custom',
                             path: ['min'],
                             message: "Min value must be less than Max value when negativeOnly is true.",
+                        });
+                    }
+                    if (data.defaultValue && parseFloat(data.defaultValue) >= 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['defaultValue'],
+                            message: "Default value must be negative when negativeOnly is true.",
                         });
                     }
                 } else {
@@ -98,7 +128,16 @@ export const FormEditSchema = z.object({
                         });
                     }
                 }
-            }),
+                if ([SELECT_FIELD, FILE_FIELD].includes(data.dataTypeName)) {
+                    if (!data.defaultChoice || data.defaultChoice.length === 0) {
+                        ctx.addIssue({
+                            code: 'custom',
+                            path: ['defaultChoice'],
+                            message: "Default Choice is required",
+                        });
+                    }
+                }
+            })
         })
     ).min(1, 'At least one field is required.'),
 });
@@ -115,41 +154,72 @@ export type FormEditType = z.infer<typeof FormEditSchema>;
  */
 const MasterFormPreview = () => {
     const location = useLocation();
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    const { t } = useTranslation();
     const { formName, selectedModule } = location.state || {};
-    const [asyncError, setAsyncError] = useState<string | null>(null);
-    const [isUpdate, setIsUpdate] = useState(false)
-    const [focusedField, setFocusedField] = useState<number | null>(0);
-    const [formFieldNameOptions, setFormFieldNameOptions] = useState<SelectOptions[]>([])
-    const { data: formTemplateData, error: formError } = useGetFormPreviewQuery(formName);
+    const { data: formTemplateData, error: formError, refetch: refetchFormTemplate } = useGetFormPreviewQuery(formName);
     const [triggerGetFormAsyncData] = useLazyGetFormAsyncDataQuery();
     const { data: dataTypes = [], isLoading: isDataTypesLoading } = useGetDataTypesQuery();
     const [updateForm, { isLoading, isError, error }] = useUpdateFormMutation();
+
     // Using React Hook Form's useForm hook
     const form = useForm<FormEditType>({
         resolver: zodResolver(FormEditSchema),
         defaultValues: {
             position: POSITION.AFTER,
             fieldName: '',
-            fields: [
-                {
-                    name: "",
-                    field: {
-                        dataTypeName: "",
-                    },
-                },
-            ],
-        },
+            fields: [{}],
+        }
     });
-    const navigate = useNavigate();
+    const [asyncError, setAsyncError] = useState<string | null>(null);
+    const [isUpdate, setIsUpdate] = useState(false)
+    const [isFormControllerOpen, setIsFormControllerOpen] = useState(false)
+    const [focusedField, setFocusedField] = useState<number | null>(null);
+    const [formFieldNameOptions, setFormFieldNameOptions] = useState<SelectOptions[]>([])
 
+    // Breadcrumbs
+    useBreadcrumb(
+        useMemo(
+            () => [
+                { type: 'link', title: selectedModule, path: UI_ROUTES.MASTER, isActive: false },
+                { type: 'page', title: formTemplateData?.displayName ?? "", isActive: true },
+            ],
+            []
+        )
+    );
 
-    // Breadcrumbs configuration
-    // Memoize expensive computations
-    const memoizedBreadcrumbItems: BreadcrumbItemType[] = useMemo(() => [
-        { type: 'link', title: selectedModule, path: UI_ROUTES.MASTER, isActive: false },
-        { type: 'page', title: formTemplateData?.displayName ?? "", isActive: true },
-    ], [selectedModule, formTemplateData?.displayName]);
-    useBreadcrumb(memoizedBreadcrumbItems);
+    // Redirect if no module selected
+    useMemo(() => {
+        if (!formName) {
+            navigate(UI_ROUTES.MASTER);
+        }
+    }, [formName, navigate]);
+    console.log("GA", formName, selectedModule);
+
+    const fieldControllerRef = useRef<HTMLDivElement | null>(null);
+
+    const handleClickOutside = useCallback(
+        (event: MouseEvent) => {
+            if (
+                fieldControllerRef.current &&
+                !fieldControllerRef.current.contains(event.target as Node) &&
+                !(event.target as HTMLElement)?.classList.contains("fieldController")
+            ) {
+                setIsFormControllerOpen(false);
+            }
+        },
+        []
+    );
+
+    useEffect(() => {
+        if (isFormControllerOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isFormControllerOpen, handleClickOutside]);
 
     useEffect(() => {
         if (formTemplateData?.fields) {
@@ -160,6 +230,7 @@ const MasterFormPreview = () => {
             setFormFieldNameOptions(options);
         }
     }, [formTemplateData]);
+
     // Handle async options fetch
     const handleFetchAsyncOptions = async (
         pageNo: number,
@@ -193,9 +264,12 @@ const MasterFormPreview = () => {
             return { options: [], totalPages: 0 };
         }
     };
+
     const handleFieldFocus = (index: number) => {
         setFocusedField(index);
+        setIsFormControllerOpen(true)
     };
+
     const handleFieldDelete = (deletedIndex: number) => {
         const currentFields = form.getValues("fields");
         const updatedFields = currentFields.filter((_: any, index: number) => index !== deletedIndex);
@@ -214,12 +288,7 @@ const MasterFormPreview = () => {
         const updatedFields = currentFields.map((field) => {
             if (field.name === fieldName) {
                 let updatedValue = value;
-                if (fieldName === 'text') {
-                    form.reset()
-                    console.log("Running");
-                    return null
 
-                }
                 if (fieldName === 'defaultChoice') {
                     const normalizedValue = Array.isArray(value)
                         ? value.map((v) => String(v))
@@ -241,201 +310,252 @@ const MasterFormPreview = () => {
 
         form.setValue("fields", updatedFields);
     };
-
     const errors = form.formState.errors;
     console.log("errors", errors);
 
     const handleAsyncFieldUpdate = (value: string | number | boolean, fieldName: string) => {
-        // const currentFields = form.getValues("fields");
+        const currentFields = form.getValues("fields");
 
-        // const updatedFields = currentFields.map((field) =>
-        //     field.field.asynchronousField && field.field.asynchronousField.hasOwnProperty(fieldName)
-        //         ? {
-        //             ...field,
-        //             field: {
-        //                 ...field.field,
-        //                 asynchronousField: {
-        //                     ...field.field.asynchronousField,
-        //                     [fieldName]: value,
-        //                 },
-        //             },
-        //         }
-        //         : field
-        // );
-        // console.log("updatedFields",updatedFields);
+        const updatedFields = currentFields.map((field) =>
+            field.field.asynchronousField && field.field.asynchronousField.hasOwnProperty(fieldName)
+                ? {
+                    ...field,
+                    field: {
+                        ...field.field,
+                        asynchronousField: {
+                            ...field.field.asynchronousField,
+                            [fieldName]: value,
+                        },
+                    },
+                }
+                : field
+        );
 
-        // form.setValue("fields", updatedFields);
+        form.setValue("fields", updatedFields);
     };
 
+    const onSubmit = async (data: any) => {
+        try {
+            // Attempt to update the form
+            await updateForm({ formName, data }).unwrap();
 
-    // Handle form submission
-    const onSubmit = (data: any) => {
-        updateForm({ formName, data }).unwrap();
+            // Show success toast notification
+            toast({
+                title: "Form Updated Successfully",
+                variant: "success",
+            });
+
+            // Refetch the form template
+            await refetchFormTemplate();
+        } catch (error: any) {
+            console.error("Error updating the form:", error);
+
+            // Extract detailed error message if available
+            const validationMessage = error?.data?.validationMessage;
+            const errorMessage = validationMessage
+                ? Object.values(validationMessage).join(", ")
+                : error?.data?.message || "An unexpected error occurred.";
+
+            // Show error toast notification
+            toast({
+                title: "Error updating the form",
+                description: errorMessage,
+                variant: "destructive",
+            });
+        }
     };
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    // if (formError) {
-    //     return <div>Error fetching form data: {formError?.message}</div>;
-    // }
 
     const handlePublish = () => {
         navigate(UI_ROUTES.MASTER_FORM_PUBLISH, {
             state: { moduleName: selectedModule, formName: formName },
         })
     }
+
+    const handleDataTypeChange = useCallback((fieldIndex: number) => {
+        const fields = form.getValues('fields');
+        const fieldData = fields[fieldIndex];
+        const fieldsToSetFalse = ['readOnly', 'required', 'uniqueValue', 'positiveOnly', 'multiple', 'negativeOnly', 'alphabetic', 'alphanumeric'];
+        const keysToRemove = ['asynchronousField', 'decimalLimit', 'min', 'max', 'pattern', 'defaultChoice', 'defaultValue', 'placeholder'];
+
+        const updatedField = {
+            ...fieldData,
+            field: {
+                ...Object.fromEntries(
+                    Object.entries(fieldData.field).filter(([key]) => !keysToRemove.includes(key))
+                ),
+                ...fieldsToSetFalse.reduce((acc, key) => {
+                    acc[key] = false;
+                    return acc;
+                }, {} as Record<string, boolean>),
+                dataTypeName: fieldData.field?.dataTypeName || ''
+            },
+        };
+        form.resetField(`fields.${fieldIndex}`, {
+            defaultValue: updatedField,
+        });
+        setFocusedField(null);
+        setFocusedField(fieldIndex);
+    }, [form]);
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
     return (
-        <div>
-            <Suspense fallback={<div>Loading Form...</div>}>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <div className='flex flex-col lg:flex-row justify-between space-y-4 lg:space-y-0 lg:space-x-4'>
-                            <div className='flex-1 lg:flex-[4] space-y-2'>
-                                <Card >
-                                    <CardHeader>
-                                        <div className='flex justify-between items-start'>
-                                            <div>
-                                                <CardTitle>{formTemplateData?.displayName}</CardTitle>
-                                                <Text>{formTemplateData?.formDescription}</Text>
-                                            </div>
-                                            <div className='space-x-2 flex-shrink-0'>
-                                                {!isUpdate &&
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        className="border-[1px] border-primary bg-primary/10 text-primary hover:bg-primary hover:text-white"
-                                                        onClick={() => setIsUpdate(true)}
-                                                    >
-                                                        Update
-                                                    </Button>
-                                                }
+        <>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <Flex dir='column' className='lg:flex-row justify-between space-y-4 lg:space-y-0 lg:space-x-1 mt-1'>
+                        {/* <div className={`flex-1 ${!isFormControllerOpen ? 'lg:flex-[4]' : 'lg:flex'}  space-y-2`}> */}
+                        <div className={`flex-1 lg:flex-[4] space-y-2 transform transition-transform duration-500 ease-in-out translate-x-0`}>
+
+                            {isUpdate &&
+
+                                <Card>
+                                    <CardHeader className='max-h-5'>
+                                        <CardTitle className='font-bold text-xl '>Update Form</CardTitle></CardHeader>
+                                    <CardContent className='mt-5'>
+                                        {/* <Separator className='my-4' /> */}
+                                        <div className="flex flex-col sm:flex-row sm:space-x-6 sm:space-y-0">
+                                            {/* Position */}
+                                            <FormItem className="flex-1">
+                                                <div className="flex flex-col space-y-2">
+                                                    <FormLabel>Position</FormLabel>
+                                                    <FormControl>
+                                                        <Controller
+                                                            name="position"
+                                                            control={form.control}
+                                                            render={({ field }) => (
+                                                                <div className='mx-auto'>
+                                                                    <BeforeAfterToggle
+                                                                        value={field.value || "AFTER"}
+                                                                        onChange={(value: "BEFORE" | "AFTER") => {
+                                                                            field.onChange(value);
+                                                                            if (value !== "BEFORE") {
+                                                                                form.setValue("fieldName", "");
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </div>
+                                            </FormItem>
+
+                                            {/* Field Name */}
+                                            <FormItem className="flex-1">
+                                                <div className="flex flex-col space-y-2">
+                                                    <FormLabel>Field Name</FormLabel>
+                                                    <FormControl>
+                                                        <Controller
+                                                            name="fieldName"
+                                                            control={form.control}
+                                                            render={({ field }) => (
+                                                                <SelectDropdown
+                                                                    options={formFieldNameOptions}
+                                                                    value={field.value}
+                                                                    onChange={field.onChange}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </div>
+                                            </FormItem>
+                                        </div>
+
+                                        <Separator className="my-4" />
+
+                                        <DynamicField
+                                            control={form.control}
+                                            layout={formTemplateData?.formLayout || "GRID_1"}
+                                            onFieldFocus={handleFieldFocus}
+                                            onFieldDelete={handleFieldDelete}
+                                            selectedFieldIndex={focusedField}
+                                            errors={form.formState.errors}
+                                        />
+                                    </CardContent>
+                                    <CardFooter>
+                                        <Button
+                                            type='submit'
+                                        >
+                                            Update
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            }
+                            <Card >
+                                <CardHeader>
+                                    <div className='flex justify-between items-start'>
+                                        <div>
+                                            <CardTitle>{formTemplateData?.displayName}</CardTitle>
+                                            <Text>{formTemplateData?.formDescription}</Text>
+                                        </div>
+                                        <div className='space-x-2 flex-shrink-0'>
+                                            {!isUpdate &&
                                                 <Button
                                                     type='button'
-                                                    className='bg-green-500 hover:bg-green-600 transition-colors'
-                                                    onClick={handlePublish}
+                                                    variant='outline'
+                                                    className="border-[1px] border-primary bg-primary/10 text-primary hover:bg-primary hover:text-white"
+                                                    onClick={() => {
+                                                        setIsUpdate(true)
+                                                        setIsFormControllerOpen(true)
+                                                    }}
                                                 >
-                                                    <Globe aria-hidden="true" /> Publish
+                                                    Update
                                                 </Button>
-                                            </div>
+                                            }
+                                            <Button
+                                                type='button'
+                                                className='bg-green-500 hover:bg-green-600 transition-colors'
+                                                onClick={handlePublish}
+                                            >
+                                                <Globe aria-hidden="true" /> Publish
+                                            </Button>
                                         </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {formTemplateData && formTemplateData.fields && (
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    {formTemplateData && formTemplateData.fields && (
+                                        <Suspense fallback={<div>Loading Form...</div>}>
                                             <FieldGenerator
                                                 fields={formTemplateData.fields}
                                                 handleFetchAsyncOptions={handleFetchAsyncOptions}
                                                 control={form.control}
                                                 layout={formTemplateData?.formLayout || 'GRID_1'}
                                             />
-                                        )}
-                                        {asyncError && <div className="error-message">{asyncError}</div>}
+                                        </Suspense>
+                                    )}
+                                    {asyncError && <div className="error-message">{asyncError}</div>}
 
-                                    </CardContent>
-                                </Card>
-                                {isUpdate &&
+                                </CardContent>
+                            </Card>
 
-                                    <Card>
-                                        <CardHeader className='max-h-5'>
-                                            <CardTitle className='font-bold text-xl '>Update Form</CardTitle></CardHeader>
-                                        <CardContent className='mt-5'>
-                                            {/* <Separator className='my-4' /> */}
-                                            <div className="flex flex-col sm:flex-row sm:space-x-6 sm:space-y-0">
-                                                {/* Position */}
-                                                <FormItem className="flex-1">
-                                                    <div className="flex flex-col space-y-2">
-                                                        <FormLabel>Position</FormLabel>
-                                                        <FormControl>
-                                                            <Controller
-                                                                name="position"
-                                                                control={form.control}
-                                                                render={({ field }) => (
-                                                                    <div className='mx-auto'>
-                                                                        <BeforeAfterToggle
-                                                                            value={field.value || "AFTER"}
-                                                                            onChange={(value: "BEFORE" | "AFTER") => {
-                                                                                field.onChange(value);
-                                                                                if (value !== "BEFORE") {
-                                                                                    form.setValue("fieldName", "");
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </div>
-                                                </FormItem>
-
-                                                {/* Field Name */}
-                                                <FormItem className="flex-1">
-                                                    <div className="flex flex-col space-y-2">
-                                                        <FormLabel>Field Name</FormLabel>
-                                                        <FormControl>
-                                                            <Controller
-                                                                name="fieldName"
-                                                                control={form.control}
-                                                                render={({ field }) => (
-                                                                    <SelectDropdown
-                                                                        options={formFieldNameOptions}
-                                                                        value={field.value}
-                                                                        onChange={field.onChange}
-                                                                    />
-                                                                )}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </div>
-                                                </FormItem>
-                                            </div>
-
-                                            <Separator className="my-4" />
-
-                                            <DynamicField
-                                                control={form.control}
-                                                layout={formTemplateData?.formLayout || "GRID_1"}
-                                                onFieldFocus={handleFieldFocus}
-                                                onFieldDelete={handleFieldDelete}
-                                                selectedFieldIndex={focusedField}
-                                                errors={form.formState.errors}
-                                            />
-                                        </CardContent>
-                                        <CardFooter>
-                                            <Button
-                                                type='submit'
-                                            // variant='outline'
-                                            // className="border-[1px] border-primary bg-primary/10 text-primary hover:bg-primary hover:text-white"
-                                            // onClick={() => setIsUpdate(true)}
-                                            >
-                                                Update
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
-                                }
-                            </div>
-
-                            {isUpdate && focusedField !== null && (
-                                <div className='flex-1 lg:flex-[2]'>
-
-                                    <FieldController
-                                        key={`field-controller-${focusedField}`}
-                                        control={form.control}
-                                        fieldIndex={focusedField}
-                                        dataType={dataTypes}
-                                        handleFieldUpdate={handleFieldUpdate}
-                                        handleAsyncFieldUpdate={handleAsyncFieldUpdate}
-                                        setValue={form.setValue}
-                                    />
-                                </div>
-                            )}
 
                         </div>
-                    </form>
-                </Form>
-            </Suspense>
-        </div>
+
+                        {isUpdate && focusedField !== null && (
+                            <aside className={`${isFormControllerOpen ? 'flex-[2]' : ''} `}>
+                                <FieldController
+                                    key={`field-controller-${focusedField}`}
+                                    control={form.control}
+                                    fieldIndex={focusedField}
+                                    dataType={dataTypes}
+                                    handleFieldUpdate={handleFieldUpdate}
+                                    handleAsyncFieldUpdate={handleAsyncFieldUpdate}
+                                    onDataTypeChange={handleDataTypeChange}
+                                    isOpen={isFormControllerOpen}
+                                    onClose={() => setIsFormControllerOpen(false)}
+                                />
+                            </aside>
+                        )}
+                    </Flex>
+                </form>
+            </Form >
+        </>
 
     );
 };

@@ -5,12 +5,12 @@ import { Command, CommandInput, CommandList, CommandGroup, CommandItem, CommandE
 import { Check, ChevronsUpDown, Plus, X, FileText, Image, Music, Video, Archive, Table } from 'lucide-react';
 
 const predefinedFileTypes = [
-    { label: 'Image', value: '.jpg,.png,.svg,.gif,.bmp', icon: Image },
-    { label: 'Text', value: '.txt,.pdf,.docx,.csv,.xls', icon: FileText },
-    { label: 'Video', value: '.mp4,.avi,.mkv,.webm', icon: Video },
-    { label: 'Audio', value: '.mp3,.wav,.ogg', icon: Music },
-    { label: 'Archive', value: '.zip,.rar,.tar', icon: Archive },
-    { label: 'Spreadsheet', value: '.xlsx,.xls,.csv', icon: Table },
+    { label: 'Image', value: ['.jpg', '.png', '.svg', '.gif', '.bmp'], icon: Image },
+    { label: 'Text', value: ['.txt', '.pdf', '.docx', '.csv', '.xls'], icon: FileText },
+    { label: 'Video', value: ['.mp4', '.avi', '.mkv', '.webm'], icon: Video },
+    { label: 'Audio', value: ['.mp3', '.wav', '.ogg'], icon: Music },
+    { label: 'Archive', value: ['.zip', '.rar', '.tar'], icon: Archive },
+    { label: 'Spreadsheet', value: ['.xlsx', '.xls', '.csv'], icon: Table },
 ];
 
 interface SelectWithCustomInputProps {
@@ -28,10 +28,8 @@ const SelectWithCustomInput: React.FC<SelectWithCustomInputProps> = ({
     const [isCustomInputVisible, setIsCustomInputVisible] = useState(false);
     const [search, setSearch] = useState('');
 
-    const handleTypeSelect = (typeValue: string) => {
-        const updatedValues = value.includes(typeValue)
-            ? value.filter((val) => val !== typeValue)
-            : [...value, typeValue];
+    const handleTypeSelect = (typeValues: string[]) => {
+        const updatedValues = Array.from(new Set([...value, ...typeValues])); // Merge and ensure uniqueness
         onChange(updatedValues);
     };
 
@@ -41,7 +39,7 @@ const SelectWithCustomInput: React.FC<SelectWithCustomInputProps> = ({
             ? trimmedCustomType
             : `.${trimmedCustomType}`;
         if (!value.includes(formattedCustomType)) {
-            const updatedValues = [...value, formattedCustomType];
+            const updatedValues = Array.from(new Set([...value, formattedCustomType])); // Ensure uniqueness
             onChange(updatedValues);
         }
         setCustomType('');
@@ -58,15 +56,15 @@ const SelectWithCustomInput: React.FC<SelectWithCustomInputProps> = ({
     );
 
     return (
-        <div className="space-y-2 w-full">
+        <div className=" w-full">
             <Popover>
                 <PopoverTrigger asChild>
                     <div
-                        className="w-full border rounded-md p-3 flex items-center justify-between 
+                        className="w-full border rounded-md p-2 flex items-center justify-between 
                                     cursor-pointer 
                                     focus:outline-none focus:ring-2 focus:ring-blue-500 relative"
                     >
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap">
                             {value.length > 0 ? (
                                 value.map((chip) => (
                                     <div
@@ -89,7 +87,7 @@ const SelectWithCustomInput: React.FC<SelectWithCustomInputProps> = ({
                                     </div>
                                 ))
                             ) : (
-                                <span className="text-gray-500">{placeholder || 'Select file types'}</span>
+                                <span className="text-gray-500 text-sm">{placeholder || 'Select file types'}</span>
                             )}
                         </div>
                         <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -110,10 +108,10 @@ const SelectWithCustomInput: React.FC<SelectWithCustomInputProps> = ({
                                 {filteredPredefinedTypes.length > 0 ? (
                                     filteredPredefinedTypes.map((type) => {
                                         const TypeIcon = type.icon;
+                                        const isSelected = type.value.every((val) => value.includes(val));
                                         return (
                                             <CommandItem
-                                                key={type.value}
-                                                value={type.value}
+                                                key={type.label}
                                                 onSelect={() => handleTypeSelect(type.value)}
                                                 className="flex items-center justify-between 
                                                             hover:bg-gray-100 cursor-pointer 
@@ -125,7 +123,7 @@ const SelectWithCustomInput: React.FC<SelectWithCustomInputProps> = ({
                                                 </div>
                                                 <Check
                                                     className={`h-4 w-4 transition-opacity 
-                                                                ${value.includes(type.value)
+                                                                ${isSelected
                                                             ? 'opacity-100 text-green-500'
                                                             : 'opacity-0'}`}
                                                 />

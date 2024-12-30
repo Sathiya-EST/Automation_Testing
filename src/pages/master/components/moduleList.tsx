@@ -63,7 +63,7 @@ const AddModuleDialog: React.FC<AddModuleDialogProps> = ({ onAddModule }) => {
         <Button
           variant="ghost"
           size="icon"
-          className="hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="hover:bg-gray-100 dark:hover:bg-gray-800 w-6 h-6"
         >
           <Plus size={18} />
         </Button>

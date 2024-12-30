@@ -297,12 +297,11 @@ function AdvancedTable<T>({
     ...column,
     index,
   }));
-
   return (
     <div className="flex flex-col h-[400px]">
       <div className="flex-grow overflow-auto">
-        <Table className="text-xs relative  w-full border">
-          <TableHeader className="bg-primary/25 text-primary text-sm hover:bg-primary ">
+        <Table className="w-full caption-bottom text-xs">
+          <TableHeader className="bg-primary/25 text-primary text-sm hover:bg-primary sticky top-0.5">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} >
                 {headerGroup.headers.map((header, index) => {

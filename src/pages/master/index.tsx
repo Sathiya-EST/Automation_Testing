@@ -22,6 +22,10 @@ import StatusFilterDropdown, { StatusValue } from "./components/StatusFilter";
 import ErrorAlert from "@/components/shared/ErrorAlert";
 import ModuleSelectionPlaceholder from "./components/ModuleSelectionInfo";
 import { useMediaQuery } from 'react-responsive';
+import { useDispatch, useSelector } from "react-redux";
+import { updateMasterForm } from "@/store/slice/masterSlice";
+import { RootState } from "@/store";
+import { ROLES } from "@/constants/app.constants";
 interface MasterColumns {
     displayName: string;
     formDescription: string;
@@ -33,13 +37,18 @@ const Master = () => {
     const { toast } = useToast();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const activeModule = useSelector((state: RootState) => state.master.form?.moduleName);
+    const userRole = useSelector((state: RootState) => state.auth.userRole);
+
+    // const activeStatus = useSelector((state: RootState) => state.master.form?.status);
     const [moduleSearchVal, setModuleSearchVal] = useState("");
-    const [selectedModule, setSelectedModule] = useState<string | null>('');
+    const [selectedModule, setSelectedModule] = useState<string | null>(activeModule || '');
     const [formReqParams, setFormReqParams] = useState<GetReqParams>({
         pageNo: 1,
         pageSize: 10,
         sort: [{ key: "createdOn", order: "ASC" }],
-        filters: [],
+        filters: selectedModule ? [{ key: "moduleName", operator: "EQUAL", field_type: "STRING", value: selectedModule }] : [],
     });
     const [isModuleSelected, setIsModuleSelected] = useState(false);
     const [moduleReqParams, setModuleReqParams] = useState<GetReqParams>({
@@ -134,6 +143,9 @@ const Master = () => {
             filters: [],
         })
         handleAddFormFilter("moduleName", "EQUAL", "STRING", moduleName);
+        dispatch(updateMasterForm({
+            moduleName,
+        }));
     }, []);
 
     const handleAddFormFilter = (key: string, operator: "LIKE" | "EQUAL", fieldType: "STRING" | "BOOLEAN", value: string | boolean) => {
@@ -217,93 +229,15 @@ const Master = () => {
             };
         });
     };
+
     const isMobileOrTablet = useMediaQuery({ query: '(max-width: 768px)' });
 
     const handleBackToModuleList = () => {
         setIsModuleSelected(false);
         setSelectedModule(null);
     };
-    return (
-        // <div className="h-auto">
-        //     <ResizablePanelGroup
-        //         direction="horizontal"
-        //         className="max-w-full rounded-lg border flex h-full"
-        //     >
-        //         <ResizablePanel
-        //             defaultSize={20}
-        //             className="h-full min-h-full overflow-auto"
-        //         >
-        //             {moduleLoading ? (
-        //                 <Spinner />
-        //             ) : moduleError ? (
-        //                 <ErrorAlert message="Failed to load modules" />
-        //             ) : moduleData ? (
-        //                 <ModuleList
-        //                     data={moduleData.data}
-        //                     handleModuleSelect={handleModuleClick}
-        //                     showForm={false}
-        //                     onAddModule={handleAddModule}
-        //                     initialActiveModule={selectedModule}
-        //                     onPageChange={(curPage: number) => { setModuleReqParams(prev => ({ ...prev, pageNo: curPage })) }}
-        //                     currentPage={moduleReqParams.pageNo}
-        //                     totalRecords={moduleData.totalRecords}
-        //                     itemsPerPage={moduleReqParams.pageSize}
-        //                     onSearch={handleModuleSearch}
-        //                     initialSearchVal={moduleSearchVal}
-        //                 />
-        //             ) : (
-        //                 <div>No modules available.</div>
-        //             )}
-        //         </ResizablePanel>
-        //         <ResizableHandle withHandle />
-        //         <ResizablePanel
-        //             defaultSize={80}
-        //             className="h-full min-h-full overflow-auto bg-background"
-        //         >
-        //             {!selectedModule ? (
-        //                 <ModuleSelectionPlaceholder />
-        //             ) : (
-        //                 <div className="p-4 space-y-1 bg-card h-full">
-        //                     <Text className="text-lg font-bold">{selectedModule}</Text>
-        //                     <div className="flex items-center space-x-4">
-        //                         <SearchInput onSearch={handleSearch} className="flex-1" />
-        //                         <StatusFilterDropdown onFilterChange={handleStatusChange} />
-        //                         <Button
-        //                             variant="default"
-        //                             className="rounded text-white"
-        //                             onClick={handleCreate}
-        //                             disabled={moduleAddLoading}
-        //                         >
-        //                             <Plus size={18} strokeWidth={3} />
-        //                             {t("master.form.list.createBtn")}
-        //                         </Button>
-        //                     </div>
 
-        //                     <div className="pt-1 h-[calc(100%-100px)]">
-        //                         {formError && <ErrorAlert message="Failed to load form data" />}
-        //                         {formLoading ? (
-        //                             <Spinner />
-        //                         ) : formData?.data?.length ? (
-        //                             <AdvancedTable<MasterColumns>
-        //                                 columns={columns}
-        //                                 data={formData.data}
-        //                                 totalCount={formData.totalRecords}
-        //                                 requestParams={formReqParams}
-        //                                 onRequestParamsChange={setFormReqParams}
-        //                             />
-        //                         ) : (
-        //                             <Alert>
-        //                                 <AlertTriangle className="h-4 w-4" />
-        //                                 <AlertTitle>No Data</AlertTitle>
-        //                                 <AlertDescription>No forms found for the selected module.</AlertDescription>
-        //                             </Alert>
-        //                         )}
-        //                     </div>
-        //                 </div>
-        //             )}
-        //         </ResizablePanel>
-        //     </ResizablePanelGroup>
-        // </div>
+    return (
         <div className="h-auto">
             <ResizablePanelGroup
                 direction="horizontal"
@@ -388,7 +322,7 @@ const Master = () => {
                                 <div className="flex items-center space-x-4">
                                     <SearchInput onSearch={handleSearch} className="flex-1" />
                                     <StatusFilterDropdown onFilterChange={handleStatusChange} />
-                                    <Button
+                                    {userRole == ROLES.DEVELOPER && <Button
                                         variant="default"
                                         className="rounded text-white"
                                         onClick={handleCreate}
@@ -396,7 +330,7 @@ const Master = () => {
                                     >
                                         <Plus size={18} strokeWidth={3} />
                                         {!isMobileOrTablet && t("master.form.list.createBtn")}
-                                    </Button>
+                                    </Button>}
                                 </div>
 
                                 <div className="pt-1 h-[calc(100%-100px)]">
@@ -424,7 +358,6 @@ const Master = () => {
                             </div>
                         )
                     ) : !selectedModule ? (
-                        // Show ModuleSelectionPlaceholder on larger screens when no module is selected
                         <ModuleSelectionPlaceholder />
                     ) : (
                         <div className="p-4 space-y-1 bg-card h-full">
@@ -432,7 +365,7 @@ const Master = () => {
                             <div className="flex items-center space-x-4">
                                 <SearchInput onSearch={handleSearch} className="flex-1" />
                                 <StatusFilterDropdown onFilterChange={handleStatusChange} />
-                                <Button
+                                {userRole == ROLES.DEVELOPER && <Button
                                     variant="default"
                                     className="rounded text-white"
                                     onClick={handleCreate}
@@ -440,7 +373,7 @@ const Master = () => {
                                 >
                                     <Plus size={18} strokeWidth={3} />
                                     {t("master.form.list.createBtn")}
-                                </Button>
+                                </Button>}
                             </div>
 
                             <div className="pt-1 h-[calc(100%-100px)]">

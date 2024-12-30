@@ -1,10 +1,8 @@
-import { z } from 'zod';
 import SelectDropdown from '@/components/shared/DropDown';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
-import { Control, SubmitHandler, useController, useFieldArray, useWatch } from 'react-hook-form';
+import { Control, useController, useWatch } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTypes, Field } from '@/types/data';
@@ -15,6 +13,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import SelectWithCustomInput from '@/pages/master/components/SelectWithCustomInput';
 import { useTranslation } from 'react-i18next';
 import { useGetAsyncFormFieldsQuery, useGetModuleOptionsQuery } from '@/store/services/master/form';
+import FieldInfoButton from '@/components/shared/FieldInfo';
+import { X } from 'lucide-react';
+import Flex from '@/components/shared/Flex';
+import { Separator } from '@/components/ui/separator';
 
 
 
@@ -24,7 +26,9 @@ type FieldControllerProps = {
     handleFieldUpdate: (value: string | boolean | number | string[], fieldName: string) => void;
     handleAsyncFieldUpdate: (value: string | boolean | number, fieldName: string) => void;
     dataType: DataTypes[];
-    setValue: any;
+    onDataTypeChange: any;
+    isOpen: boolean;
+    onClose: () => void
 };
 
 const FieldController = ({
@@ -33,7 +37,9 @@ const FieldController = ({
     handleFieldUpdate,
     handleAsyncFieldUpdate,
     dataType,
-    setValue
+    onDataTypeChange,
+    isOpen,
+    onClose
 }: FieldControllerProps) => {
     const [fieldsConfig, setFieldsConfig] = useState<Field>();
     const { t } = useTranslation();
@@ -51,7 +57,7 @@ const FieldController = ({
 
     const { data: FieldOptions } = useGetAsyncFormFieldsQuery(selectedAsynForm ? selectedAsynForm : "");
 
-    const { field: { value: selectedType, onChange } } = useController({
+    const { field: { value: selectedType } } = useController({
         name: `fields[${fieldIndex}].field.dataTypeName`,
         control,
     });
@@ -100,51 +106,45 @@ const FieldController = ({
             : t('master.form.create.fieldController.selectField.noOptionLabel')
         : t('master.form.create.fieldController.selectField.hasOptionsLabel');
 
-    const handleResetValue = (fieldIndex: number) => {
-        // setValue(`fields[${fieldIndex}].field.readOnly`, false);
-        // setValue(`fields[${fieldIndex}].field.required`, false);
-        // setValue(`fields[${fieldIndex}].field.min`, null);
-        // setValue(`fields[${fieldIndex}].field.max`, null);
-        // setValue(`fields[${fieldIndex}].field.pattern`, null);
-        // setValue(`fields[${fieldIndex}].field.formula`, null);
-        // setValue(`fields[${fieldIndex}].field.alphabetic`, false);
-        // setValue(`fields[${fieldIndex}].field.alphanumeric`, false);
-        // setValue(`fields[${fieldIndex}].field.positiveOnly`, undefined);
-        // setValue(`fields[${fieldIndex}].field.negativeOnly`, undefined);
-        // setValue(`fields[${fieldIndex}].field.multiple`, undefined);
-        // setValue(`fields[${fieldIndex}].field.asynchronousField`, null);
-        // setValue(`fields[${fieldIndex}].field.compute`, null);
-        // setValue(`fields[${fieldIndex}].field.uniqueValue`, false);
-        // setValue(`fields[${fieldIndex}].field.decimalLimit`, null);
-        // setValue(`fields[${fieldIndex}].field.defaultChoice`, null);
-        // setValue(`fields[${fieldIndex}].field.placeholder`, undefined);
-        // setValue(`fields[${fieldIndex}].field.defaultValue`, undefined);
-        console.log("No action");
 
-    }
-
+    const readOnlyValue = useWatch({
+        control,
+        name: `fields.${fieldIndex}.field.readOnly`,
+        defaultValue: false,
+    });
+    const handleClose = () => {
+        onClose();
+    };
     return (
-        <Card>
-            <CardHeader className=" font-semibold border-b-2">
-                {t('master.form.create.fieldController.title')}
+        <Card className={`p-0 fixed right-0 top-[64px] h-[calc(100vh-64px)] w-auto lg:w-[30%] bg-white shadow-lg z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-auto`}>
+            <CardHeader >
+                <Flex dir='row'>
+                    <CardTitle className='text-xl'>{t('master.form.create.fieldController.title')}</CardTitle>
+                    <X
+                        className="w-4 h-4 cursor-pointer"
+                        onClick={handleClose}
+                    />
+                </Flex>
             </CardHeader>
-            <CardContent className="grid gap-2 overflow-y-auto p-2 pb-5 mb-1">
+            <Separator />
+            <CardContent className="grid gap-2 overflow-y-auto  pb-5 mb-1">
                 {/* Directly using parent form control */}
-                <div className="grid gap-2 gap-y-5 ">
+                <div className="grid gap-2 gap-y-5 " key={selectedType}>
+
                     {/* Column Name Field */}
                     <FormField
                         control={control}
                         name={`fields[${fieldIndex}].name`}
                         render={({ field }) => (
-                            <FormItem className="grid grid-cols-3 items-center gap-2">
+                            <FormItem className="grid grid-cols-3 items-center gap-2 relative">
                                 <FormLabel htmlFor="name" className="text-left font-normal">
                                     {t('master.form.create.fieldController.NameField.label')}
                                 </FormLabel>
-                                <div className="col-span-2 relative">
+                                <div className="col-span-2 relative group">
                                     <FormControl>
                                         <Input
                                             id="name"
-                                            className="h-9 peer"
+                                            className="h-9"
                                             placeholder={t('master.form.create.fieldController.NameField.placeholder')}
                                             {...field}
                                             onChange={(e) => {
@@ -153,16 +153,34 @@ const FieldController = ({
                                             }}
                                         />
                                     </FormControl>
-                                    <FormDescription
-                                        className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
-                                    >
-                                        {t('master.form.create.fieldController.NameField.desc')}
-                                    </FormDescription>
-                                    <FormMessage />
+                                    <FieldInfoButton tooltipContent={t('master.form.create.fieldController.NameField.desc')} />
+                                    {/* <TooltipProvider>
+                                        <Tooltip delayDuration={200}>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    className="absolute -top-2 -right-2 bg-white rounded-full border shadow-sm p-1 
+                                                    text-gray-400 hover:text-gray-600 transition-all opacity-0 invisible
+                                                    group-hover:opacity-100 group-hover:visible
+                                                    group-focus-within:opacity-100 group-focus-within:visible"
+                                                    aria-label="Help information"
+                                                >
+                                                    <MessageCircleQuestion className="h-3.5 w-3.5" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="max-w-xs text-xs">
+                                                {t('master.form.create.fieldController.NameField.desc')}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider> */}
+                                    <div className="min-h-[1rem]">
+                                        <FormMessage />
+                                    </div>
                                 </div>
                             </FormItem>
                         )}
                     />
+
                     {/* Property Type Field */}
                     <FormField
                         control={control}
@@ -172,13 +190,13 @@ const FieldController = ({
                                 <FormLabel htmlFor="dataTypeName" className="text-left font-normal">
                                     {t('master.form.create.fieldController.TypeField.label')}
                                 </FormLabel>
-                                <div className="col-span-2">
+                                <div className="col-span-2 group">
                                     <FormControl>
                                         <SelectDropdown
                                             options={DataTypeoptions}
-                                            className="h-9 peer"
+                                            className="h-9 peer "
                                             onChange={(value) => {
-                                                handleResetValue(fieldIndex)
+                                                onDataTypeChange(fieldIndex)
                                                 handleFieldUpdate(value, 'dataTypeName');
                                                 field.onChange(value);
                                             }}
@@ -186,10 +204,10 @@ const FieldController = ({
                                             placeholder={t('master.form.create.fieldController.TypeField.placeholder')}
                                         />
                                     </FormControl>
-                                    <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                        {t('master.form.create.fieldController.TypeField.desc')}
-                                    </FormDescription>
-                                    <FormMessage className="mt-1 text-sm text-red-600" />
+                                    <FieldInfoButton tooltipContent={t('master.form.create.fieldController.TypeField.desc')} />
+                                    <div className="min-h-[1rem] ">
+                                        <FormMessage />
+                                    </div>
                                 </div>
                             </FormItem>
                         )}
@@ -200,30 +218,28 @@ const FieldController = ({
                             <FormField
                                 control={control}
                                 name={`fields[${fieldIndex}].field.defaultChoice`}
-                                render={({ field }) => {
-                                    return (
-                                        <FormItem className="grid grid-cols-3 items-center gap-2">
-                                            <FormLabel htmlFor="type" className="text-left font-normal">
-                                                {t('master.form.create.fieldController.selectField.label')}
-                                            </FormLabel>
-                                            <div className="col-span-2">
-                                                <FormControl>
-                                                    {/* PopoverTrigger should properly wrap the Button */}
-                                                    <PopoverTrigger asChild>
-                                                        <Button type="button" variant="outline" className='text-blue-500'>
-                                                            {renderDefaultChoices}
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                </FormControl>
+                                render={() => (
+                                    <FormItem className="grid grid-cols-3 items-center gap-2">
+                                        <FormLabel htmlFor="type" className="text-left font-normal">
+                                            {t('master.form.create.fieldController.selectField.label')}
+                                        </FormLabel>
+                                        <div className="col-span-2">
+                                            <FormControl>
+                                                {/* PopoverTrigger should properly wrap the Button */}
+                                                <PopoverTrigger asChild>
+                                                    <Button type="button" variant="outline" className='text-blue-500'>
+                                                        {renderDefaultChoices}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                            </FormControl>
 
-                                                <PopoverContent className="w-auto max-h-80 p-0 overflow-y-auto">
-                                                    <SelectFieldOptions control={control} fieldIndex={fieldIndex} />
-                                                </PopoverContent>
-                                                <FormMessage className="mt-1 text-sm text-red-600" />
-                                            </div>
-                                        </FormItem>
-                                    );
-                                }}
+                                            <PopoverContent className="w-auto max-h-80 p-0 overflow-y-auto">
+                                                <SelectFieldOptions control={control} fieldIndex={fieldIndex} />
+                                            </PopoverContent>
+                                            <FormMessage className="mt-1 text-sm text-red-600" />
+                                        </div>
+                                    </FormItem>
+                                )}
                             />
                         </Popover>
                     )}
@@ -236,7 +252,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="type" className="text-left font-normal">
                                         {t('master.form.create.fieldController.fileTypeField.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 group">
                                         <FormControl>
                                             <SelectWithCustomInput
                                                 onChange={(value: string[]) => {
@@ -247,10 +263,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.fileTypeField.desc')}
-                                        </FormDescription>
-                                        <FormMessage className="mt-1 text-sm text-red-600" />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.fileTypeField.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -269,7 +285,7 @@ const FieldController = ({
                                         <FormLabel htmlFor="moduleName" className="text-left font-normal">
                                             {t('master.form.create.fieldController.asyncField.moduleNameField.label')}
                                         </FormLabel>
-                                        <div className="col-span-2 relative">
+                                        <div className="col-span-2 group relative">
                                             <FormControl>
                                                 <SelectDropdown
                                                     options={ModuleOptions?.moduleOptions || []}
@@ -282,12 +298,11 @@ const FieldController = ({
                                                     placeholder={t('master.form.create.fieldController.asyncField.moduleNameField.placeholder')}
                                                 />
                                             </FormControl>
-                                            <FormDescription
-                                                className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
-                                            >
-                                                {t('master.form.create.fieldController.asyncField.moduleNameField.desc')}
-                                            </FormDescription>
-                                            <FormMessage />
+                                            <FieldInfoButton tooltipContent={t('master.form.create.fieldController.asyncField.moduleNameField.desc')} />
+
+                                            <div className="min-h-[1rem] ">
+                                                <FormMessage />
+                                            </div>
                                         </div>
                                     </FormItem>
                                 )}
@@ -300,7 +315,7 @@ const FieldController = ({
                                         <FormLabel htmlFor="formName" className="text-left font-normal">
                                             {t('master.form.create.fieldController.asyncField.formNameField.label')}
                                         </FormLabel>
-                                        <div className="col-span-2 relative">
+                                        <div className="col-span-2 relative group">
                                             <FormControl>
                                                 <SelectDropdown
                                                     options={FormOptions?.formOptions || []}
@@ -314,12 +329,10 @@ const FieldController = ({
                                                     placeholder={t('master.form.create.fieldController.asyncField.formNameField.placeholder')}
                                                 />
                                             </FormControl>
-                                            <FormDescription
-                                                className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
-                                            >
-                                                {t('master.form.create.fieldController.asyncField.formNameField.desc')}
-                                            </FormDescription>
-                                            <FormMessage />
+                                            <FieldInfoButton tooltipContent={t('master.form.create.fieldController.asyncField.formNameField.desc')} />
+                                            <div className="min-h-[1rem] ">
+                                                <FormMessage />
+                                            </div>
                                         </div>
                                     </FormItem>
                                 )}
@@ -332,7 +345,7 @@ const FieldController = ({
                                         <FormLabel htmlFor="fieldName" className="text-left font-normal">
                                             {t('master.form.create.fieldController.asyncField.fieldNameField.label')}
                                         </FormLabel>
-                                        <div className="col-span-2 relative">
+                                        <div className="col-span-2 relative group">
                                             <FormControl>
                                                 <SelectDropdown
                                                     options={FieldOptions?.options || []}
@@ -345,12 +358,10 @@ const FieldController = ({
                                                     placeholder={t('master.form.create.fieldController.asyncField.fieldTypeField.placeholder')}
                                                 />
                                             </FormControl>
-                                            <FormDescription
-                                                className="absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300"
-                                            >
-                                                {t('master.form.create.fieldController.asyncField.fieldNameField.desc')}
-                                            </FormDescription>
-                                            <FormMessage />
+                                            <FieldInfoButton tooltipContent={t('master.form.create.fieldController.asyncField.fieldNameField.desc')} />
+                                            <div className="min-h-[1rem] ">
+                                                <FormMessage />
+                                            </div>
                                         </div>
                                     </FormItem>
                                 )}
@@ -363,7 +374,7 @@ const FieldController = ({
                     {fieldsConfig?.required && (
                         <FormField
                             control={control}
-                            name={`fields[${fieldIndex}].field.required`}
+                            name={`fields.${fieldIndex}.field.required`}
                             render={({ field }) => (
                                 <FormItem className="grid grid-cols-3 items-center gap-2">
                                     <FormLabel htmlFor="required" className="text-left font-normal">
@@ -435,7 +446,7 @@ const FieldController = ({
                                     <FormControl className="flex-shrink-0">
                                         <Checkbox
                                             id="readOnly"
-                                            checked={field.value}
+                                            checked={readOnlyValue}
                                             onCheckedChange={(checked) => {
                                                 handleFieldUpdate(checked, 'readOnly');
                                                 field.onChange(checked);
@@ -610,7 +621,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="placeholder" className="text-left font-normal">
                                         {t('master.form.create.fieldController.placeholder.label')}
                                     </FormLabel>
-                                    <div className="col-span-2 relative">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="placeholder"
@@ -622,10 +633,11 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.placeholder.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.placeholder.desc')} />
+
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -641,7 +653,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="defaultValue" className="text-left font-normal">
                                         {t('master.form.create.fieldController.defaultValue.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="defaultValue"
@@ -653,10 +665,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.defaultValue.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.defaultValue.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -672,7 +684,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="pattern" className="text-left font-normal">
                                         {t('master.form.create.fieldController.pattern.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="pattern"
@@ -684,10 +696,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.pattern.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.pattern.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -703,7 +715,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="formula" className="text-left font-normal">
                                         {t('master.form.create.fieldController.formula.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="formula"
@@ -715,10 +727,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.formula.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.formula.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -734,7 +746,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="defaultChoice" className="text-left font-normal">
                                         {t('master.form.create.fieldController.defaultChoice.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="defaultChoice"
@@ -746,10 +758,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.defaultChoice.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.defaultChoice.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -765,23 +777,24 @@ const FieldController = ({
                                     <FormLabel htmlFor="decimalLimit" className="text-left font-normal">
                                         {t('master.form.create.fieldController.decimalLimit.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="decimalLimit"
                                                 type='number'
                                                 className="h-9 peer"
                                                 onChange={(e) => {
-                                                    handleFieldUpdate(e.target.value, 'decimalLimit');
-                                                    field.onChange(e);
+                                                    const numericValue = Number(e.target.value);
+                                                    handleFieldUpdate(numericValue, 'decimalLimit');
+                                                    field.onChange(numericValue);
                                                 }}
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.decimalLimit.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.decimalLimit.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -797,7 +810,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="min" className="text-left font-normal">
                                         {t('master.form.create.fieldController.min.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="min"
@@ -811,10 +824,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.min.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.min.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -830,7 +843,7 @@ const FieldController = ({
                                     <FormLabel htmlFor="max" className="text-left font-normal">
                                         {t('master.form.create.fieldController.max.label')}
                                     </FormLabel>
-                                    <div className="col-span-2">
+                                    <div className="col-span-2 relative group">
                                         <FormControl>
                                             <Input
                                                 id="max"
@@ -844,10 +857,10 @@ const FieldController = ({
                                                 value={field.value}
                                             />
                                         </FormControl>
-                                        <FormDescription className="mt-1 absolute text-xs text-gray-500 opacity-0 peer-focus-within:opacity-100 transition-opacity duration-300">
-                                            {t('master.form.create.fieldController.max.desc')}
-                                        </FormDescription>
-                                        <FormMessage />
+                                        <FieldInfoButton tooltipContent={t('master.form.create.fieldController.max.desc')} />
+                                        <div className="min-h-[1rem] ">
+                                            <FormMessage />
+                                        </div>
                                     </div>
                                 </FormItem>
                             )}
@@ -855,21 +868,6 @@ const FieldController = ({
                     )}
                 </div>
             </CardContent>
-            {/* <CardFooter className="flex justify-end gap-3 p-4">
-                <Button
-                    type='button'
-                    variant="outline"
-                    onClick={() => control._reset()}
-                >
-                    Clear
-                </Button>
-                <Button
-                    type='button'
-                    onClick={() => control.handleSubmit(onFieldSubmit)}
-                >
-                    Update
-                </Button>
-            </CardFooter> */}
         </Card >
     );
 };
