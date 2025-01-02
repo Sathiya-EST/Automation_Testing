@@ -172,9 +172,12 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
 
   const handleModuleClick = useCallback((moduleIdPk: string, moduleName: string) => {
     toggleModule(moduleIdPk);
-    setActiveModule(moduleName);
-    setActiveForm(null);
-    handleModuleSelect && handleModuleSelect(moduleName);
+    if (!showForm) {
+
+      setActiveModule(moduleName);
+      setActiveForm(null);
+      handleModuleSelect && handleModuleSelect(moduleName);
+    }
   }, [handleModuleSelect, toggleModule]);
 
   const handleFormClick = useCallback((formId: string, moduleId: string, moduleName: string) => {
@@ -184,7 +187,7 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
   }, [handleFormSelect]);
 
   return (
-    <div className="h-auto overflow-y-auto">
+    <div className="h-auto">
       <SidebarProvider className="bg-card dark:bg-gray-950">
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
@@ -194,8 +197,8 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
             )}
           </SidebarGroupLabel>
           <SearchInput onSearch={onSearch} placeholder="Search Module..." initialValue={initialSearchVal} />
-          <SidebarMenu>
-            {data.map((module) => (
+          <SidebarMenu >
+            <div className="overflow-hidden hover:overflow-auto scrollbar-thin scrollbar-thumb-scrollbar-thumb h-[60vh]">              {data.map((module) => (
               <Collapsible
                 key={module.moduleIdPk}
                 open={!!openModules[module.moduleIdPk]}
@@ -226,15 +229,21 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
                       <SidebarMenuSub>
                         {module.formList.map((form) => (
                           <SidebarMenuSubItem key={form.formId}>
-                            <div className="flex items-center w-full">
-                              <Database className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                            <div className={`flex p-0.5 items-center w-full ${activeForm === form.formId ? 'text-primary bg-gray-100 dark:bg-gray-700' : ''
+                              }`}>
+                              <Database
+                                className={`w-4 h-4 flex-shrink-0 text-gray-500 ${activeForm === form.formId
+                                  ? 'text-primary hover:text-primary dark:bg-gray-700'
+                                  : ''
+                                  }`}
+                              />
                               <SidebarMenuSubButton asChild>
                                 <Button
                                   variant="ghost"
-                                  className={`flex items-center justify-between w-full rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${activeForm === form.formId ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+                                  className={`flex ml-2 items-center justify-between w-full rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${activeForm === form.formId ? 'text-primary bg-gray-100 dark:bg-gray-700' : ''}`}
                                   onClick={() => handleFormClick(form.formId, module.moduleIdPk, module.moduleName)}
                                 >
-                                  <span className="ml-2 truncate max-w-[180px]">
+                                  <span className=" truncate max-w-[180px]">
                                     {form.formName}
                                   </span>
                                 </Button>
@@ -248,9 +257,10 @@ const ModuleList: React.FC<ModuleListProps> = memo(({
                 </SidebarMenuItem>
               </Collapsible>
             ))}
+            </div>
 
-            <SidebarFooter>
-              <div className="flex justify-between items-center py-4">
+            <SidebarFooter className="shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] ">
+              <div className="flex justify-between items-center">
                 <Button
                   variant="ghost"
                   onClick={() => handlePageChange(currentPage - 1)}

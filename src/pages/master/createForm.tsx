@@ -23,6 +23,7 @@ const CreateForm = () => {
         }
     }, [selectedModule, navigate]);
 
+
     // Breadcrumbs configuration
     useBreadcrumb(
         useMemo(
@@ -106,43 +107,15 @@ const CreateForm = () => {
 
     return (
         <div className="space-y-4">
-            {/* Error Message */}
-            {isError && (
-                <Alert variant="destructive" className="bg-red-50 border-red-200  mt-2">
-                    <AlertDescription>
-                        {createFormError && 'Error creating form. Please try again.'}
-                    </AlertDescription>
-                </Alert>
-            )}
-
             {/* Main Form Component */}
             <CreateFormComp
                 moduleName={selectedModule}
                 dataType={dataTypes}
                 handleCreateForm={handleCreateForm}
+                isSuccess={isSuccess}
+                errorMessage={createFormError && createFormError}
             // isSubmitting={isFormCreating}
             />
-
-            {/* Loading State */}
-            {isFormCreating && (
-                <Alert>
-                    <AlertDescription className="flex items-center gap-2">
-                        <Spinner />
-                        Creating form...
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            {/* Success Message */}
-            {isSuccess && (
-                <Alert className="bg-green-50 border-green-200">
-                    <AlertDescription className="text-green-800">
-                        Form created successfully! Redirecting...
-                    </AlertDescription>
-                </Alert>
-            )}
-
-
         </div>
     );
 };

@@ -1,28 +1,67 @@
+import Flex from '@/components/shared/Flex';
 import Text from '@/components/shared/Text';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { UI_ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/use-toast';
-import { useAddRecordMutation, useGetFormPreviewQuery, useLazyGetFormAsyncDataQuery } from '@/store/services/master/form';
+import { useAddRecordMutation, useGetFormPreviewQuery } from '@/store/services/master/form';
 import mapErrors from '@/utils/mapFormErrors';
-import { lazy, Suspense } from 'react'
+import { Delete } from 'lucide-react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
+import AsyncFieldAccordion from './components/ParentListAccordian';
+import useBreadcrumb from '@/hooks/useBreadCrumb';
 
 const FieldGenerator = lazy(() => import('@/components/shared/FieldGenerator'));
 
 
 const DataCreate = () => {
   const location = useLocation();
+  const [asyncFieldFormNames, setAsyncFieldFormNames] = useState<string[]>([]);
   const { formName, selectedModule } = location.state || {};
-  const { data: formTemplateData, error: formError } = useGetFormPreviewQuery(formName);
-  const [triggerGetFormAsyncData] = useLazyGetFormAsyncDataQuery();
+  const { data: formTemplateData } = useGetFormPreviewQuery(formName);
   const [addRecord] = useAddRecordMutation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const form = useForm()
+  const form = useForm({
+    defaultValues: {}
+  })
   const { setError } = form;
+
+  // Redirect if no module selected
+  useMemo(() => {
+    if (!formName && !selectedModule) {
+      navigate(UI_ROUTES.MASTER_DATA);
+    }
+  }, [formName, navigate]);
+
+  // Breadcrumbs
+  useBreadcrumb(
+    useMemo(
+      () => [
+        { type: 'link', title: formTemplateData?.moduleName ?? "", path: UI_ROUTES.MASTER_DATA, isActive: false },
+        { type: 'page', title: formTemplateData?.displayName ?? "", isActive: true },
+      ],
+      [formTemplateData]
+    )
+  );
+
+  useEffect(() => {
+    if (formTemplateData) {
+      const asyncFields = formTemplateData.fields.filter((field) =>
+        field.field.dataTypeName === "Asynchronous List"
+      );
+
+      const formNames = asyncFields
+        .map((asyncField) => asyncField.field.asynchronousField?.formName)
+        .filter((formName): formName is string => formName !== undefined);
+
+      setAsyncFieldFormNames(formNames);
+    }
+  }, [formTemplateData]);
+
   const onSubmit = async (data: any) => {
     try {
       const { default_id_pk, ...submitData } = data;
@@ -45,59 +84,31 @@ const DataCreate = () => {
       }
     }
   };
-  const handleFetchAsyncOptions = async (
-    pageNo: number,
-    pageSize: number,
-    formName: string,
-    fieldName: string,
-    query: string
-  ): Promise<{ options: { label: string; value: string }[]; totalPages: number }> => {
-    try {
-      const result = await triggerGetFormAsyncData({
-        pageNo,
-        pageSize,
-        formName,
-        fieldName,
-        searchQuery: query,
-      }).unwrap();
-
-      if (result && result.transformedData) {
-        const options = result.transformedData.map((item: any) => ({
-          label: item.label,
-          value: item.value,
-        }));
-        const totalPages = Math.ceil(result.totalRecords / pageSize);
-        return { options, totalPages };
-      }
-
-      return { options: [], totalPages: 0 };
-    } catch (error) {
-      // setAsyncError('Error fetching asynchronous data.');
-      console.error(error);
-      return { options: [], totalPages: 0 };
-    }
-  };
-
+  const handleClear = () => {
+    form.reset();
+  }
   return (
-    <div>
+    <div className='space-y-4'>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
             <CardHeader>
-              <div className='flex justify-between items-start'>
-                <div>
-                  <CardTitle>{formTemplateData?.displayName}</CardTitle>
-                  <Text>{formTemplateData?.formDescription}</Text>
-                </div>
-
-              </div>
+              <Flex className='items-start'>
+                <Flex dir='column'>
+                  <Text variant='title'>{formTemplateData?.displayName}</Text>
+                  <Text >{formTemplateData?.formDescription}</Text>
+                </Flex>
+                <Button type="button" className="flex items-center gap-2 bg-orange-100 border border-orange-600 text-orange-600 hover:bg-orange-200 focus:ring-2 focus:ring-orange-600" onClick={handleClear}>
+                  <Delete className="h-6 w-6" />
+                  Clear
+                </Button>
+              </Flex>
             </CardHeader>
             <CardContent>
               <Suspense fallback={<div>Loading Form...</div>}>
                 {formTemplateData && formTemplateData.fields && (
                   <FieldGenerator
                     fields={formTemplateData.fields}
-                    handleFetchAsyncOptions={handleFetchAsyncOptions}
                     control={form.control}
                     layout={formTemplateData?.formLayout || 'GRID_2'}
                     formAction={'add'}
@@ -125,6 +136,13 @@ const DataCreate = () => {
             </CardFooter>
           </Card>
         </form>
+        {asyncFieldFormNames && <Card>
+          <AsyncFieldAccordion
+            asyncFieldFormNames={asyncFieldFormNames}
+          />
+        </Card>}
+
+
       </Form>
     </div>
   )

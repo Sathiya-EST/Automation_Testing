@@ -99,7 +99,8 @@
         "generate": "Generate",
         "publish": "Publish",
         "search": "Search...",
-        "clear": "Clear"
+        "clear": "Clear",
+        "loading": "Loading..."
     },
     "master": {
         "form": {
@@ -165,7 +166,7 @@
                     },
                     "readOnlyField": {
                         "label": "Read Only",
-                        "desc": "This field cannot be edited"
+                        "desc": "This field cannot be Updateed"
                     },
                     "selectField": {
                         "label": "Select Options",
@@ -272,9 +273,69 @@
                     }
                 }
             },
-            "update": {},
+            "update": {
+                "title": "Update Form",
+                "position": {
+                    "label": "Position",
+                    "before": "Before",
+                    "after": "After"
+                },
+                "fieldName": {
+                    "label": "Field Name"
+                },
+                "updateBtn": "Update",
+                "publishBtn": "Publish",
+                "loadingForm": "Form Loading...",
+                "loading": "Loading.."
+            },
             "preview": {},
-            "publish": {}
+            "publish": {
+                "title": "Publish Setting",
+                "deleteLabel": "Delete",
+                "updateLabel": "Update",
+                "insertLabel": "Insert",
+                "viewLabel": "View",
+                "fullAccessLabel": "Full Access",
+                "specificAccessLabel": "Specific Access",
+                "noAccessLabel": "No Access",
+                "fullAccess": "Full Access to",
+                "noAccess": "No Access to",
+                "fullAccessTo": {
+                    "deleteAccess": "You have Provided Full Access to Delete any records. Any authorized user can remove records.",
+                    "updateAccess": "You have Provided Full Access to Update any records. Any authorized user can update records.",
+                    "createAccess": "You have Provided Full Access to Create any records. Any authorized user can create records.",
+                    "viewAccess": "You have Provided Full Access to View any records. Any authorized user can view records."
+                },
+                "noAccessTo": {
+                    "deleteAccess": "Currently, no permission has been granted for Delete.",
+                    "updateAccess": "Currently, no permission has been granted for Update.",
+                    "createAccess": "Currently, no permission has been granted for Create.",
+                    "viewAccess": "Currently, no permission has been granted for View."
+                },
+                "accessData": {
+                    "Role": {
+                        "title": "Role",
+                        "placeholder": "Select Role",
+                        "nodataPlaceholder": "No Roles selected...",
+                        "selected": "Selected Roles"
+                    },
+                    "Department": {
+                        "title": "Department",
+                        "placeholder": "Select Department",
+                        "nodataPlaceholder": "No Departments selected...",
+                        "selected": "Selected Departments"
+                    },
+                    "User": {
+                        "title": "User",
+                        "placeholder": "Select User",
+                        "nodataPlaceholder": "No Users selected...",
+                        "selected": "Selected Users"
+                    }
+                },
+                "publishBtn": "Publish",
+                "unpublishedBtn": "UnPublish",
+                "publishSuccess": "Form Published Successfully!"
+            }
         },
         "data": {
             "formData": {
@@ -284,6 +345,12 @@
                     "filterBtn": "Status",
                     "sortBtn": "Sort",
                     "viewBtn": "View",
+                    "dwldBtn": "Download",
+                    "exportAsExcel": "Export as Excel",
+                    "exporting": "Exporting ...",
+                    "dwldErrReport": "Download Error Report",
+                    "retry": "Retry",
+                    "uploadErr": "Bulk Upload Error",
                     "tableHeader": {
                         "formName": "Form Name",
                         "formDesc": "Form Description",
@@ -293,6 +360,20 @@
                     "statusFilter": {
                         "published": "Published",
                         "unPublished": "UnPublished"
+                    },
+                    "loadingModules": "Loading Modules...",
+                    "moduleErr": "Failed to load modules",
+                    "noModules": "No modules available.",
+                    "errformData": "Failed to fetch records",
+                    "noData": "No Records found for the selected FormName",
+                    "noDatadesc": "No Records found for the selected FormName",
+                    "bulk": {
+                        "title": "Bulk Import / Export",
+                        "dwldTemp": "Download Template",
+                        "importCSV": "Import CSV :",
+                        "fileUploaderTitle": "Upload CSV File",
+                        "uploadErr": "Some Data requires correction",
+                        "dwldErr": "Download Error Report,Fix Issues and re upload the file."
                     }
                 }
             }

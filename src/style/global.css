@@ -8,7 +8,10 @@
     }
   body {
     @apply bg-background text-foreground overflow-y-hidden;
-
+    @apply font-arial
+    }
+    .title {
+      @apply font-semibold text-lg font-inter ;
     }
 }
 
@@ -16,7 +19,7 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 25%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
@@ -44,7 +47,7 @@
 
   .light {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 25%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;

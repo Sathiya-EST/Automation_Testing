@@ -27,7 +27,6 @@ const FieldGenerator = lazy(() => import('@/components/shared/FieldGenerator'));
 
 export const FormEditSchema = z.object({
     position: z.enum([POSITION.BEFORE, POSITION.AFTER]),
-    // fieldName: z.string().optional(),
     fieldName: z.string(),
     fields: z.array(
         z.object({
@@ -177,6 +176,12 @@ const MasterFormPreview = () => {
     const [isFormControllerOpen, setIsFormControllerOpen] = useState(false)
     const [focusedField, setFocusedField] = useState<number | null>(null);
     const [formFieldNameOptions, setFormFieldNameOptions] = useState<SelectOptions[]>([])
+    // Redirect if no module selected
+    useMemo(() => {
+        if (!formName) {
+            navigate(UI_ROUTES.MASTER);
+        }
+    }, [formName, navigate]);
 
     // Breadcrumbs
     useBreadcrumb(
@@ -185,17 +190,10 @@ const MasterFormPreview = () => {
                 { type: 'link', title: selectedModule, path: UI_ROUTES.MASTER, isActive: false },
                 { type: 'page', title: formTemplateData?.displayName ?? "", isActive: true },
             ],
-            []
+            [formTemplateData]
         )
     );
 
-    // Redirect if no module selected
-    useMemo(() => {
-        if (!formName) {
-            navigate(UI_ROUTES.MASTER);
-        }
-    }, [formName, navigate]);
-    console.log("GA", formName, selectedModule);
 
     const fieldControllerRef = useRef<HTMLDivElement | null>(null);
 
@@ -336,27 +334,22 @@ const MasterFormPreview = () => {
 
     const onSubmit = async (data: any) => {
         try {
-            // Attempt to update the form
             await updateForm({ formName, data }).unwrap();
-
-            // Show success toast notification
             toast({
                 title: "Form Updated Successfully",
                 variant: "success",
             });
-
-            // Refetch the form template
+            setIsFormControllerOpen(false)
+            setIsUpdate(false)
+            form.reset();
             await refetchFormTemplate();
         } catch (error: any) {
             console.error("Error updating the form:", error);
-
-            // Extract detailed error message if available
             const validationMessage = error?.data?.validationMessage;
             const errorMessage = validationMessage
                 ? Object.values(validationMessage).join(", ")
                 : error?.data?.message || "An unexpected error occurred.";
 
-            // Show error toast notification
             toast({
                 title: "Error updating the form",
                 description: errorMessage,
@@ -399,7 +392,7 @@ const MasterFormPreview = () => {
     }, [form]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div>{t('common.loading')}</div>;
     }
 
     return (
@@ -407,21 +400,19 @@ const MasterFormPreview = () => {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <Flex dir='column' className='lg:flex-row justify-between space-y-4 lg:space-y-0 lg:space-x-1 mt-1'>
-                        {/* <div className={`flex-1 ${!isFormControllerOpen ? 'lg:flex-[4]' : 'lg:flex'}  space-y-2`}> */}
                         <div className={`flex-1 lg:flex-[4] space-y-2 transform transition-transform duration-500 ease-in-out translate-x-0`}>
 
                             {isUpdate &&
-
                                 <Card>
                                     <CardHeader className='max-h-5'>
-                                        <CardTitle className='font-bold text-xl '>Update Form</CardTitle></CardHeader>
+                                        <CardTitle className='font-bold text-xl '>{t("master.form.update.title")}</CardTitle></CardHeader>
                                     <CardContent className='mt-5'>
                                         {/* <Separator className='my-4' /> */}
                                         <div className="flex flex-col sm:flex-row sm:space-x-6 sm:space-y-0">
                                             {/* Position */}
                                             <FormItem className="flex-1">
                                                 <div className="flex flex-col space-y-2">
-                                                    <FormLabel>Position</FormLabel>
+                                                    <FormLabel>{t("master.form.update.position.label")}</FormLabel>
                                                     <FormControl>
                                                         <Controller
                                                             name="position"
@@ -448,7 +439,7 @@ const MasterFormPreview = () => {
                                             {/* Field Name */}
                                             <FormItem className="flex-1">
                                                 <div className="flex flex-col space-y-2">
-                                                    <FormLabel>Field Name</FormLabel>
+                                                    <FormLabel>{t("master.form.update.fieldName.label")}</FormLabel>
                                                     <FormControl>
                                                         <Controller
                                                             name="fieldName"
@@ -482,7 +473,7 @@ const MasterFormPreview = () => {
                                         <Button
                                             type='submit'
                                         >
-                                            Update
+                                            {t("master.form.update.updateBtn")}
                                         </Button>
                                     </CardFooter>
                                 </Card>
@@ -505,7 +496,7 @@ const MasterFormPreview = () => {
                                                         setIsFormControllerOpen(true)
                                                     }}
                                                 >
-                                                    Update
+                                                    {t('master.form.update.updateBtn')}
                                                 </Button>
                                             }
                                             <Button
@@ -513,19 +504,19 @@ const MasterFormPreview = () => {
                                                 className='bg-green-500 hover:bg-green-600 transition-colors'
                                                 onClick={handlePublish}
                                             >
-                                                <Globe aria-hidden="true" /> Publish
+                                                <Globe aria-hidden="true" /> {t('master.form.update.publishBtn')}
                                             </Button>
                                         </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
                                     {formTemplateData && formTemplateData.fields && (
-                                        <Suspense fallback={<div>Loading Form...</div>}>
+                                        <Suspense fallback={<div>{t('master.form.update.loadingForm')}</div>}>
                                             <FieldGenerator
                                                 fields={formTemplateData.fields}
-                                                handleFetchAsyncOptions={handleFetchAsyncOptions}
                                                 control={form.control}
                                                 layout={formTemplateData?.formLayout || 'GRID_1'}
+                                                submit={false}
                                             />
                                         </Suspense>
                                     )}

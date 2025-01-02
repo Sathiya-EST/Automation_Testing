@@ -128,6 +128,7 @@ export interface FormFieldsType {
     // formPurpose?: "MASTER" | "PROCESS";
     formLayout: string;
     fields: FormFieldType[];
+    isPublished: boolean
 }
 // Layout options
 export const layoutValues = Object.values(LAYOUT) as [string, ...string[]];

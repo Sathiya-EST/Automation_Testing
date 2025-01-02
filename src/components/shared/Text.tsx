@@ -1,6 +1,6 @@
 import React from 'react';
 
-type TextVariant = 'body' | 'heading' | 'caption';
+type TextVariant = 'body' | 'heading' | 'caption' | 'title'; // Added 'title' variant
 type TextSize = 'small' | 'medium' | 'large';
 type TextColor = 'default' | 'primary' | 'secondary' | 'danger';
 
@@ -25,6 +25,7 @@ const Text: React.FC<TextProps> = ({
         body: 'font-normal',
         heading: 'font-bold',
         caption: 'font-light text-xs',
+        title: 'font-semibold text-2xl',
     };
 
     const sizeStyles = {
@@ -40,7 +41,7 @@ const Text: React.FC<TextProps> = ({
         danger: 'text-red-600 dark:text-red-400',
     };
 
-    const combinedStyles = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${colorStyles[color]} ${className}`;
+    const combinedStyles = variant === 'title' ? "title" : `${className} ${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${colorStyles[color]}`;
 
     return <span className={combinedStyles}>{children}</span>;
 };

@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import FormUpload from '@/assets/FormUpload';
 import { DataTypes, layoutValues } from '@/types/data';
 import { useTranslation } from 'react-i18next';
+import ErrorAlert from '@/components/shared/ErrorAlert';
 
 
 export const FormSchema = z.object({
@@ -159,9 +160,11 @@ interface CreateFormProps {
     moduleName: string
     dataType: DataTypes[]
     handleCreateForm: (data: FormType) => void
+    isSuccess: boolean
+    errorMessage: any
 }
 
-const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handleCreateForm }) => {
+const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handleCreateForm, isSuccess, errorMessage }) => {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -294,7 +297,11 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                 <Form {...form}>
                     <form className="space-x-4 w-full" onSubmit={form.handleSubmit(onSubmit)}>
                         <div className="flex gap-4">
-                            <section className="flex-[4]">
+                            <section className="flex-[4] space-y-2">
+                                {errorMessage?.validationMessage &&
+                                    Object.entries(errorMessage.validationMessage).map(([field, message]) => (
+                                        <ErrorAlert key={field} message={typeof message === 'string' ? message : 'An unknown error occurred.'} />
+                                    ))}
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>
@@ -420,10 +427,12 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                         </div>
                     </form>
                 </Form>
-                <DialogContent className="sm:max-w-100 h-auto">
-                    <FormUpload />
-                    <DialogTitle className='w-full text-center text-xl'>Form Generated Successfully!</DialogTitle>
-                </DialogContent>
+                {isSuccess &&
+                    <DialogContent className="sm:max-w-100 h-auto">
+                        <FormUpload />
+                        <DialogTitle className='w-full text-center text-xl'>Form Generated Successfully!</DialogTitle>
+                    </DialogContent>
+                }
             </Dialog>
         </>
     );

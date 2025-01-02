@@ -1,38 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { Control, useFormContext } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Checkbox } from "../ui/checkbox";
 import DatePicker from "./Datepicker";
 import TimePicker from "./TimePicker";
-import AsyncSelectDropdown from "./AsyncSelectDropdown";
 import DateTimePicker from "./DateTimepicker";
-import { CaseSensitive, File, Hash } from "lucide-react";
-import SelectDropdown from "./DropDown";
+import { CaseSensitive, Hash } from "lucide-react";
 import { FormFieldType } from "@/types/data";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import CustomSelect from "./CustomSelect";
 import CustomAsyncSelect from "./CustomAsyncSelect";
+import FileUpload from "@/pages/master/components/FileUpload";
 
 interface FormProps {
     fields: FormFieldType[];
     control: Control<any>;
     // onSubmit: (data: FieldValues) => Promise<void>
-    handleFetchAsyncOptions: (
-        pageNo: number,
-        pageSize: number,
-        formName: string,
-        fieldName: string,
-        query: string
-    ) => Promise<{ options: { label: string; value: string }[]; totalPages: number }>;
+    // handleFetchAsyncOptions: (
+    //     pageNo: number,
+    //     pageSize: number,
+    //     formName: string,
+    //     fieldName: string,
+    //     query: string
+    // ) => Promise<{ options: { label: string; value: string }[]; totalPages: number }>;
     layout: string;
-    formAction?: 'view' | 'update' | 'add'
+    formAction?: 'view' | 'update' | 'add';
+    submit?: boolean
 }
 
-const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsyncOptions, layout, formAction }) => {
+const FieldGenerator: React.FC<FormProps> = ({ fields, control, layout, formAction, submit = true }) => {
     const { formState: { errors } } = useFormContext();
-    const [asyncDataOptions, setAsyncDataOptions] = useState<{ label: string; value: string }[]>([]);
-    const [totalAsyncOptions, setTotalAsyncOptions] = useState(0);
-    const [asyncOptionsLoading, setAsyncOptionsLoading] = useState(false);
     const getGridClass = (layout: string) => {
         switch (layout) {
             case "GRID_1":
@@ -45,24 +42,7 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                 return "grid-cols-1";
         }
     };
-    const handleFetchOptions = async (
-        formName: string,
-        fieldName: string,
-        pageNo: number,
-        pageSize: number,
-        query: string
-    ) => {
-        setAsyncOptionsLoading(true);
-        try {
-            const { options, totalPages } = await handleFetchAsyncOptions(pageNo, pageSize, formName, fieldName, query);
-            setAsyncDataOptions(options || []);
-            setTotalAsyncOptions(totalPages);
-        } catch (error) {
-            console.error("Error fetching options:", error);
-        } finally {
-            setAsyncOptionsLoading(false);
-        }
-    };
+
     const renderField = (field: FormFieldType) => {
         const { name, label, field: fieldProps } = field;
         const {
@@ -76,8 +56,8 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
             asynchronousField,
         } = fieldProps;
 
-        // const isReadOnly = formAction === "view" || readOnly;
         const isReadOnly = formAction === "add" ? false : formAction === "view" ? true : readOnly;
+        const isRequired = !submit ? false : required
         const fieldError: any = errors[name];
 
         switch (dataTypeName) {
@@ -88,7 +68,16 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Input {...field} type="text" required={required} placeholder={placeholder} className="pl-10" disabled={isReadOnly} defaultValue={defaultValue} />
+                                    <Input {...field}
+                                        value={field.value ?? ""}
+                                        onChange={field.onChange}
+                                        type="text"
+                                        required={isRequired}
+                                        placeholder={placeholder}
+                                        className="pl-10"
+                                        disabled={isReadOnly}
+                                        defaultValue={defaultValue}
+                                    />
                                     <CaseSensitive size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
 
@@ -108,7 +97,20 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} defaultValue={defaultValue} />
+                                    <Input
+                                        {...field}
+                                        type="number"
+                                        value={field.value ?? ""}
+                                        placeholder={placeholder}
+                                        className="pl-10"
+                                        disabled={isReadOnly}
+                                        defaultValue={defaultValue}
+                                        onChange={(e) => {
+                                            const value = e.target.value ? Number(e.target.value) : null;
+                                            field.onChange(value);
+                                        }}
+
+                                    />
                                     <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
 
@@ -129,7 +131,16 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Input {...field} type="number" placeholder={placeholder} className="pl-10" disabled={isReadOnly} defaultValue={defaultValue} />
+                                    <Input
+                                        {...field}
+                                        type="number"
+                                        value={field.value ?? ""}
+                                        onChange={field.onChange}
+                                        placeholder={placeholder}
+                                        className="pl-10"
+                                        disabled={isReadOnly}
+                                        defaultValue={defaultValue}
+                                    />
                                     <Hash size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                 </div>
                             </FormControl>
@@ -149,9 +160,8 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                                 <CustomSelect
                                     {...field}
                                     options={defaultChoice || []}
-                                    // options={defaultChoice?.map((option) => ({ label: option, value: option })) || []}
                                     readOnly={isReadOnly}
-                                // multiple={multiple ?? false}
+                                    multiple={multiple ?? false}
                                 />
                             </FormControl>
                             {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
@@ -164,24 +174,29 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
 
             case "Check Box / Boolean":
                 return (
-                    <FormField key={name} control={control} name={name} render={({ field }) => (
-                        <FormItem>
-                            <div className="flex items-center space-x-2 cursor-pointer">
-                                <FormControl>
-                                    <Checkbox
-                                        {...field}
-                                        disabled={isReadOnly}
-                                    />
-                                </FormControl>
-                                <FormLabel htmlFor={name} >{label}</FormLabel>
-
-                            </div>
-                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
-                            <FormMessage>
-                                {fieldError?.message ? fieldError.message : null}
-                            </FormMessage>
-                        </FormItem>)}
+                    <FormField
+                        key={name}
+                        control={control}
+                        name={name}
+                        render={({ field }) => (
+                            <FormItem>
+                                <div className="flex items-center space-x-2 cursor-pointer">
+                                    <FormControl>
+                                        <Checkbox
+                                            id={name}
+                                            checked={field.value || false}
+                                            onCheckedChange={(checked) => field.onChange(checked)}
+                                            disabled={isReadOnly}
+                                            className="my-auto"
+                                        />
+                                    </FormControl>
+                                    <FormLabel htmlFor={name}>{label}</FormLabel>
+                                </div>
+                                <FormMessage>{fieldError?.message}</FormMessage>
+                            </FormItem>
+                        )}
                     />
+
                 );
 
             case "Date":
@@ -226,20 +241,19 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                         <FormItem>
                             <FormLabel htmlFor={name}>{label}</FormLabel>
                             <FormControl>
-                                <div className="relative">
-                                    <Input type="file" id={name} name={name} value={field.value} onChange={field.onChange} className="pl-10" required={required} multiple={multiple ?? false} readOnly={isReadOnly}
-                                    // defaultValue={defaultValue}
-                                    />
-                                    <File size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                                </div>
+                                <FileUpload
+                                    onFileUpload={(fileData) => field.onChange(fileData)}
+                                    acceptTypes={defaultChoice ?? []}
+                                    maxFileLimit={5}
+                                />
 
                             </FormControl>
-                            {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}
+                            {/* Display form validation error message */}
                             <FormMessage>
                                 {fieldError?.message ? fieldError.message : null}
                             </FormMessage>
-                        </FormItem>)}
-                    />
+                        </FormItem>
+                    )} />
                 );
             case "time":
                 return (
@@ -266,13 +280,13 @@ const FieldGenerator: React.FC<FormProps> = ({ fields, control, handleFetchAsync
                                     {...field}
                                     formName={asynchronousField?.formName ?? ""}
                                     fieldName={asynchronousField?.fieldName ?? ""}
-                                    options={asyncDataOptions}
-                                    isLoading={asyncOptionsLoading}
-                                    totalPages={totalAsyncOptions || 0}
-                                    fetchOptions={handleFetchOptions}
+                                    // options={asyncDataOptions}
+                                    // isLoading={asyncOptionsLoading}
+                                    // totalPages={totalAsyncOptions || 0}
+                                    // fetchOptions={handleFetchOptions}
                                     placeholder="Select an option"
                                     readOnly={isReadOnly}
-                                // multiple={multiple ?? false}
+                                    multiple={multiple ?? false}
                                 />
                             </FormControl>
                             {/* <FormDescription>{fieldError?.message && <p>{fieldError.message}</p>}</FormDescription> */}

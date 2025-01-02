@@ -7,10 +7,10 @@ import {
 } from '@/components/ui/resizable';
 import { UI_ROUTES } from '@/constants/routes';
 import useBreadcrumb from '@/hooks/useBreadCrumb';
-import { BreadcrumbItemType, FileUploadData, Filter, GetReqParams } from '@/types/data';
+import { FileUploadData, Filter, GetReqParams } from '@/types/data';
 import ModuleList from './components/ModuleList';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircleIcon, AlertTriangle, Download, Eye, FileDown, Plus } from 'lucide-react';
+import { AlertCircleIcon, Download, Eye, FileDown, Plus } from 'lucide-react';
 import { useGetModuleMutation } from '@/store/services/master/module';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +27,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Separator } from '@/components/ui/separator';
 import { downLoadCSVTemplate, dwldErrReport, exportAsExcel, uploadCSV } from '@/utils/useCSVDownload';
 import { MASTER_API } from '@/constants/api.constants';
+import ErrorAlert from '@/components/shared/ErrorAlert';
+import FormSelectionPlaceholder from './components/FormSelectionPlaceholder';
+import InfoAlert from '@/components/shared/InfoAlert';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateMasterData } from '@/store/slice/masterSlice';
+import { RootState } from '@/store';
 
 interface MasterColumns {
   displayName: string;
@@ -41,10 +47,13 @@ const DataList: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [getModule, { data: moduleData, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
-
+  const dispatch = useDispatch();
+  const activeForm = useSelector((state: RootState) => state.master.data?.formName);
+  const activeModule = useSelector((state: RootState) => state.master.data?.moduleName);
+  const [isExporting, setIsExporting] = useState(false);
   const [moduleSearchVal, setModuleSearchVal] = useState("");
-  const [selectedModule, setSelectedModule] = useState<string>('');
-  const [selectedForm, setSelectedForm] = useState<string | null>(null);
+  const [selectedModule, setSelectedModule] = useState<string>(activeModule || "");
+  const [selectedForm, setSelectedForm] = useState<string>(activeForm || "");
   const [isDwldErrReport, setIsDwldErrReport] = useState<boolean>(false)
   const [moduleReqParams, setModuleReqParams] = useState<GetReqParams>({
     pageNo: 1,
@@ -56,16 +65,7 @@ const DataList: React.FC = () => {
     pageNo: 1,
     pageSize: 10,
     sort: [],
-    filters: selectedForm
-      ? [
-        {
-          key: "moduleName",
-          operator: "EQUAL",
-          field_type: "STRING",
-          value: selectedForm,
-        },
-      ]
-      : [],
+    filters: [],
   });
 
   // Breadcrumbs
@@ -78,18 +78,15 @@ const DataList: React.FC = () => {
       []
     )
   );
-  // Redirect if no module selected
-  useMemo(() => {
-    if (!selectedModule) {
-      navigate(UI_ROUTES.MASTER);
-    }
-  }, [selectedModule, navigate]);
 
-
-  const { data: formRecords, error: recordError, isLoading: recordLoading } = useGetFormListDataQuery({
+  const { data: formRecords, error: recordError, isLoading: recordLoading, refetch: formRecordsRefetch } = useGetFormListDataQuery({
     reqParams: formReqParams,
     formName: selectedForm && selectedForm || '',
   });
+
+  useEffect(() => {
+    formRecordsRefetch();
+  }, [formRecordsRefetch, formReqParams]);
 
   const { data: formColumnData } = useGetFormListColumnsQuery({ formName: selectedForm && selectedForm || '' });
 
@@ -110,7 +107,7 @@ const DataList: React.FC = () => {
             onClick={formName ? () => handleView(formName) : undefined}
           >
             <Eye className="w-4 h-4" />
-            View
+            {t('master.data.formData.list.viewBtn')}
           </Button >
         )
       }
@@ -127,23 +124,24 @@ const DataList: React.FC = () => {
   const handleFormSelect = useCallback((formName: string, moduleName: string) => {
     setSelectedForm(formName);
     setSelectedModule(moduleName);
-    console.log(formName, moduleName);
-  }, [])
+    setFormReqParams({
+      pageNo: 1,
+      pageSize: 10,
+      sort: [],
+      filters: [],
+    })
+    dispatch(updateMasterData({
+      formName,
+      moduleName
+    }));
+  }, [dispatch])
+
   useEffect(() => {
     (async () => {
       try {
         await getModule(moduleReqParams);
       } catch (err) {
-        toast({
-          title: "Error Fetching Modules",
-          description: "Failed to load modules. Please refresh the page.",
-          variant: "destructive",
-          action: (
-            <ToastAction altText="Retry" onClick={() => getModule(moduleReqParams)}>
-              Retry
-            </ToastAction>
-          ),
-        });
+        console.log("Download Error Report");
       }
     })();
   }, [getModule, moduleReqParams, toast]);
@@ -157,8 +155,8 @@ const DataList: React.FC = () => {
     navigate(`${UI_ROUTES.MASTER_DATA_CREATE}`, { state: { formName: selectedForm, selectedModule } });
   };
 
-  const handleAddFilter = (key: string, operator: 'LIKE' | 'EQUAL', field_type: 'STRING' | 'BOOLEAN', value: string | boolean) => {
-    setRequestParams((prevParams) => {
+  const handleAddFormFilter = (key: string, operator: 'LIKE' | 'EQUAL', field_type: 'STRING' | 'BOOLEAN', value: string | boolean) => {
+    setFormReqParams((prevParams) => {
       const existingFilterIndex = prevParams.filters.findIndex(filter => filter.key === key);
 
       if (existingFilterIndex !== -1) {
@@ -190,24 +188,15 @@ const DataList: React.FC = () => {
     const field_type = 'STRING';
     const value = query;
 
-    handleAddFilter(key, operator, field_type, value);
+    handleAddFormFilter(key, operator, field_type, value);
   };
-  const renderErrorAlert = (errorMessage: string) => (
-    <Alert variant="destructive">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Error</AlertTitle>
-      <AlertDescription>
-        {errorMessage}
-      </AlertDescription>
-    </Alert>
-  );
 
   const handleFileUpload = async (fileData: FileUploadData) => {
     const uploadResult = await uploadCSV(fileData);
     setIsDwldErrReport(false)
     if (!uploadResult.success) {
       toast({
-        title: "Bulk Upload Error",
+        title: t('master.data.formData.list.noData'),
         description: (
           <>
             <p>{uploadResult.message}</p>
@@ -217,7 +206,7 @@ const DataList: React.FC = () => {
               size="sm"
               onClick={() => window.open(uploadResult.downloadLink, '_blank')}
             >
-              Download Error Report
+              {t('master.data.formData.list.dwldErrReport')}
             </Button>
           </>
         ),
@@ -225,9 +214,9 @@ const DataList: React.FC = () => {
         action: (
           <ToastAction
             altText="Retry"
-            onClick={() => fetchModules()}
+            onClick={() => getModule(moduleReqParams)}
           >
-            Retry
+            {t('master.data.formData.list.retry')}
           </ToastAction>
         ),
       });
@@ -239,20 +228,40 @@ const DataList: React.FC = () => {
     }
   };
 
-  const handleExportFormRecord = () => {
+  const handleExportFormRecord = async () => {
+    try {
+      setIsExporting(true);
+      const exportAsExcelUrl = `${MASTER_API.EXPORT_AS_EXCEL}?formName=${selectedForm}`;
+      const params = {
+        pageNo: 1,
+        pageSize: formRecords?.totalRecords ?? 5,
+        filters: formReqParams?.filters ?? [],
+        sort: []
+      };
+      const defaultFileName = `${formColumnData?.data.displayName}.xlsx`;
 
-    const exportAsExcelUrl = `${MASTER_API.EXPORT_AS_EXCEL}?formName=${selectedForm}`
-    const params = {
-      pageNo: 1,
-      pageSize: formRecords?.totalRecords ?? 5,
-      filters: filters ?? [],
-      sort: []
+      await exportAsExcel(exportAsExcelUrl, params, defaultFileName);
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setIsExporting(false);
     }
-    const defaultFileName = `${formColumnData?.data.displayName}.xlsx`;
-
-    exportAsExcel(exportAsExcelUrl, params, defaultFileName)
-
   };
+
+  // const handleExportFormRecord = () => {
+
+  //   const exportAsExcelUrl = `${MASTER_API.EXPORT_AS_EXCEL}?formName=${selectedForm}`
+  //   const params = {
+  //     pageNo: 1,
+  //     pageSize: formRecords?.totalRecords ?? 5,
+  //     filters: formReqParams?.filters ?? [],
+  //     sort: []
+  //   }
+  //   const defaultFileName = `${formColumnData?.data.displayName}.xlsx`;
+
+  //   exportAsExcel(exportAsExcelUrl, params, defaultFileName)
+
+  // };
   const handleDownloadTemplate = () => {
     const defaultDwldTemplateFileName = `${formColumnData?.data.displayName}.csv`;
     const downloadCSVFileUrl = `${MASTER_API.DOWNLOAD_CSV}?formName=${selectedForm}`
@@ -271,18 +280,14 @@ const DataList: React.FC = () => {
     const fieldType = "STRING";
 
     setModuleReqParams((prev) => {
-      // Remove the `moduleName` key filter if the value is empty
       const filters = prev.filters.filter((f) => f.key !== key);
 
       if (searchVal.trim() === "") {
-        // If the search value is empty, return the updated filters without adding a new one
         return {
           ...prev,
           filters,
         };
       }
-
-      // Otherwise, add the new filter
       const newFilter: Filter = {
         key,
         operator,
@@ -296,6 +301,25 @@ const DataList: React.FC = () => {
       };
     });
   };
+  const defaultSearchFilter = formReqParams.filters.find(
+    (filter) => filter.key === 'default_search_criteria'
+  );
+
+  const searchKey = typeof defaultSearchFilter?.value === 'string'
+    ? defaultSearchFilter.value
+    : undefined;
+
+  const initialSearchValue = typeof defaultSearchFilter?.value === 'string'
+    ? defaultSearchFilter.value
+    : '';
+
+  const { isPublished, createRow } = formColumnData?.data || {};
+
+  const [hasViewAccess, hasCreateAccess] = [
+    isPublished,
+    createRow,
+  ];
+
   return (
     <div>
       <ResizablePanelGroup
@@ -304,25 +328,27 @@ const DataList: React.FC = () => {
       >
         {/* First Panel (Module List) */}
         <ResizablePanel defaultSize={20} className="h-full flex-grow">
-          {moduleLoading ? (
+          {moduleLoading && !moduleData ? (
             <Spinner />
           ) : moduleError ? (
-            renderErrorAlert("Failed to load modules")
+            <ErrorAlert message={t('master.data.formData.list.moduleErr')} />
           ) : moduleData ? (
             <ModuleList
               data={moduleData.data}
               handleFormSelect={handleFormSelect}
-              onPageChange={function (page: number): void {
-                throw new Error('Function not implemented.');
+              onPageChange={(curPage: number) => {
+                setModuleReqParams((prev) => ({ ...prev, pageNo: curPage }));
               }}
               currentPage={moduleReqParams.pageNo}
               totalRecords={moduleData.totalRecords}
               itemsPerPage={moduleReqParams.pageSize}
               onSearch={handleModuleSearch}
               initialSearchVal={moduleSearchVal}
+              initialActiveModule={selectedModule}
+              initialActiveForm={selectedForm}
             />
           ) : (
-            <div>No modules available.</div>
+            <div>{t('master.data.formData.list.noModules')}</div>
           )}
         </ResizablePanel>
 
@@ -331,103 +357,119 @@ const DataList: React.FC = () => {
 
         {/* Second Panel (Form/Detail View) */}
         <ResizablePanel defaultSize={80} className="h-full bg-background flex-grow">
-          <Dialog>
-            <DialogContent>
-              <DialogHeader >
-                <DialogTitle>Bulk Import / Export</DialogTitle>
-                <DialogDescription></DialogDescription>
-              </DialogHeader>
-              <>
-                <Button
-                  variant="default"
-                  className="rounded text-white flex space-x-2"
-                  onClick={handleExportFormRecord}
-                >
-                  <FileDown />
-                  Export As Excel
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded flex space-x-2"
-                  onClick={handleDownloadTemplate}
-                >
-                  <Download />
-                  Download Template
-                </Button>
-                <Separator />
-                <Text className='text-md font-semibold'>Import CSV : </Text>
-                <FileUploader
-                  acceptedFileTypes={['.csv']}
-                  title="CSV Uploader"
-                  onFileUpload={handleFileUpload}
-                  defaultFileName={formColumnData?.data.displayName}
-                />
-                {isDwldErrReport && (
-                  <Alert className="flex items-center p-3 bg-red-50 border-l-4 border-red-500 rounded-md">
-                    <AlertCircleIcon className="w-5 h-5" color='red' />
-                    <div className="flex-1">
-                      <AlertTitle className="text-sm font-semibold text-red-700">Bulk Upload Error</AlertTitle>
-                      <AlertDescription className="text-xs text-red-600">
-                        Some data requires corrections.
-                        <span className="font-medium"> Download the error report</span>, fix issues, and re-upload.
-                      </AlertDescription>
-                    </div>
-                    <Button className="bg-red-500 hover:bg-red-600 text-white pl-3" onClick={handleDwldErrReport}>
-                      Download
+          {formColumnData ? (
+            hasViewAccess ? (
+              <Dialog>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{formColumnData?.data.displayName} - {t('master.data.formData.list.bulk.title')}</DialogTitle>
+                    <DialogDescription></DialogDescription>
+                  </DialogHeader>
+                  <>
+                    <Button
+                      variant="default"
+                      className="rounded text-white flex space-x-2"
+                      onClick={handleExportFormRecord}
+                    >
+                      <FileDown />
+                      {isExporting ? t('master.data.formData.list.exporting') : t('master.data.formData.list.exportAsExcel')}
                     </Button>
-                  </Alert>
-                )}
-              </>
-            </DialogContent>
-            <div className="p-4 space-y-1 bg-card ">
-              <Text className="text-lg font-bold">{selectedModule} - {formColumnData?.data.displayName}</Text>
-              <div className="flex items-center space-x-4">
-                <SearchInput
-                  onSearch={(query: string) => handleSearch(query)}
-                  className="flex-1"
-                />
-                <DialogTrigger asChild>
-                  <button type='button' className='px-3 py-2 border rounded hover:bg-slate-200'>
-                    <CSVUploadIcon className='dark:fill-white light:bg-gray-700' />
-                  </button>
-                </DialogTrigger>
-                <Button
-                  variant="default"
-                  className="rounded text-white"
-                  onClick={handleCreate}
-                >
-                  <Plus size={18} strokeWidth={3} />
-                  {t('master.data.formData.list.createBtn')}
-                </Button>
-              </div>
-              <div className="pt-1">
-                {/* Error Handling for Form Data */}
-                {recordError && renderErrorAlert("Failed to load form data")}
-
-                {recordLoading && <Spinner />}
-
-                {formRecords && formColumnData && formRecords.data && formColumnData.columnData ? (
-                  <AdvancedTable<MasterColumns>
-                    columns={updatedColumns ?? []}
-                    data={formRecords.data}
-                    totalCount={formRecords?.totalRecords || 5}
-                    requestParams={formReqParams}
-                    onRequestParamsChange={onFormRequestParamsChange}
-                  />
-                ) : (
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>No Data</AlertTitle>
-                    <AlertDescription>
-                      No Data found for the selected Form Name.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </div>
-          </Dialog>
-
+                    {hasCreateAccess && (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="rounded flex space-x-2"
+                          onClick={handleDownloadTemplate}
+                        >
+                          <Download />
+                          {t('master.data.formData.list.bulk.dwldTemp')}
+                        </Button>
+                        <Separator />
+                        <Text className="text-md font-semibold">{t('master.data.formData.list.bulk.importCSV')}</Text>
+                        <FileUploader
+                          acceptedFileTypes={['.csv']}
+                          title={t('master.data.formData.list.bulk.fileUploaderTitle')}
+                          onFileUpload={handleFileUpload}
+                          defaultFileName={formColumnData?.data.displayName}
+                        />
+                        {isDwldErrReport && (
+                          <Alert className="flex items-center p-3 bg-red-50 border-l-4 border-red-500 rounded-md">
+                            <AlertCircleIcon className="w-5 h-5" color="red" />
+                            <div className="flex-1">
+                              <AlertTitle className="text-sm font-semibold text-red-700">
+                                {t('master.data.formData.list.bulk.uploadErr')}
+                              </AlertTitle>
+                              <AlertDescription className="text-xs text-red-600">
+                                {t('master.data.formData.list.bulk.uploadErr')}
+                                <span className="font-medium"> {t('master.data.formData.list.bulk.dwldErr')}</span>
+                              </AlertDescription>
+                            </div>
+                            <Button
+                              className="bg-red-500 hover:bg-red-600 text-white pl-3"
+                              onClick={handleDwldErrReport}
+                            >
+                              {t('master.data.formData.list.dwldBtn')}
+                            </Button>
+                          </Alert>
+                        )}
+                      </>
+                    )}
+                  </>
+                </DialogContent>
+                <div className="p-4 space-y-1 bg-card">
+                  <Text variant="title">{formColumnData?.data.moduleName} - {formColumnData?.data.displayName}</Text>
+                  <div className="flex items-center space-x-4">
+                    <SearchInput
+                      key={searchKey}
+                      onSearch={(query: string) => handleSearch(query)}
+                      className="flex-1"
+                      initialValue={initialSearchValue}
+                    />
+                    <DialogTrigger asChild>
+                      <button type="button" className="px-3 py-2 border rounded hover:bg-slate-200">
+                        <CSVUploadIcon className="dark:fill-white light:bg-gray-700" />
+                      </button>
+                    </DialogTrigger>
+                    {hasCreateAccess && (
+                      <Button
+                        variant="default"
+                        className="rounded text-white"
+                        onClick={handleCreate}
+                      >
+                        <Plus size={18} strokeWidth={3} />
+                        {t('master.data.formData.list.createBtn')}
+                      </Button>
+                    )}
+                  </div>
+                  <div className="pt-1">
+                    {recordError && <ErrorAlert message={t('master.data.formData.list.errformData')} />}
+                    {recordLoading && <Spinner />}
+                    {formRecords?.data && formColumnData?.columnData ? (
+                      <AdvancedTable<MasterColumns>
+                        columns={updatedColumns ?? []}
+                        data={formRecords.data ?? []}
+                        totalCount={formRecords?.totalRecords || 5}
+                        requestParams={formReqParams}
+                        onRequestParamsChange={onFormRequestParamsChange}
+                      />
+                    ) : (
+                      <InfoAlert
+                        title={t('master.data.formData.list.noData')}
+                        desc={t('master.data.formData.list.noDatadesc')}
+                      />
+                    )}
+                  </div>
+                </div>
+              </Dialog>
+            ) : (
+              'You don’t have access to this table'
+            )
+          ) : (
+            <FormSelectionPlaceholder />
+          )}
         </ResizablePanel>
+
+
       </ResizablePanelGroup>
     </div>
   );

@@ -1,22 +1,27 @@
 import { useEffect, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { FormControl, FormItem, FormMessage } from "@/components/ui/form";
+import { FormControl, FormItem } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { useLazyGetFormAsyncDataQuery } from "@/store/services/master/form";
 
 interface AsyncSelectDropdownProps {
     formName: string;
     fieldName: string;
-    onChange: (value: string) => void; // Single string value
-    value: string; // Single string value
+    onChange: (value: string[] | string) => void;
+    value: string[] | string;
     placeholder: string;
-    options: { label: string; value: string | null }[]; // Options array
-    isLoading: boolean;
-    totalPages: number;
-    fetchOptions: (formName: string, fieldName: string, pageNo: number, pageSize: number, query: string) => void;
     readOnly?: boolean;
+    multiple?: boolean;
 }
 
 const CustomAsyncSelect = ({
@@ -25,30 +30,57 @@ const CustomAsyncSelect = ({
     onChange,
     value,
     placeholder,
-    options,
-    isLoading,
-    totalPages,
-    fetchOptions,
     readOnly,
+    multiple = false,
 }: AsyncSelectDropdownProps) => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [pageNo, setPageNo] = useState(1);
+    const [asyncOptions, setAsyncOptions] = useState<{ label: string; value: string }[]>([]);
 
-    // Filter options to eliminate empty strings and null values
-    const filteredOptions = options.filter(
-        (option) => option.value && option.value.trim() !== ""
-    );
-
-    const selectedRecord = filteredOptions.find((record) => record.value === value);
+    const [triggerGetFormAsyncData, { isLoading }] = useLazyGetFormAsyncDataQuery();
 
     useEffect(() => {
-        if (fetchOptions) {
-            fetchOptions(formName, fieldName, pageNo, 10, searchQuery);
-        }
-    }, [searchQuery, pageNo]);
+        const fetchOptions = async () => {
+            try {
+                const result = await triggerGetFormAsyncData({
+                    pageNo: 1,
+                    pageSize: 1000,
+                    formName,
+                    fieldName,
+                    searchQuery,
+                }).unwrap();
+
+                if (result && result.transformedData) {
+                    const options = result.transformedData.map((item: any) => ({
+                        label: item.label,
+                        value: item.value,
+                    }));
+                    setAsyncOptions(options);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchOptions();
+    }, [searchQuery, formName, fieldName, triggerGetFormAsyncData]);
+
+    // Handle the selected value(s) (supports both single and multiple selections)
+    const selectedValues = Array.isArray(value) ? value : [value];
+
+    // Find the records for selected values
+    const selectedRecords = multiple
+        ? asyncOptions.filter((record) => selectedValues.includes(record.value))
+        : asyncOptions.filter((record) => record.value === selectedValues[0]);
 
     const handleSelection = (selectedValue: string) => {
-        onChange(selectedValue);
+        if (multiple) {
+            const newSelectedValues = selectedValues.includes(selectedValue)
+                ? selectedValues.filter((val) => val !== selectedValue)
+                : [...selectedValues, selectedValue];
+            onChange(newSelectedValues);
+        } else {
+            onChange([selectedValue]);
+        }
     };
 
     return (
@@ -60,14 +92,23 @@ const CustomAsyncSelect = ({
                             <Button
                                 variant="outline"
                                 role="combobox"
-                                className={cn("w-full justify-between", !selectedRecord && "text-muted-foreground")}
+                                aria-expanded="false"
+                                aria-controls="async-select-dropdown"
+                                className={cn("w-full justify-between", !selectedRecords.length && "text-muted-foreground")}
                                 disabled={readOnly}
                             >
-                                {selectedRecord ? (
-                                    <p className="font-normal">{selectedRecord.label}</p>
+                                {multiple ? (
+                                    <p className="font-normal">
+                                        {selectedRecords.length > 0
+                                            ? selectedRecords.map((record) => record.label).join(", ")
+                                            : placeholder}
+                                    </p>
+                                ) : selectedRecords.length > 0 ? (
+                                    <p className="font-normal">{selectedRecords[0].label}</p>
                                 ) : (
                                     <p className="text-slate-400 font-normal">{placeholder}</p>
                                 )}
+
                                 {isLoading ? (
                                     <Loader2 className="ml-2 animate-spin text-primary" />
                                 ) : (
@@ -77,7 +118,7 @@ const CustomAsyncSelect = ({
                         </FormControl>
                     </PopoverTrigger>
                     {!readOnly && (
-                        <PopoverContent className="w-[200px] p-0">
+                        <PopoverContent id="async-select-dropdown" className="w-[200px] p-0">
                             <Command>
                                 <CommandInput
                                     placeholder="Search records..."
@@ -85,6 +126,7 @@ const CustomAsyncSelect = ({
                                     value={searchQuery}
                                     onValueChange={(newValue) => setSearchQuery(newValue)}
                                     autoFocus
+                                    aria-label="Search for options"
                                 />
                                 <CommandList>
                                     {isLoading ? (
@@ -95,16 +137,22 @@ const CustomAsyncSelect = ({
                                         <>
                                             <CommandEmpty>No records found.</CommandEmpty>
                                             <CommandGroup>
-                                                {filteredOptions.map((option) => (
+                                                {asyncOptions.map((option) => (
                                                     <CommandItem
                                                         key={option.value}
                                                         value={option.value || ""}
                                                         onSelect={() => handleSelection(option.value || "")}
-                                                    >
-                                                        {option.label}
-                                                        {value === option.value && (
-                                                            <Check className="ml-auto opacity-100" />
+                                                        className={cn(
+                                                            "flex items-center justify-between",
+                                                            selectedValues.includes(option.value) && "bg-muted text-primary" // Highlight selected items
                                                         )}
+                                                    >
+                                                        <span>{option.label}</span>
+                                                        {(multiple
+                                                            ? selectedValues.includes(option.value)
+                                                            : value === option.value) && (
+                                                                <Check className="ml-auto text-primary" />
+                                                            )}
                                                     </CommandItem>
                                                 ))}
                                             </CommandGroup>
@@ -112,28 +160,9 @@ const CustomAsyncSelect = ({
                                     )}
                                 </CommandList>
                             </Command>
-                            <div className="flex justify-between p-2 border-t border-gray-200">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setPageNo(pageNo - 1)}
-                                    disabled={pageNo === 1 || readOnly}
-                                >
-                                    <ChevronLeft />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setPageNo(pageNo + 1)}
-                                    disabled={pageNo === totalPages || readOnly}
-                                >
-                                    <ChevronRight />
-                                </Button>
-                            </div>
                         </PopoverContent>
                     )}
                 </Popover>
-                {/* <FormMessage /> */}
             </FormItem>
         </div>
     );

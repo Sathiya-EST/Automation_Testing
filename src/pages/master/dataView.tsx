@@ -4,12 +4,15 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Form } from "@/components/ui/form";
 import { UI_ROUTES } from "@/constants/routes";
 import { useToast } from "@/hooks/use-toast";
-import { useDeleteRecordMutation, useGetFormPreviewQuery, useGetFormRecordQuery, useLazyGetFormAsyncDataQuery, useUpdateRecordMutation } from "@/store/services/master/form";
+import { useDeleteRecordMutation, useGetFormPreviewQuery, useGetFormRecordQuery, useUpdateRecordMutation } from "@/store/services/master/form";
 import { SquarePen, Trash2 } from "lucide-react";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import mapErrors from '../../utils/mapFormErrors';
+import useBreadcrumb from "@/hooks/useBreadCrumb";
+import DeleteConfirmationPopup from "@/components/Modals/DeleteModal";
+import AsyncFieldAccordion from "./components/ParentListAccordian";
 
 const FieldGenerator = lazy(() => import('@/components/shared/FieldGenerator'));
 
@@ -22,17 +25,44 @@ const MasterDataCrud = () => {
         { formName, formId },
         { skip: !formName || !formId }
     );
-    const [triggerGetFormAsyncData] = useLazyGetFormAsyncDataQuery();
+    const [asyncFieldFormNames, setAsyncFieldFormNames] = useState<string[]>([]);
+
     const [updateRecord] = useUpdateRecordMutation();
     const [deleteRecord] = useDeleteRecordMutation();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
+    // Redirect if no module selected
+    useMemo(() => {
+        if (!formName && !selectedModule) {
+            navigate(UI_ROUTES.MASTER);
+        }
+    }, [formName, navigate]);
 
+
+    useBreadcrumb(
+        useMemo(
+            () => [
+                { type: 'link', title: formTemplateData?.moduleName ?? "", path: UI_ROUTES.MASTER_DATA, isActive: false },
+                { type: 'page', title: formTemplateData?.displayName ?? "hi", isActive: true },
+            ],
+            [formTemplateData]
+        )
+    );
+    useEffect(() => {
+        if (formTemplateData) {
+            const asyncFields = formTemplateData.fields.filter((field) =>
+                field.field.dataTypeName === "Asynchronous List"
+            );
+
+            const formNames = asyncFields
+                .map((asyncField) => asyncField.field.asynchronousField?.formName)
+                .filter((formName): formName is string => formName !== undefined);
+
+            setAsyncFieldFormNames(formNames);
+        }
+    }, [formTemplateData]);
     const handleDelete = async () => {
-        // Confirm deletion with the user
-        const isConfirmed = confirmDeletion(formName);
-        if (!isConfirmed) return;
-
         try {
             await deleteRecord({ formName, formIdpk: formId }).unwrap();
 
@@ -58,9 +88,6 @@ const MasterDataCrud = () => {
      * @param {string} formName - The name of the form to include in the confirmation message.
      * @returns {boolean} - Whether the user confirmed the deletion.
      */
-    const confirmDeletion = (_formName: string): boolean => {
-        return window.confirm(`Are you sure you want to delete this record for ${formName}?`);
-    };
 
     /**
      * Handle navigation after a successful deletion.
@@ -73,39 +100,7 @@ const MasterDataCrud = () => {
         defaultValues: formRecordData
     })
     const { setError } = form;
-    const handleFetchAsyncOptions = async (
-        pageNo: number,
-        pageSize: number,
-        formName: string,
-        fieldName: string,
-        query: string
-    ): Promise<{ options: { label: string; value: string }[]; totalPages: number }> => {
-        try {
-            const result = await triggerGetFormAsyncData({
-                pageNo,
-                pageSize,
-                formName,
-                fieldName,
-                searchQuery: query,
-            }).unwrap();
 
-            if (result && result.transformedData) {
-                const options = result.transformedData.map((item: any) => ({
-                    label: item.label,
-                    value: item.value,
-                }));
-                const totalPages = Math.ceil(result.totalRecords / pageSize);
-                return { options, totalPages };
-            }
-
-            return { options: [], totalPages: 0 };
-        } catch (error) {
-            // setAsyncError('Error fetching asynchronous data.');
-            console.error(error);
-            return { options: [], totalPages: 0 };
-        }
-    };
-    
     useEffect(() => {
         form.reset(formRecordData)
     }, [formRecordData])
@@ -122,7 +117,10 @@ const MasterDataCrud = () => {
             navigate(UI_ROUTES.MASTER_DATA_CRUD, {
                 state: { formName, formId, updateSuccess: true }
             });
+            if (!response) {
+                console.log("Failed to update record");
 
+            }
         } catch (error: any) {
             console.error('Update failed:', error);
             if (error?.data?.validationMessage) {
@@ -132,7 +130,7 @@ const MasterDataCrud = () => {
     };
 
     return (
-        <div>
+        <div className='space-y-4'>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <Card>
@@ -150,7 +148,6 @@ const MasterDataCrud = () => {
                                 {formTemplateData && formTemplateData.fields && (
                                     <FieldGenerator
                                         fields={formTemplateData.fields}
-                                        handleFetchAsyncOptions={handleFetchAsyncOptions}
                                         control={form.control}
                                         layout={formTemplateData?.formLayout || 'GRID_2'}
                                         formAction={isUpdate ? 'update' : 'view'}
@@ -166,11 +163,18 @@ const MasterDataCrud = () => {
                                             type="button"
                                             variant="outline"
                                             className="w-full md:w-[150px] border-destructive text-destructive hover:border-destructive hover:text-destructive"
-                                            onClick={handleDelete}
+                                            onClick={() => setDeletePopupOpen(true)}
                                         >
                                             <Trash2 />
                                             Delete
                                         </Button>
+                                        <DeleteConfirmationPopup
+                                            isOpen={isDeletePopupOpen}
+                                            onClose={() => setDeletePopupOpen(false)}
+                                            onDelete={handleDelete}
+                                            title="Delete Item"
+                                            description="Are you sure you want to delete this item? This action cannot be undone."
+                                        />
                                         <Button
                                             type="button"
                                             className="w-full md:w-[150px]"
@@ -204,6 +208,11 @@ const MasterDataCrud = () => {
                         </CardFooter>
                     </Card>
                 </form>
+                {asyncFieldFormNames && <Card>
+                    <AsyncFieldAccordion
+                        asyncFieldFormNames={asyncFieldFormNames}
+                    />
+                </Card>}
             </Form>
         </div >
     )

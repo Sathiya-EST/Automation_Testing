@@ -41,7 +41,6 @@ const Master = () => {
     const activeModule = useSelector((state: RootState) => state.master.form?.moduleName);
     const userRole = useSelector((state: RootState) => state.auth.userRole);
 
-    // const activeStatus = useSelector((state: RootState) => state.master.form?.status);
     const [moduleSearchVal, setModuleSearchVal] = useState("");
     const [selectedModule, setSelectedModule] = useState<string | null>(activeModule || '');
     const [formReqParams, setFormReqParams] = useState<GetReqParams>({
@@ -75,7 +74,12 @@ const Master = () => {
         data: formData,
         isLoading: formLoading,
         error: formError,
+        refetch: refetchFormData
     } = useGetFormsQuery(formReqParams);
+
+    useEffect(() => {
+        refetchFormData();
+    }, [refetchFormData]);
 
     const columns = [
         {
@@ -156,7 +160,7 @@ const Master = () => {
     };
 
     const handleSearch = (query: string) => {
-        handleAddFormFilter("default_search_criteria", "LIKE", "STRING", query);
+        handleAddFormFilter("defaultSearchCriteria", "LIKE", "STRING", query);
     };
 
     const handleStatusChange = (status: StatusValue) => {

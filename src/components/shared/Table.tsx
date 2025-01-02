@@ -89,7 +89,6 @@ function AdvancedTable<T>({
       ...updatedSettings
     }));
 
-    // If you need to update pagination in React Table
     if (updatedSettings.pageSize) {
       table.setPageSize(updatedSettings.pageSize);
     }
@@ -232,17 +231,17 @@ function AdvancedTable<T>({
             {/* Previous Page Button */}
             <PaginationItem>
               <PaginationPrevious
-                href="#"
+                // href="#"
                 onClick={() => table.previousPage()}
                 className={cn(
-                  'text-xs',
+                  'text-xs cursor-pointer',
                   !table.getCanPreviousPage() && 'pointer-events-none opacity-50'
                 )}
               />
             </PaginationItem>
             {isMobileOrTablet ? (
               <PaginationItem>
-                <span className="text-xs font-medium">
+                <span className="text-xs font-medium  cursor-pointer">
                   {pagination.pageIndex + 1}/{table.getPageCount()}
                 </span>
               </PaginationItem>
@@ -258,13 +257,13 @@ function AdvancedTable<T>({
                 return (
                   <PaginationItem key={page}>
                     <PaginationLink
-                      href="#"
+                      // href="#"
                       isActive={pagination.pageIndex === page}
                       onClick={() => table.setPageIndex(page)}
                       className={cn(
-                        'w-8 h-8 p-0 hover:bg-primary/10 text-xs flex items-center justify-center',
+                        'w-8 h-8 p-0 hover:bg-primary/10 text-xs flex items-center justify-center  cursor-pointer',
                         pagination.pageIndex === page
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90  cursor-pointer'
                           : ''
                       )}
                     >
@@ -278,10 +277,10 @@ function AdvancedTable<T>({
             {/* Next Page Button */}
             <PaginationItem>
               <PaginationNext
-                href="#"
+                // href="#"
                 onClick={() => table.nextPage()}
                 className={cn(
-                  'text-xs',
+                  'text-xs cursor-pointer',
                   !table.getCanNextPage() && 'pointer-events-none opacity-50'
                 )}
               />
@@ -298,10 +297,10 @@ function AdvancedTable<T>({
     index,
   }));
   return (
-    <div className="flex flex-col h-[400px]">
+    <div className="flex flex-col  h-[65vh]">
       <div className="flex-grow overflow-auto">
         <Table className="w-full caption-bottom text-xs">
-          <TableHeader className="bg-primary/25 text-primary text-sm hover:bg-primary sticky top-0.5">
+          <TableHeader className="bg-primary/25  text-sm  sticky top-0.5">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} >
                 {headerGroup.headers.map((header, index) => {
@@ -316,7 +315,7 @@ function AdvancedTable<T>({
                       style={{ ...getCommonPinningStyles(column), width: `${size}px` }}
                       className={`${isPinned
                         ? "bg-primary text-background"
-                        : "bg-primary/5"
+                        : "bg-primary/5 text-primary"
                         }`}
                     >
                       <div className="flex justify-between items-center">
@@ -379,33 +378,42 @@ function AdvancedTable<T>({
           <TableBody className="divide-y overflow-auto"
 
           >
-            {table.getRowModel().rows.map((row, index) => (
-              <TableRow
-                key={row.id}
-                className={`${index % 2 === 0
-                  ? "bg-background dark:bg-muted hover:bg-primary/10"
-                  : "bg-primary/5 dark:bg-primary/5 hover:bg-primary/10"
-                  }`}
-              >
-                {row.getVisibleCells().map((cell) => {
-                  const { column } = cell;
-                  const isPinned = column.getIsPinned()
-
-                  return (
-                    <TableCell key={cell.id}
-                      style={{ ...getCommonPinningStyles(column) }}
-                      className={`${isPinned
-                        ? "min-h-2 bg-primary/10  "
-                        : "min-h-2 bg-primary/5  "
-                        }`}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  );
-                })}
+            {table.getRowModel().rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={table.getAllColumns().length} className="text-start text-xl text-gray-500 dark:text-gray-300">
+                  No Data Available
+                </TableCell>
               </TableRow>
+            ) : (
+              table.getRowModel().rows.map((row, index) => (
+                <TableRow
+                  key={row.id}
+                  className={`${index % 2 === 0
+                    ? "bg-background dark:bg-muted hover:bg-primary/10"
+                    : "bg-primary/5 dark:bg-primary/5 hover:bg-primary/10"
+                    }`}
+                >
+                  {row.getVisibleCells().map((cell) => {
+                    const { column } = cell;
+                    const isPinned = column.getIsPinned();
 
-            ))}
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        style={{ ...getCommonPinningStyles(column) }}
+                        className={`${isPinned
+                          ? "min-h-2 bg-primary/10"
+                          : "min-h-2 bg-primary/5"
+                          }`}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            )}
+
           </TableBody>
         </Table>
       </div >

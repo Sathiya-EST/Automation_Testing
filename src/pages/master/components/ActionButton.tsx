@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import React, { useMemo } from "react";
 import { useController, useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface ActionButtonProps {
     icon: React.ElementType;
@@ -25,7 +26,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     onAccessChange,
     className,
 }) => {
-    const { getValues, setValue } = useFormContext();
+    const { getValues } = useFormContext();
+    const { t } = useTranslation()
 
     const { field } = useController({
         name: fieldName,
@@ -52,11 +54,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     return (
         <div className={cn('flex flex-col space-y-2', className)}>
             <Button
+                type="button"
                 variant="outline"
                 className={cn(
                     `flex items-center justify-center space-x-2 ${colorClass} ${bgClass}`,
-                    'hover:bg-gray-100 transition-colors duration-200'
+                    'transition-colors duration-200',
+                    `${colorClass ? `hover:${colorClass}-darken` : ''}`,
+                    `${bgClass ? `hover:${bgClass}-darken` : ''}`
                 )}
+
             >
                 {Icon && <Icon className="w-5 h-5 mr-2" />}
                 {label}
@@ -68,15 +74,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({
             >
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="fullAccess" id={`${fieldName}-full`} />
-                    <Label htmlFor={`${fieldName}-full`}>Full Access</Label>
+                    <Label htmlFor={`${fieldName}-full`}>{t("master.form.publish.fullAccessLabel")}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="specificAccess" id={`${fieldName}-specific`} disabled={isDeleteFullAcces} />
-                    <Label htmlFor={`${fieldName}-specific`}>Specific Access</Label>
+                    <Label htmlFor={`${fieldName}-specific`}>{t("master.form.publish.specificAccessLabel")}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="noAccess" id={`${fieldName}-noAccess`} disabled={isDeleteFullAcces} />
-                    <Label htmlFor={`${fieldName}-noAccess`}>No Access</Label>
+                    <Label htmlFor={`${fieldName}-noAccess`}>{t("master.form.publish.noAccessLabel")}</Label>
                 </div>
             </RadioGroup>
         </div>

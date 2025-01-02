@@ -243,7 +243,7 @@ export const formApi = createApi({
             },
         }),
 
-        publishForm: builder.mutation<ApiResponse, { formName: string; publishData: publishDataType }>({
+        publishForm: builder.mutation<ApiResponse, { formName: string; publishData: publishDataType | { isPublished: boolean } }>({
             query: ({ formName, publishData }) => ({
                 url: `${MASTER_API.PUBLISH_FORM}?formName=${formName}`,
                 method: 'PUT',
