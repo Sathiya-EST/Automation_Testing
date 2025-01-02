@@ -1,8 +1,6 @@
-import Flex from "@/components/shared/Flex";
 import { Input } from "@/components/ui/input";
 import { convertToBase64 } from "@/utils/convertBase64";
 import { File } from "lucide-react";
-import { useState } from "react";
 
 const isValidFile = (file: File, maxFileLimit: number, acceptTypes: string[]): boolean => {
     const fileSize = file.size / 1024 / 1024;
@@ -30,8 +28,8 @@ const FileUpload = ({
     maxFileLimit,
     defaultFileName = '',
 }: FileUploadProps) => {
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [file, setFile] = useState<File | null>(null);
+    // const [uploadProgress, setUploadProgress] = useState(0);
+    // const [file, setFile] = useState<File | null>(null);
 
     const handleFile = async (selectedFile: File) => {
         if (isValidFile(selectedFile, maxFileLimit, acceptTypes)) {
@@ -41,10 +39,10 @@ const FileUpload = ({
                 const fileData: FileUploadData = {
                     fileName: defaultFileName || selectedFile.name.split('.')[0],
                     fileExtension: selectedFile.name.split('.').pop() || '',
-                    file: base64String.split(',')[1], // Base64 string without the "data:image" prefix
+                    file: base64String.split(',')[1], 
                 };
 
-                setFile(selectedFile);
+                // setFile(selectedFile);
                 onFileUpload(fileData);
 
                 // toast.success('File Uploaded', {
@@ -57,7 +55,7 @@ const FileUpload = ({
                     const interval = setInterval(() => {
                         if (progress < 100) {
                             progress += 10;
-                            setUploadProgress(progress);
+                            // setUploadProgress(progress);
                         } else {
                             clearInterval(interval);
                         }

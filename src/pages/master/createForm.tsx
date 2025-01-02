@@ -52,9 +52,7 @@ const CreateForm = () => {
     } = useGetDataTypesQuery();
 
     const [createForm, {
-        isLoading: isFormCreating,
         isSuccess,
-        isError,
         error: createFormError
     }] = useCreateFormMutation();
 

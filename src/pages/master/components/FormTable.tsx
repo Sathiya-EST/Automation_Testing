@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { EllipsisVertical, Eye, ArrowDown, ArrowUp } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import TableSettingPopover from "./TableSettings";
 import { Badge } from "@/components/ui/badge";
 
 interface FormData {
@@ -48,11 +47,11 @@ const FormTable: React.FC<FormTableProps> = ({ formData, handleView }) => {
     };
 
     const sortedFormData = [...formData].sort((a, b) => {
-        const aValue = a[sortBy];
-        const bValue = b[sortBy];
+        // const aValue = a[sortBy as keyof FormData];
+        // const bValue = b[sortBy as keyof FormData];
 
-        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        // if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        // if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
         return 0;
     });
 

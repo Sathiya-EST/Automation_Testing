@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { MASTER_API } from '@/constants/api.constants';
 import baseQueryWithAuth from '../baseQueryHook';
-import { DataTypes, FileUploadData, FormFieldsType, FormViewData, GetReqParams, publishDataType, ResponseType } from '@/types/data';
+import { DataTypes, FormFieldsType, FormViewData, GetReqParams, publishDataType, ResponseType } from '@/types/data';
 import { FormType } from '@/pages/master/components/CreateFormComp';
 
 interface ApiResponse {

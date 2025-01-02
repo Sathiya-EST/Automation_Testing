@@ -1,8 +1,6 @@
-import React from 'react'
 
-type Props = {}
 
-const FilterDrawer = (props: Props) => {
+const FilterDrawer = () => {
   return (
     <div>FilterDrawer</div>
   )

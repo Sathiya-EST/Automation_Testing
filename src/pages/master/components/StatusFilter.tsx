@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Check, CircleDot, Circle, LucideIcon, Ban, CircleCheckBig } from "lucide-react";
+import {  Circle, LucideIcon, Ban, CircleCheckBig } from "lucide-react";
 
 // Define status type
 export type StatusValue = 'published' | 'unPublished' | 'all';

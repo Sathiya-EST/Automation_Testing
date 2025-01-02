@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UI_ROUTES } from '@/constants/routes';
 
-type Props = {};
+
 
 interface ChangePasswordForm {
     oldPassword: string;

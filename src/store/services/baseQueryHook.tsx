@@ -25,7 +25,8 @@ const baseQueryWithAuth: BaseQueryFn<FetchArgs, unknown, FetchBaseQueryError> = 
 
     let result = await customBaseQuery(args, api, extraOptions);
 
-    if (result.error?.originalStatus === 401) {
+    if (result.error?.status === 401) {
+    // if (result.error?.originalStatus === 401) {
 
         if (refreshToken) {
             const refreshedTokens = await getNewAccessToken(refreshToken, api, extraOptions);

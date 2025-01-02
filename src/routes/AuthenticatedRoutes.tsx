@@ -4,7 +4,6 @@ import AccessDenied from '@/pages/auth/accessDenied'
 import PageNotFound from '@/pages/auth/pageNotFound'
 import Master from '@/pages/master'
 import FormList from '@/pages/master/components/FormList'
-import MyTableComponent from '@/pages/master/components/Test'
 import CreateForm from '@/pages/master/createForm'
 import DataForm from '@/pages/master/dataCreate'
 import DataList from '@/pages/master/dataList'
@@ -28,7 +27,7 @@ const AuthenticatedRoutes = (
             <Route path={UI_ROUTES.MASTER} element={<Master />} />
             <Route path={UI_ROUTES.MASTER_FORM} element={<FormList />} />
             <Route path={UI_ROUTES.MASTER_FORM_CREATE} element={<CreateForm />} />
-            <Route path={UI_ROUTES.MASTER_FORM_ACCESS} element={<MyTableComponent />} />
+            {/* <Route path={UI_ROUTES.MASTER_FORM_ACCESS} element={<MyTableComponent />} /> */}
             <Route path={UI_ROUTES.MASTER_FORM_PUBLISH} element={<ProtectedRoute component={PublishForm} roles={['DEVELOPER']} />} />
             <Route path={UI_ROUTES.MASTER_FORM_PREVIEW} element={<MasterFormPreview />} />
 

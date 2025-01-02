@@ -9,13 +9,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UI_ROUTES } from '@/constants/routes';
 
-type Props = {};
 
 interface ForgotPasswordForm {
   email: string;
 }
 
-const ForgotPassword = (props: Props) => {
+const ForgotPassword = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,9 +27,9 @@ const ForgotPassword = (props: Props) => {
 
   const onSubmit = async (data: ForgotPasswordForm) => {
     setIsSubmitting(true);
+    console.log(data);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
       alert(t('login.forgotPassword.success'));
       navigate(UI_ROUTES.LOGIN)

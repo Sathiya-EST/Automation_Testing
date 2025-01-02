@@ -26,7 +26,7 @@ const GroupSection = ({
     options: SelectOptions[],
     initialSelectedValues?: string[],
 }) => {
-    const isFullAccess = watch(`${accessType}.fullAccess`);
+    // const isFullAccess = watch(`${accessType}.fullAccess`);
     const deleteAccess = watch(`deleteAccess.fullAccess`);
     const initialFormValues = watch(`${accessType}.specificAccess.${groupName.toUpperCase()}`) || [];
     const [currentSelectedOptions, setCurrentSelectedOptions] = useState<string[]>(

@@ -397,7 +397,7 @@ const CreateFormComp: React.FC<CreateFormProps> = ({ moduleName, dataType, handl
                                                 )}
                                             />
                                             <DynamicField
-                                                control={form.control}
+                                                control={form.control }
                                                 layout={selectedValue}
                                                 onFieldFocus={handleFieldFocus}
                                                 onFieldDelete={handleFieldDelete}

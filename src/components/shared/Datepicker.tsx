@@ -111,7 +111,7 @@ import {
 
 interface DatePickerProps {
   selectedDate?: Date | string;
-  onChange: (date: string | undefined) => void;
+  onChange: (date: any) => void;
   placeholder?: string;
   className?: string;
   format?: string;
@@ -169,7 +169,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
           : date
     );
 
-    // Convert to yyyy-MM-dd string format
     onChange(formatDate(updatedDate, "yyyy-MM-dd"));
   };
 

@@ -391,7 +391,9 @@ const PublishForm = () => {
         }
     }
     const handleViewOptionChange = () => {
-        const editOptions = form.getValues('updateAccess.specificAccess');
+        // const editOptions = form.getValues('updateAccess.specificAccess');
+        console.log("view option change");
+        
     }
     const groupOptions = {
         'Role': roleOptions,

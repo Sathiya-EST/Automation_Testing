@@ -1,5 +1,5 @@
 import React, { useState, useRef, DragEvent, ChangeEvent } from 'react';
-import { FileUp, FileSpreadsheet, X, FileText, Check } from 'lucide-react';
+import { FileUp, FileSpreadsheet, X, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { FileUploadData } from '@/types/data';

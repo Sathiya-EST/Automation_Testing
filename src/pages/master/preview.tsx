@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useGetDataTypesQuery, useGetFormPreviewQuery, useLazyGetFormAsyncDataQuery, useUpdateFormMutation } from '@/store/services/master/form';
+import { useGetDataTypesQuery, useGetFormPreviewQuery,  useUpdateFormMutation } from '@/store/services/master/form';
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import Text from '@/components/shared/Text';
 import { Globe } from 'lucide-react';
@@ -157,10 +157,9 @@ const MasterFormPreview = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { formName, selectedModule } = location.state || {};
-    const { data: formTemplateData, error: formError, refetch: refetchFormTemplate } = useGetFormPreviewQuery(formName);
-    const [triggerGetFormAsyncData] = useLazyGetFormAsyncDataQuery();
-    const { data: dataTypes = [], isLoading: isDataTypesLoading } = useGetDataTypesQuery();
-    const [updateForm, { isLoading, isError, error }] = useUpdateFormMutation();
+    const { data: formTemplateData, refetch: refetchFormTemplate } = useGetFormPreviewQuery(formName);
+    const { data: dataTypes = [] } = useGetDataTypesQuery();
+    const [updateForm, { isLoading }] = useUpdateFormMutation();
 
     // Using React Hook Form's useForm hook
     const form = useForm<FormEditType>({
@@ -171,7 +170,7 @@ const MasterFormPreview = () => {
             fields: [{}],
         }
     });
-    const [asyncError, setAsyncError] = useState<string | null>(null);
+    const [asyncError] = useState<string | null>(null);
     const [isUpdate, setIsUpdate] = useState(false)
     const [isFormControllerOpen, setIsFormControllerOpen] = useState(false)
     const [focusedField, setFocusedField] = useState<number | null>(null);
@@ -228,40 +227,6 @@ const MasterFormPreview = () => {
             setFormFieldNameOptions(options);
         }
     }, [formTemplateData]);
-
-    // Handle async options fetch
-    const handleFetchAsyncOptions = async (
-        pageNo: number,
-        pageSize: number,
-        formName: string,
-        fieldName: string,
-        query: string
-    ): Promise<{ options: { label: string; value: string }[]; totalPages: number }> => {
-        try {
-            const result = await triggerGetFormAsyncData({
-                pageNo,
-                pageSize,
-                formName,
-                fieldName,
-                searchQuery: query,
-            }).unwrap();
-
-            if (result && result.transformedData) {
-                const options = result.transformedData.map((item: any) => ({
-                    label: item.label,
-                    value: item.value,
-                }));
-                const totalPages = Math.ceil(result.totalRecords / pageSize);
-                return { options, totalPages };
-            }
-
-            return { options: [], totalPages: 0 };
-        } catch (error) {
-            setAsyncError('Error fetching asynchronous data.');
-            console.error(error);
-            return { options: [], totalPages: 0 };
-        }
-    };
 
     const handleFieldFocus = (index: number) => {
         setFocusedField(index);

@@ -20,8 +20,8 @@ const MasterDataCrud = () => {
     const location = useLocation();
     const { formName, selectedModule, formId } = location.state || {};
     const [isUpdate, setIsUpdate] = useState<boolean>(false)
-    const { data: formTemplateData, error: formError } = useGetFormPreviewQuery(formName);
-    const { data: formRecordData, error: formRecordError } = useGetFormRecordQuery(
+    const { data: formTemplateData } = useGetFormPreviewQuery(formName);
+    const { data: formRecordData } = useGetFormRecordQuery(
         { formName, formId },
         { skip: !formName || !formId }
     );

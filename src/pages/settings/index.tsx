@@ -8,15 +8,14 @@ import { useMemo } from 'react'
 import LanguageSwitcher from './components/LanguageSelect';
 import { useTranslation } from 'react-i18next';
 
-type Props = {}
 
-const Settings = (props: Props) => {
+const Settings = () => {
   const updatedRoutes: BreadcrumbItemType[] = useMemo(() => [
     { type: 'page', title: 'Settings', isActive: true },
   ], []);
 
   useBreadcrumb(updatedRoutes);
-  const { t,i18n } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <Card>
@@ -40,8 +39,8 @@ const Settings = (props: Props) => {
             <Label>Choose Language</Label>
           </div>
           <div className=" p-4 col-span-3">
-          <h1>{t('welcome')}</h1> 
-          <LanguageSwitcher />
+            <h1>{t('welcome')}</h1>
+            <LanguageSwitcher />
           </div>
 
         </div>

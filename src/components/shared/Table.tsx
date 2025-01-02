@@ -31,7 +31,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import TableSettingPopover, { TableSettings } from '@/pages/master/components/TableSettings';
 import PinningControls from './PinningControl';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../ui/pagination';
-import { GetReqParams, TableRequestParams } from '@/types/data';
+import { GetReqParams } from '@/types/data';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from 'react-responsive';
 
@@ -64,7 +64,7 @@ function AdvancedTable<T>({
   maxW = '300',
   maxH = 'auto'
 }: AdvancedTableProps<T>) {
-  const [loading, setLoading] = useState<boolean>(true)
+  // const [loading, setLoading] = useState<boolean>(true)
   const [columnVisibility, setColumnVisibility] = useState({});
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
     left: [],

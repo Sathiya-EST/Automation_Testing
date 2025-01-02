@@ -1,8 +1,5 @@
 import {
     Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
 } from "@/components/ui/accordion";
 import ParentDataList from "./ParentList";
 
