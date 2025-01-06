@@ -15,6 +15,8 @@ interface FileUploaderProps {
     className?: string;
     validateFile?: (file: File) => boolean;
     defaultFileName?: string;
+    uploadProgress: number;
+    setUploadProgress: (progress: number) => void;
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
@@ -23,11 +25,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     onFileUpload,
     onFileRemove,
     validateFile,
-    defaultFileName
+    defaultFileName,
+    uploadProgress = 0,
+    setUploadProgress,
 }) => {
     const [dragActive, setDragActive] = useState(false);
     const [file, setFile] = useState<File | null>(null);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleDrag = (e: DragEvent<HTMLDivElement>) => {
@@ -99,19 +102,19 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                     description: `${selectedFile.name} has been successfully uploaded`
                 });
 
-                // Simulating file upload progress
-                const simulateUploadProgress = () => {
-                    let progress = 0;
-                    const interval = setInterval(() => {
-                        if (progress < 100) {
-                            progress += 10;
-                            setUploadProgress(progress);
-                        } else {
-                            clearInterval(interval);
-                        }
-                    }, 500);
-                };
-                simulateUploadProgress();
+                // // Simulating file upload progress
+                // const simulateUploadProgress = () => {
+                //     let progress = 0;
+                //     const interval = setInterval(() => {
+                //         if (progress < 100) {
+                //             progress += 10;
+                //             setUploadProgress(progress);
+                //         } else {
+                //             clearInterval(interval);
+                //         }
+                //     }, 500);
+                // };
+                // simulateUploadProgress();
 
             } catch (error) {
                 toast.error('File Conversion Failed', {

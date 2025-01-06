@@ -299,10 +299,10 @@ function AdvancedTable<T>({
   return (
     <div className="flex flex-col  h-[65vh]">
       <div className="flex-grow overflow-auto">
-        <Table className="w-full caption-bottom text-xs">
-          <TableHeader className="bg-primary/25  text-sm  sticky top-0.5">
+        <table className="w-full caption-bottom text-xs ">
+          <thead className="bg-primary text-sm  sticky top-0 p-4 z-20">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} >
+              <tr key={headerGroup.id} className='p-4' >
                 {headerGroup.headers.map((header, index) => {
                   const size = header.column.getSize();
                   const { column } = header;
@@ -310,12 +310,12 @@ function AdvancedTable<T>({
                   const isLastColumn = index === headerGroup.headers.length - 1;
 
                   return (
-                    <TableHead
+                    <th
                       key={header.id}
                       style={{ ...getCommonPinningStyles(column), width: `${size}px` }}
                       className={`${isPinned
-                        ? "bg-primary text-background"
-                        : "bg-primary/5 text-primary"
+                        ? "bg-primary text-background p-2"
+                        : "bg-primary/5 text-background p-2"
                         }`}
                     >
                       <div className="flex justify-between items-center">
@@ -368,29 +368,26 @@ function AdvancedTable<T>({
                           backgroundColor: header.column.getIsResizing() ? 'rgba(0, 0, 255, 0.5)' : 'bg-primary',
                         }}
                       />
-                    </TableHead>
+                    </th>
                   );
                 })}
-              </TableRow>
+              </tr>
             ))}
-          </TableHeader>
-
-          <TableBody className="divide-y overflow-auto"
-
-          >
+          </thead>
+          <tbody className="divide-y overflow-auto">
             {table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={table.getAllColumns().length} className="text-start text-xl text-gray-500 dark:text-gray-300">
+              <tr>
+                <td colSpan={table.getAllColumns().length} className="text-start text-xl text-gray-500 dark:text-gray-300">
                   No Data Available
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
               table.getRowModel().rows.map((row, index) => (
-                <TableRow
+                <tr
                   key={row.id}
                   className={`${index % 2 === 0
-                    ? "bg-background dark:bg-muted hover:bg-primary/10"
-                    : "bg-primary/5 dark:bg-primary/5 hover:bg-primary/10"
+                    ? "bg-background dark:bg-muted hover:bg-primary/10 "
+                    : "bg-primary/5 dark:bg-primary/5 hover:bg-primary/10   z-0"
                     }`}
                 >
                   {row.getVisibleCells().map((cell) => {
@@ -398,24 +395,24 @@ function AdvancedTable<T>({
                     const isPinned = column.getIsPinned();
 
                     return (
-                      <TableCell
+                      <td
                         key={cell.id}
                         style={{ ...getCommonPinningStyles(column) }}
                         className={`${isPinned
-                          ? "min-h-2 bg-primary/10"
-                          : "min-h-2 bg-primary/5"
+                          ? "min-h-2 bg-primary/10  p-3"
+                          : "min-h-2 bg-primary/5  p-3"
                           }`}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+                      </td>
                     );
                   })}
-                </TableRow>
+                </tr>
               ))
             )}
 
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div >
       <PaginationControls pagination={pagination} table={table} />
 

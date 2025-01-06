@@ -33,6 +33,7 @@ import InfoAlert from '@/components/shared/InfoAlert';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateMasterData } from '@/store/slice/masterSlice';
 import { RootState } from '@/store';
+import { log } from 'util';
 
 interface MasterColumns {
   displayName: string;
@@ -55,6 +56,8 @@ const DataList: React.FC = () => {
   const [selectedModule, setSelectedModule] = useState<string>(activeModule || "");
   const [selectedForm, setSelectedForm] = useState<string>(activeForm || "");
   const [isDwldErrReport, setIsDwldErrReport] = useState<boolean>(false)
+  const [uploadProgress, setUploadProgress] = useState(0);
+
   const [moduleReqParams, setModuleReqParams] = useState<GetReqParams>({
     pageNo: 1,
     pageSize: 10,
@@ -192,40 +195,46 @@ const DataList: React.FC = () => {
   };
 
   const handleFileUpload = async (fileData: FileUploadData) => {
+    setIsDwldErrReport(false)
+    setUploadProgress(0)
     const uploadResult = await uploadCSV(fileData);
     setIsDwldErrReport(false)
+    setUploadProgress(50)
     if (!uploadResult.success) {
-      toast({
-        title: t('master.data.formData.list.noData'),
-        description: (
-          <>
-            <p>{uploadResult.message}</p>
-            <br />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(uploadResult.downloadLink, '_blank')}
-            >
-              {t('master.data.formData.list.dwldErrReport')}
-            </Button>
-          </>
-        ),
-        variant: "destructive",
-        action: (
-          <ToastAction
-            altText="Retry"
-            onClick={() => getModule(moduleReqParams)}
-          >
-            {t('master.data.formData.list.retry')}
-          </ToastAction>
-        ),
-      });
+      console.log("Failed to upload Date");
+
+      // toast({
+      //   title: t('master.data.formData.list.noData'),
+      //   description: (
+      //     <>
+      //       <p>{uploadResult.message}</p>
+      //       <br />
+      //       <Button
+      //         variant="outline"
+      //         size="sm"
+      //         onClick={() => window.open(uploadResult.downloadLink, '_blank')}
+      //       >
+      //         {t('master.data.formData.list.dwldErrReport')}
+      //       </Button>
+      //     </>
+      //   ),
+      //   variant: "destructive",
+      //   action: (
+      //     <ToastAction
+      //       altText="Retry"
+      //       onClick={() => getModule(moduleReqParams)}
+      //     >
+      //       {t('master.data.formData.list.retry')}
+      //     </ToastAction>
+      //   ),
+      // });
     } else {
       console.log('File uploaded successfully!');
     }
     if (uploadResult.statusCode === 400) {
       setIsDwldErrReport(true)
     }
+    setUploadProgress(100)
   };
 
   const handleExportFormRecord = async () => {
@@ -248,20 +257,6 @@ const DataList: React.FC = () => {
     }
   };
 
-  // const handleExportFormRecord = () => {
-
-  //   const exportAsExcelUrl = `${MASTER_API.EXPORT_AS_EXCEL}?formName=${selectedForm}`
-  //   const params = {
-  //     pageNo: 1,
-  //     pageSize: formRecords?.totalRecords ?? 5,
-  //     filters: formReqParams?.filters ?? [],
-  //     sort: []
-  //   }
-  //   const defaultFileName = `${formColumnData?.data.displayName}.xlsx`;
-
-  //   exportAsExcel(exportAsExcelUrl, params, defaultFileName)
-
-  // };
   const handleDownloadTemplate = () => {
     const defaultDwldTemplateFileName = `${formColumnData?.data.displayName}.csv`;
     const downloadCSVFileUrl = `${MASTER_API.DOWNLOAD_CSV}?formName=${selectedForm}`
@@ -391,6 +386,8 @@ const DataList: React.FC = () => {
                           title={t('master.data.formData.list.bulk.fileUploaderTitle')}
                           onFileUpload={handleFileUpload}
                           defaultFileName={formColumnData?.data.displayName}
+                          setUploadProgress={setUploadProgress}
+                          uploadProgress={uploadProgress}
                         />
                         {isDwldErrReport && (
                           <Alert className="flex items-center p-3 bg-red-50 border-l-4 border-red-500 rounded-md">
