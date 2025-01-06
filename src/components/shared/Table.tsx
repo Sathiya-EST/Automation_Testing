@@ -425,4 +425,3 @@ function AdvancedTable<T>({
 }
 
 export default AdvancedTable;
-// max-h-[55vh] min-h-[50vh] 

@@ -63,7 +63,7 @@ const BeforeAfterToggle: React.FC<BeforeAfterToggleProps> = ({
                     items-center 
                     space-x-2 
                     transition-colors 
-                    ${value === 'BEFORE' || value === null ? 'text-white' : 'text-gray-700'}
+                    ${value === 'BEFORE' || value === null ? 'text-foreground' : 'text-gray-700 dark:text-gray-400'}
                 `}
             >
                 <ArrowLeft className="h-5 w-5" />
@@ -81,7 +81,7 @@ const BeforeAfterToggle: React.FC<BeforeAfterToggleProps> = ({
                     items-center 
                     space-x-2 
                     transition-colors 
-                    ${value === 'AFTER' ? 'text-white' : 'text-gray-700'}
+                    ${value === 'AFTER' ? 'text-foreground' : 'text-gray-700 dark:text-gray-500'}
                 `}
             >
                 <span className="text-sm font-medium">{t('master.form.update.position.after')}</span>
@@ -91,22 +91,4 @@ const BeforeAfterToggle: React.FC<BeforeAfterToggleProps> = ({
     );
 };
 
-// Example Usage Component
-const BeforeAfterToggleShowcase: React.FC = () => {
-    const [toggleValue, setToggleValue] = useState<'BEFORE' | 'AFTER' | null>(null);
-
-    return (
-        <div className="p-6 bg-muted flex flex-col items-center space-y-4">
-            <BeforeAfterToggle
-                value={toggleValue}
-                onChange={setToggleValue}
-                className="shadow-md hover:shadow-lg"
-            />
-            <div className="text-center">
-                <p>Current State: <span className="font-bold">{toggleValue ?? 'None'}</span></p>
-            </div>
-        </div>
-    );
-};
-
-export { BeforeAfterToggle, BeforeAfterToggleShowcase };
+export default BeforeAfterToggle

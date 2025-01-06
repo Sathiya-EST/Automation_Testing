@@ -116,7 +116,7 @@ const FieldController = ({
         onClose();
     };
     return (
-        <Card className={`p-0 fixed right-0 top-[64px] h-[calc(100vh-64px)] w-auto lg:w-[30%] bg-white shadow-lg z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-auto`}>
+        <Card className={`p-0 fixed right-0 top-[64px] h-[calc(100vh-64px)] w-auto lg:w-[30%]  shadow-lg z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-auto`}>
             <CardHeader >
                 <Flex dir='row'>
                     <CardTitle className='text-xl'>{t('master.form.create.fieldController.title')}</CardTitle>
@@ -154,25 +154,6 @@ const FieldController = ({
                                         />
                                     </FormControl>
                                     <FieldInfoButton tooltipContent={t('master.form.create.fieldController.NameField.desc')} />
-                                    {/* <TooltipProvider>
-                                        <Tooltip delayDuration={200}>
-                                            <TooltipTrigger asChild>
-                                                <button
-                                                    type="button"
-                                                    className="absolute -top-2 -right-2 bg-white rounded-full border shadow-sm p-1 
-                                                    text-gray-400 hover:text-gray-600 transition-all opacity-0 invisible
-                                                    group-hover:opacity-100 group-hover:visible
-                                                    group-focus-within:opacity-100 group-focus-within:visible"
-                                                    aria-label="Help information"
-                                                >
-                                                    <MessageCircleQuestion className="h-3.5 w-3.5" />
-                                                </button>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="max-w-xs text-xs">
-                                                {t('master.form.create.fieldController.NameField.desc')}
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider> */}
                                     <div className="min-h-[1rem]">
                                         <FormMessage />
                                     </div>
@@ -277,7 +258,7 @@ const FieldController = ({
                     {selectedType === ASYNC_FIELD && (
                         <>
                             <Text className="font-semibold">{t('master.form.create.fieldController.asyncField.title')}</Text>
-                            <FormField
+                            {ModuleOptions && <FormField
                                 control={control}
                                 name={`fields[${fieldIndex}].field.asynchronousField.moduleName`}
                                 render={({ field }) => (
@@ -294,20 +275,19 @@ const FieldController = ({
                                                         field.onChange(value);
                                                         setSelectedAsyncModule(value)
                                                     }}
-                                                    value={field.value}
+                                                    value={field.value || ""}
                                                     placeholder={t('master.form.create.fieldController.asyncField.moduleNameField.placeholder')}
                                                 />
                                             </FormControl>
                                             <FieldInfoButton tooltipContent={t('master.form.create.fieldController.asyncField.moduleNameField.desc')} />
-
                                             <div className="min-h-[1rem] ">
                                                 <FormMessage />
                                             </div>
                                         </div>
                                     </FormItem>
                                 )}
-                            />
-                            <FormField
+                            />}
+                            {FormOptions && <FormField
                                 control={control}
                                 name={`fields[${fieldIndex}].field.asynchronousField.formName`}
                                 render={({ field }) => (
@@ -325,7 +305,7 @@ const FieldController = ({
                                                         field.onChange(value);
                                                         setSelectedAsyncForm(value)
                                                     }}
-                                                    value={field.value}
+                                                    value={field.value || ""}
                                                     placeholder={t('master.form.create.fieldController.asyncField.formNameField.placeholder')}
                                                 />
                                             </FormControl>
@@ -336,8 +316,8 @@ const FieldController = ({
                                         </div>
                                     </FormItem>
                                 )}
-                            />
-                            <FormField
+                            />}
+                            {FieldOptions && <FormField
                                 control={control}
                                 name={`fields[${fieldIndex}].field.asynchronousField.fieldName`}
                                 render={({ field }) => (
@@ -354,8 +334,8 @@ const FieldController = ({
                                                         handleAsyncFieldUpdate(value, 'fieldName');
                                                         field.onChange(value);
                                                     }}
-                                                    value={field.value}
-                                                    placeholder={t('master.form.create.fieldController.asyncField.fieldTypeField.placeholder')}
+                                                    value={field.value || ""}
+                                                    placeholder={t('master.form.create.fieldController.asyncField.fieldNameField.placeholder')}
                                                 />
                                             </FormControl>
                                             <FieldInfoButton tooltipContent={t('master.form.create.fieldController.asyncField.fieldNameField.desc')} />
@@ -365,7 +345,7 @@ const FieldController = ({
                                         </div>
                                     </FormItem>
                                 )}
-                            />
+                            />}
                         </>
 
                     )}

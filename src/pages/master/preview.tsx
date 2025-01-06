@@ -6,14 +6,14 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useGetDataTypesQuery, useGetFormPreviewQuery,  useUpdateFormMutation } from '@/store/services/master/form';
+import { useGetDataTypesQuery, useGetFormPreviewQuery, useUpdateFormMutation } from '@/store/services/master/form';
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import Text from '@/components/shared/Text';
 import { Globe } from 'lucide-react';
 import FieldController from './components/FieldController';
 import DynamicField from './components/DynamicField';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BeforeAfterToggle } from '@/components/shared/PositionToggle';
+import BeforeAfterToggle from '@/components/shared/PositionToggle';
 import { z } from 'zod';
 import { FILE_FIELD, POSITION, SELECT_FIELD, validDataTypes } from '@/constants/app.constants';
 import { Separator } from '@/components/ui/separator';
@@ -27,7 +27,7 @@ const FieldGenerator = lazy(() => import('@/components/shared/FieldGenerator'));
 
 export const FormEditSchema = z.object({
     position: z.enum([POSITION.BEFORE, POSITION.AFTER]),
-    fieldName: z.string(),
+    fieldName: z.string().nonempty('Field name is required'),
     fields: z.array(
         z.object({
             name: z.string().min(1, 'Field name is required'),
@@ -166,7 +166,7 @@ const MasterFormPreview = () => {
         resolver: zodResolver(FormEditSchema),
         defaultValues: {
             position: POSITION.AFTER,
-            fieldName: '',
+            // fieldName: '',
             fields: [{}],
         }
     });

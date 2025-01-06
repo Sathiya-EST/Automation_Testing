@@ -105,6 +105,29 @@ const MasterDataCrud = () => {
         form.reset(formRecordData)
     }, [formRecordData])
 
+    // const onSubmit = async (data: any) => {
+    //     try {
+    //         const { default_id_pk, ...submitData } = data;
+    //         const response = await updateRecord({
+    //             formName,
+    //             formIdpk: formId,
+    //             data: submitData,
+    //         }).unwrap();
+
+    //         navigate(UI_ROUTES.MASTER_DATA_CRUD, {
+    //             state: { formName, formId, updateSuccess: true }
+    //         });
+    //         if (!response) {
+    //             console.log("Failed to update record");
+
+    //         }
+    //     } catch (error: any) {
+    //         console.error('Update failed:', error);
+    //         if (error?.data?.validationMessage) {
+    //             mapErrors(error.data.validationMessage, setError);
+    //         }
+    //     }
+    // };
     const onSubmit = async (data: any) => {
         try {
             const { default_id_pk, ...submitData } = data;
@@ -113,13 +136,15 @@ const MasterDataCrud = () => {
                 formIdpk: formId,
                 data: submitData,
             }).unwrap();
-
-            navigate(UI_ROUTES.MASTER_DATA_CRUD, {
-                state: { formName, formId, updateSuccess: true }
-            });
-            if (!response) {
+            if (response) {
+                // Navigate to the list view with success state
+                navigate(UI_ROUTES.MASTER_DATA);
+                toast({
+                    title: "Record Updated Successfully",
+                    variant: "success"
+                });
+            } else {
                 console.log("Failed to update record");
-
             }
         } catch (error: any) {
             console.error('Update failed:', error);

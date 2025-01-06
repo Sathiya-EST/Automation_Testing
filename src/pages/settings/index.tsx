@@ -39,7 +39,6 @@ const Settings = () => {
             <Label>Choose Language</Label>
           </div>
           <div className=" p-4 col-span-3">
-            <h1>{t('welcome')}</h1>
             <LanguageSwitcher />
           </div>
 

@@ -103,22 +103,6 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
                                 <FormLabel>{fieldData.name || `Field ${index + 1}`}</FormLabel>
                                 <FormControl>
                                     <Input
-                                        {...(control.register as UseFormRegister<FormData | FormEditData>)(`fields.${index}.name` as const, {
-                                            // Add ref to the registration options
-                                            // shouldUseNativeValidation: true,
-                                            onChange: (e) => {
-                                                // Store the ref when the input is mounted
-                                                refs.current[index] = e.target;
-                                            }
-                                        })}
-                                        id={`fields.${index}.name`}
-                                        type="text"
-                                        placeholder={fieldData.field?.placeholder}
-                                        className={` ${isSelected ? 'bg-primary/10' : ''}${hasError ? 'border-red-500 bg-red-50' : ''}
-                    `}
-                                        readOnly={true}
-                                    />
-                                    {/* <Input
                                         ref={(el) => (refs.current[index] = el)}
                                         id={`fields.${index}.name`}
                                         type="text"
@@ -126,7 +110,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
                                         {...(control.register as UseFormRegister<FormData | FormEditData>)(`fields.${index}.name` as const)}
                                         className={` ${isSelected ? 'bg-primary/10' : ''} ${hasError ? 'border-red-500 bg-red-50' : ''}`}
                                         readOnly={true}
-                                    /> */}
+                                    />
                                 </FormControl>
                                 {hasError && (
                                     <div className="text-red-500 text-sm mt-1">
