@@ -103,7 +103,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
                                 <FormLabel>{fieldData.name || `Field ${index + 1}`}</FormLabel>
                                 <FormControl>
                                     <Input
-                                        ref={(el) => (refs.current[index] = el)}
+                                        // ref={(el) => (refs.current[index] = el)}
                                         id={`fields.${index}.name`}
                                         type="text"
                                         placeholder={fieldData.field?.placeholder}

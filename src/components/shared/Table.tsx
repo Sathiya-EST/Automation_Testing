@@ -12,14 +12,6 @@ import {
   Column,
 } from '@tanstack/react-table';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -337,7 +329,7 @@ function AdvancedTable<T>({
                         <Popover>
                           <PopoverTrigger asChild>
                             <button className="absolute bottom-3 right-0 z-50">
-                              <EllipsisVertical className={`${isPinned ? 'text-background' : 'text-primary'}`} />
+                              <EllipsisVertical className={`${isPinned ? 'text-background' : 'text-background'}`} />
                             </button>
                           </PopoverTrigger>
                           <PopoverContent side="left" className="w-auto">
@@ -377,7 +369,7 @@ function AdvancedTable<T>({
           <tbody className="divide-y overflow-auto">
             {table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={table.getAllColumns().length} className="text-start text-xl text-gray-500 dark:text-gray-300">
+                <td colSpan={table.getAllColumns().length} className="text-start text-xl text-gray-500 dark:text-gray-300 p-2">
                   No Data Available
                 </td>
               </tr>
@@ -387,7 +379,7 @@ function AdvancedTable<T>({
                   key={row.id}
                   className={`${index % 2 === 0
                     ? "bg-background dark:bg-muted hover:bg-primary/10 "
-                    : "bg-primary/5 dark:bg-primary/5 hover:bg-primary/10   z-0"
+                    : "bg-primary/5 dark:bg-primary/5 hover:bg-primary/10  z-0"
                     }`}
                 >
                   {row.getVisibleCells().map((cell) => {
@@ -399,8 +391,8 @@ function AdvancedTable<T>({
                         key={cell.id}
                         style={{ ...getCommonPinningStyles(column) }}
                         className={`${isPinned
-                          ? "min-h-2 bg-primary/10  p-3"
-                          : "min-h-2 bg-primary/5  p-3"
+                          ? "min-h-2 bg-primary/10  p-2"
+                          : "min-h-2 bg-primary/5  p-2"
                           }`}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
 import { useGetFormListColumnsQuery, useGetFormListDataQuery } from '@/store/services/master/form';
 import { Button } from '@/components/ui/button';
-import { ToastAction } from '@/components/ui/toast';
 import Spinner from '@/components/shared/Spinner';
 import Text from '@/components/shared/Text';
 import SearchInput from '@/components/shared/Search';
@@ -33,7 +32,6 @@ import InfoAlert from '@/components/shared/InfoAlert';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateMasterData } from '@/store/slice/masterSlice';
 import { RootState } from '@/store';
-import { log } from 'util';
 
 interface MasterColumns {
   displayName: string;
@@ -49,8 +47,8 @@ const DataList: React.FC = () => {
   const navigate = useNavigate();
   const [getModule, { data: moduleData, error: moduleError, isLoading: moduleLoading }] = useGetModuleMutation();
   const dispatch = useDispatch();
-  const activeForm = useSelector((state: RootState) => state.master.data?.formName);
-  const activeModule = useSelector((state: RootState) => state.master.data?.moduleName);
+  const activeForm = useSelector((state: RootState) => state?.master.data?.formName);
+  const activeModule = useSelector((state: RootState) => state?.master.data?.moduleName);
   const [isExporting, setIsExporting] = useState(false);
   const [moduleSearchVal, setModuleSearchVal] = useState("");
   const [selectedModule, setSelectedModule] = useState<string>(activeModule || "");

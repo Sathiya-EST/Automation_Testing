@@ -6,7 +6,7 @@ import useBreadcrumb from '@/hooks/useBreadCrumb';
 import { BreadcrumbItemType } from '@/types/data';
 import { useMemo } from 'react'
 import LanguageSwitcher from './components/LanguageSelect';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 
 const Settings = () => {
@@ -15,7 +15,7 @@ const Settings = () => {
   ], []);
 
   useBreadcrumb(updatedRoutes);
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
 
   return (
     <Card>
